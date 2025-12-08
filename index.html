@@ -124,4 +124,151 @@
         </div>
 
         <div class="form-group">
-            <label>
+            <label>コンディション</label>
+            <div class="input-wrapper condition-group">
+                <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
+                <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😊 普通">😊 普通</label>
+                <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中">🤔 考え中</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😐 やや不調">😐 やや不調</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😓 疲労">😓 疲労</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😟 心配">😟 心配</label>
+                <label class="condition-label"><input type="radio" name="condition" value="🤒 体調不良">🤒 体調不良</label>
+                <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感">🎉 達成感</label>
+                <label class="condition-label"><input type="radio" name="condition" value="💡 ひらめき">💡 ひらめき</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="progress">今日の進捗状況</label>
+            <div class="input-wrapper">
+                <textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="tomorrow">明日の業務内容</label>
+            <div class="input-wrapper">
+                <textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="comment">所見や感じたこと</label>
+            <div class="input-wrapper">
+                <textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea>
+            </div>
+        </div>
+
+
+        <div class="button-group">
+            <button onclick="resetForm()" class="reset-btn">リセット</button>
+            <button onclick="sendData()" class="send-btn">送信</button>
+        </div>
+
+    </div>     <div id="data-list">
+        <h2>過去の報告一覧</h2>
+        読み込み中...
+    </div>
+
+    <script>
+        // ★ここにGASのURLを貼り付けてください
+        const GAS_URL = "ここにGASのウェブアプリURLを貼り付け"; 
+
+        function getSelectedCondition() {
+            const selected = document.querySelector('input[name="condition"]:checked');
+            return selected ? selected.value : '';
+        }
+
+        function resetForm() {
+            document.getElementById('name').value = "";
+            document.querySelector('input[name="condition"]:checked') ? document.querySelector('input[name="condition"]:checked').checked = false : null;
+            document.getElementById('progress').value = "";
+            document.getElementById('tomorrow').value = "";
+            document.getElementById('comment').value = "";
+        }
+
+        // データ送信（POST）
+        function sendData() {
+            // 5つの項目全ての値を取得
+            const name = document.getElementById('name').value;
+            const condition = getSelectedCondition(); 
+            const progress = document.getElementById('progress').value;
+            const tomorrow = document.getElementById('tomorrow').value;
+            const comment = document.getElementById('comment').value;
+
+            if(!name || !condition || !progress || !tomorrow || !comment) { 
+                alert("全ての項目を入力・選択してください"); 
+                return; 
+            }
+
+            // GASへ送るデータ (5項目)
+            const data = { 
+                name: name, 
+                condition: condition,
+                progress: progress,
+                tomorrow: tomorrow,
+                comment: comment
+            };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert("日報を送信完了しました！");
+                resetForm(); 
+                fetchData(); // リストを更新
+            })
+            .catch(err => alert("送信エラー: " + err));
+        }
+
+        // データ取得（GET）- 過去の報告一覧機能
+        function fetchData() {
+            const listContainer = document.getElementById('data-list');
+            listContainer.querySelector('h2').textContent = "過去の報告一覧"; // タイトルは残す
+            listContainer.innerHTML += "<p>データを取得中...</p>";
+            
+            fetch(GAS_URL)
+            .then(response => response.json())
+            .then(data => {
+                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
+                
+                data.reverse().forEach(row => {
+                    // 6つの列に対応 [0:日付, 1:名前, 2:コンディション, 3:進捗, 4:明日, 5:所見]
+                    const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+                    const name = row[1];
+                    const condition = row[2];
+                    const progress = row[3];
+                    const tomorrow = row[4];
+                    const comment = row[5];
+                    
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    
+                    div.innerHTML = `
+                        <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
+                        **今日の進捗**: ${progress.substring(0, 70)}...<br>
+                        **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
+                        **所見**: ${comment.substring(0, 70)}...
+                    `;
+                    listContainer.appendChild(div);
+                });
+                if (data.length === 0) {
+                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
+                }
+            })
+            .catch(err => {
+                listContainer.innerHTML = "データの読み込みに失敗しました。GASのURLを確認してください。";
+                console.error(err);
+            });
+        }
+
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
