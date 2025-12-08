@@ -19,11 +19,11 @@
         /* フォーム全体のスタイル */
         .form-container { 
             /* ★ここがポイント：背景を透明にしてbodyの色を透かす */
-            background-color: transparent; 
-            border: 1px solid #e0e0e0; 
-            padding: 2rem; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            background-color: transparent !important; /* 透明を優先させる */
+            border: 1px solid #e0e0e0; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
         /* フォームグループ：ラベルと入力欄を横並びにする */
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
