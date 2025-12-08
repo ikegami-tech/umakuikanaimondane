@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日報フォーム (5項目・デザイン修正)</title>
+    <title>日報フォーム (最終デザイン)</title>
     <style>
         body { font-family: sans-serif; max-width: 700px; margin: 3rem auto; padding: 0 1rem; background-color: #ffffff; }
         
@@ -17,7 +17,7 @@
         /* フォームグループ：ラベルと入力欄を横並びにする */
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
 
-        /* ラベル（項目名）のスタイル */
+        /* ラベル（項目名）のスタイル - 画像のデザインに合わせる */
         label { 
             display: block; 
             width: 150px; /* ラベルの幅を固定 */
@@ -27,7 +27,7 @@
             font-weight: bold;
             color: #333;
             /* 画像のデザインにあるオレンジの縦線 */
-            border-left: 3px solid #ff7f00; 
+            border-left: 4px solid #ff7f00; /* 太さ調整 */
             padding-left: 10px; 
         }
         
@@ -43,24 +43,29 @@
             box-sizing: border-box; 
             font-size: 16px; 
         }
-        textarea { height: 100px; resize: vertical; } /* テキストエリアを少し小さく */
+        textarea { height: 100px; resize: vertical; }
 
         /* ラジオボタンのスタイル (コンディション) */
-        .condition-group { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 5px; }
+        .condition-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; /* 間隔を狭める */
+            padding-top: 5px; 
+            line-height: 1.2;
+        }
         .condition-label {
-            background: #ffffff;
-            border: 1px solid #ccc;
+            border: 1px solid transparent; /* 初期は透明 */
             border-radius: 6px;
-            padding: 5px 10px;
+            padding: 5px 8px;
             font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s;
             display: flex;
             align-items: center;
         }
+        /* 選択されたラジオボタンに枠線を付ける */
         .condition-label:has(input[type="radio"]:checked) {
-            border-color: #007bff;
-            background-color: #e0f0ff;
+            border-color: #ff7f00; /* オレンジの線 */
+            background-color: #fff8f0; /* 薄いオレンジ背景 */
             font-weight: bold;
         }
 
@@ -68,37 +73,40 @@
         /* ボタンエリア */
         .button-group { 
             display: flex; 
-            justify-content: center; /* 中央揃えに変更 */
+            justify-content: center; 
             gap: 20px; 
             margin-top: 30px; 
         }
         
-        /* リセットボタン (グレー) */
+        /* リセットボタン (薄いグレー) */
         button.reset-btn { 
             padding: 10px 30px; 
-            background: #9e9e9e; 
+            background: #bdbdbd; /* 画像に合わせたグレー */
             color: white; 
             border: none; 
             cursor: pointer; 
-            border-radius: 4px;
+            border-radius: 6px; /* 角を少し丸く */
             font-size: 16px;
         }
         
         /* 送信ボタン (オレンジ) */
         button.send-btn { 
             padding: 10px 30px; 
-            background: #ff7f00; 
+            background: #ff7f00; /* 画像に合わせたオレンジ */
             color: white; 
             border: none; 
             cursor: pointer; 
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 16px;
             font-weight: bold;
         }
         button.send-btn:hover { background: #e07000; }
 
-        /* データリスト (今回は省略) */
-        #data-list { display: none; } /* フォームデザインに集中するため、一覧は非表示にします */
+        /* 過去の報告一覧 */
+        #data-list { margin-top: 4rem; border-top: 1px solid #ccc; padding-top: 1.5rem; }
+        .item { background: #f4f4f4; padding: 1.25rem; margin-bottom: 1rem; border-radius: 4px; line-height: 1.6;}
+        .item strong { color: #000; font-weight: bold; }
+        .item small { color: #888; display: block; margin-top: 0.25rem; }
 
     </style>
 </head>
@@ -116,152 +124,4 @@
         </div>
 
         <div class="form-group">
-            <label>コンディション</label>
-            <div class="input-wrapper condition-group">
-                <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
-                <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
-                <label class="condition-label"><input type="radio" name="condition" value="😊 普通">😊 普通</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中">🤔 考え中</label>
-                <label class="condition-label"><input type="radio" name="condition" value="😐 やや不調">😐 やや不調</label>
-                <label class="condition-label"><input type="radio" name="condition" value="😓 疲労">😓 疲労</label>
-                <label class="condition-label"><input type="radio" name="condition" value="😟 心配">😟 心配</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🤒 体調不良">🤒 体調不良</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感">🎉 達成感</label>
-                <label class="condition-label"><input type="radio" name="condition" value="💡 ひらめき">💡 ひらめき</label>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label for="progress">今日の進捗状況</label>
-            <div class="input-wrapper">
-                <textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="tomorrow">明日の業務内容</label>
-            <div class="input-wrapper">
-                <textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="comment">所見や感じたこと</label>
-            <div class="input-wrapper">
-                <textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea>
-            </div>
-        </div>
-
-
-        <div class="button-group">
-            <button onclick="resetForm()" class="reset-btn">リセット</button>
-            <button onclick="sendData()" class="send-btn">送信</button>
-        </div>
-
-    </div>     <div id="data-list">
-        
-    </div>
-
-    <script>
-        // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
-
-        // 選択されているラジオボタンの値を取得
-        function getSelectedCondition() {
-            const selected = document.querySelector('input[name="condition"]:checked');
-            return selected ? selected.value : '';
-        }
-
-        // フォームのリセット
-        function resetForm() {
-            document.getElementById('name').value = "";
-            document.querySelector('input[name="condition"]:checked') ? document.querySelector('input[name="condition"]:checked').checked = false : null;
-            document.getElementById('progress').value = "";
-            document.getElementById('tomorrow').value = "";
-            document.getElementById('comment').value = "";
-            // alert("入力内容をリセットしました。"); // アラートはなくても良い
-        }
-
-        // データ送信（POST）
-        function sendData() {
-            const name = document.getElementById('name').value;
-            const condition = getSelectedCondition(); 
-            const progress = document.getElementById('progress').value;
-            const tomorrow = document.getElementById('tomorrow').value;
-            const comment = document.getElementById('comment').value;
-
-            if(!name || !condition || !progress || !tomorrow || !comment) { 
-                alert("全ての項目を入力・選択してください"); 
-                return; 
-            }
-
-            const data = { 
-                name: name, 
-                condition: condition,
-                progress: progress,
-                tomorrow: tomorrow,
-                comment: comment
-            };
-
-            fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                alert("日報を送信完了しました！");
-                resetForm(); // 送信後にリセット
-                fetchData(); // ★ここで一覧を更新します
-            })
-            .catch(err => alert("送信エラー: " + err));
-        }
-
-        // データ取得（GET）- 機能を復活
-        function fetchData() {
-            const listContainer = document.getElementById('data-list');
-            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
-            
-            fetch(GAS_URL)
-            .then(response => response.json())
-            .then(data => {
-                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
-                
-                // 新しい順に表示するために逆順にする
-                data.reverse().forEach(row => {
-                    // ★6つの列に対応 [0:日付, 1:名前, 2:コンディション, 3:進捗, 4:明日, 5:所見]
-                    const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
-                    const name = row[1];
-                    const condition = row[2];
-                    const progress = row[3];
-                    const tomorrow = row[4];
-                    const comment = row[5];
-                    
-                    const div = document.createElement('div');
-                    div.className = 'item';
-                    // 6項目を表示に追加 (長すぎる内容は一部省略)
-                    div.innerHTML = `
-                        <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
-                        **今日の進捗**: ${progress.substring(0, 50)}...<br>
-                        **明日の業務**: ${tomorrow.substring(0, 50)}...<br>
-                        **所見**: ${comment.substring(0, 50)}...
-                    `;
-                    listContainer.appendChild(div);
-                });
-                if (data.length === 0) {
-                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
-                }
-            })
-            .catch(err => {
-                listContainer.innerHTML = "データの読み込みに失敗しました。GASのURLを確認してください。";
-                console.error(err);
-            });
-        }
-
-        // ページ読み込み時にデータを取得
-        window.onload = fetchData;
-    </script>
-</body>
-</html>
+            <label>
