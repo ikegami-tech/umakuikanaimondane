@@ -125,3 +125,107 @@
                 <label class="condition-label"><input type="radio" name="condition" value="😐 やや不調">😐 やや不調</label>
                 <label class="condition-label"><input type="radio" name="condition" value="😓 疲労">😓 疲労</label>
                 <label class="condition-label"><input type="radio" name="condition" value="😟 心配">😟 心配</label>
+                <label class="condition-label"><input type="radio" name="condition" value="🤒 体調不良">🤒 体調不良</label>
+                <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感">🎉 達成感</label>
+                <label class="condition-label"><input type="radio" name="condition" value="💡 ひらめき">💡 ひらめき</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="progress">今日の進捗状況</label>
+            <div class="input-wrapper">
+                <textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="tomorrow">明日の業務内容</label>
+            <div class="input-wrapper">
+                <textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="comment">所見や感じたこと</label>
+            <div class="input-wrapper">
+                <textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea>
+            </div>
+        </div>
+
+
+        <div class="button-group">
+            <button onclick="resetForm()" class="reset-btn">リセット</button>
+            <button onclick="sendData()" class="send-btn">送信</button>
+        </div>
+
+    </div>     <div id="data-list">
+        
+    </div>
+
+    <script>
+        // ★ここにGASのURLを貼り付けてください
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
+
+        // 選択されているラジオボタンの値を取得
+        function getSelectedCondition() {
+            const selected = document.querySelector('input[name="condition"]:checked');
+            return selected ? selected.value : '';
+        }
+
+        // フォームのリセット
+        function resetForm() {
+            document.getElementById('name').value = "";
+            document.querySelector('input[name="condition"]:checked') ? document.querySelector('input[name="condition"]:checked').checked = false : null;
+            document.getElementById('progress').value = "";
+            document.getElementById('tomorrow').value = "";
+            document.getElementById('comment').value = "";
+            alert("入力内容をリセットしました。");
+        }
+
+        // データ送信（POST）
+        function sendData() {
+            // 5つの項目全ての値を取得
+            const name = document.getElementById('name').value;
+            const condition = getSelectedCondition(); 
+            const progress = document.getElementById('progress').value;
+            const tomorrow = document.getElementById('tomorrow').value;
+            const comment = document.getElementById('comment').value;
+
+            // 必須チェック
+            if(!name || !condition || !progress || !tomorrow || !comment) { 
+                alert("全ての項目を入力・選択してください"); 
+                return; 
+            }
+
+            // GASへ送るデータ (5項目)
+            const data = { 
+                name: name, 
+                condition: condition,
+                progress: progress,
+                tomorrow: tomorrow,
+                comment: comment
+            };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert("日報を送信完了しました！");
+                resetForm(); // 送信後にリセット
+            })
+            .catch(err => alert("送信エラー: " + err));
+        }
+
+        // データ取得（GET） - 今回は省略
+        function fetchData() { /* 今回のフォームデザインに集中するため、GET機能は省略します */ }
+
+        // ページ読み込み時に実行
+        window.onload = fetchData; 
+    </script>
+</body>
+</html>
