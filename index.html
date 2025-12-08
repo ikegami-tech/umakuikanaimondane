@@ -57,25 +57,33 @@
         textarea { height: 100px; resize: vertical; }
 
         /* ラジオボタンのスタイル (コンディション) */
-        .condition-group { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px; /* 間隔を狭める */
-            padding-top: 5px; 
-            line-height: 1.2;
-        }
-        .condition-label {
-            border: 1px solid transparent; /* 初期は透明 */
-            border-radius: 6px;
-            padding: 5px 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-            .condition-group .condition-label {
+.condition-group { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 8px; 
+    padding-top: 5px; 
+    line-height: 1.2;
+    
+    /* ★修正点 1: ここにマージンの設定を入れます */
+    margin-left: -4px;
+}
+/* condition-labelの基本スタイル */
+.condition-label {
+    border: 1px solid transparent; /* 初期は透明 */
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    
+    /* ★修正点 2: ここにマージンの設定を入れます */
+    margin-left: 4px;
+}
+/* 1行4つに並べるための特別な設定 */
+.condition-group .condition-label {
     /* 100% の幅から、間隔(gap)の分を引いて、4つに分ける計算 */
-    width: calc(25% - 6px); 
+    width: calc(25% - 4px); /* 4pxに修正 */
     box-sizing: border-box; 
     justify-content: center; /* ボタン内のテキストを中央に寄せます */
 }
