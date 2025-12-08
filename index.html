@@ -38,8 +38,8 @@
     </div>
 
     <script>
-        // ★ここに新しいGASコードをデプロイして取得したURLを貼り付けます
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; // ← ここを書き換える！
+        // ★ここにGASのウェブアプリURLを貼り付けます (あなたのURLでOK)
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
 
         // データ送信（POST）関数
         function sendReport() {
@@ -51,12 +51,10 @@
                 return; 
             }
 
-            // GASのdoPostに送るデータ構造
             const dataPayload = { name: name, message: message };
 
             fetch(GAS_URL, {
                 method: 'POST',
-                // no-corsモードで、クロスドメインでの送信を許可
                 mode: 'no-cors', 
                 headers: {
                     'Content-Type': 'application/json'
@@ -64,13 +62,9 @@
                 body: JSON.stringify(dataPayload)
             })
             .then(() => {
-                // no-corsでは厳密なレスポンス確認ができないため、成功したとみなして処理を続行
                 alert("日報の送信が成功しました！");
-                
-                // フォームをクリア
                 document.getElementById('name').value = "";
                 document.getElementById('message').value = "";
-                
                 fetchData(); // リストを更新
             })
             .catch(err => alert("日報送信中にエラーが発生しました: " + err));
@@ -83,16 +77,40 @@
 
             fetch(GAS_URL)
             .then(response => {
-                // doGetはJSONを返すため、response.json()でデータを取得
                 if (!response.ok) {
-                    // HTTPエラーを検知
                     throw new Error('GASからの応答がエラーです (' + response.status + ')');
                 }
-                return response.json();
+                // GASのdoGetが返すJSONをパース
+                return response.json(); 
             })
             .then(data => {
                 listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
                 
-                // 最新の報告を上に表示するため、データを逆順に処理
+                // 最新の報告を上に表示
                 data.reverse().forEach(row => {
-                    // スプレッドシートの列順: [0:submissionDate, 1:userName, 2:reportMessage
+                    // スプレッドシートの列順: [0:日付, 1:名前, 2:メッセージ]
+                    const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+                    const name = row[1];
+                    const msg = row[2];
+                    
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    div.innerHTML = `<strong>${name}</strong> <small>報告日時: ${date}</small><br>${msg}`;
+                    listContainer.appendChild(div);
+                });
+
+                if (data.length === 0) {
+                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
+                }
+            })
+            .catch(err => {
+                listContainer.innerHTML = "データの読み込みに失敗しました。GASのURLとデプロイ設定を確認してください。";
+                console.error(err);
+            });
+        }
+
+        // ページが完全に読み込まれたらデータを取得
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
