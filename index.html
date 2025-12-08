@@ -42,8 +42,18 @@
             padding-left: 10px; 
         }
         
-        /* 入力欄のコンテナ */
-        .input-wrapper { flex-grow: 1; }
+       /* ■ 入力欄のコンテナ (input-wrapper) のスタイル */
+        .input-wrapper { 
+            flex-grow: 1; /* ★元の設定 */
+        }
+
+        /* ★修正後の正しい書き方（新規追加ルール） */
+        /* form-groupの中にある input-wrapper の設定を上書き */
+        .form-group .input-wrapper {
+            /* これで、左右の余白（パディング）をゼロにして、ボタンのはみ出しを防ぎます */
+            padding-left: 0;
+            padding-right: 0;
+        }
 
         /* テキスト入力欄 */
         input[type="text"], textarea { 
