@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日報送信システム</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 2rem auto; padding: 0 1.5rem; background-color: #f4f7f6; }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; }
+        input[type="text"], textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        textarea { height: 120px; resize: vertical; }
+        button { padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
+        button:hover { background: #0056b3; }
+        #data-list { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px dashed #ccc; }
+        .item { background: #ffffff; padding: 1.25rem; margin-bottom: 1rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .item strong { color: #007bff; }
+        .item small { color: #999; font-size: 0.85em; display: block; margin-top: 0.25rem; }
+    </style>
+</head>
+<body>
+
+    <h1>今日の業務報告（日報）</h1>
+
+    <div class="form-group">
+        <label for="name">お名前</label>
+        <input type="text" id="name" placeholder="氏名を入力してください">
+    </div>
+    <div class="form-group">
+        <label for="message">日報内容</label>
+        <textarea id="message" placeholder="本日の業務内容、進捗、課題などを記入"></textarea>
+    </div>
+    <button onclick="sendReport()">日報を送信</button>
+
+    <div id="data-list">
+        過去の報告を読み込み中...
+    </div>
+
+    <script>
+        // ★ここに新しいGASコードをデプロイして取得したURLを貼り付けます
+        const GAS_URL = "ここにGASのウェブアプリURLを貼り付け"; // ← ここを書き換える！
+
+        // データ送信（POST）関数
+        function sendReport() {
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
+
+            if(!name || !message) { 
+                alert("名前と日報内容の両方を入力してください。"); 
+                return; 
+            }
+
+            // GASのdoPostに送るデータ構造
+            const dataPayload = { name: name, message: message };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                // no-corsモードで、クロスドメインでの送信を許可
+                mode: 'no-cors', 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataPayload)
+            })
+            .then(() => {
+                // no-corsでは厳密なレスポンス確認ができないため、成功したとみなして処理を続行
+                alert("日報の送信が成功しました！");
+                
+                // フォームをクリア
+                document.getElementById('name').value = "";
+                document.getElementById('message').value = "";
+                
+                fetchData(); // リストを更新
+            })
+            .catch(err => alert("日報送信中にエラーが発生しました: " + err));
+        }
+
+        // データ取得（GET）関数
+        function fetchData() {
+            const listContainer = document.getElementById('data-list');
+            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
+
+            fetch(GAS_URL)
+            .then(response => {
+                // doGetはJSONを返すため、response.json()でデータを取得
+                if (!response.ok) {
+                    // HTTPエラーを検知
+                    throw new Error('GASからの応答がエラーです (' + response.status + ')');
+                }
+                return response.json();
+            })
+            .then(data => {
+                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
+                
+                // 最新の報告を上に表示するため、データを逆順に処理
+                data.reverse().forEach(row => {
+                    // スプレッドシートの列順: [0:submissionDate, 1:userName, 2:reportMessage
