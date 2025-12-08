@@ -3,113 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日報送信システム</title>
+    <title>Sysnipo - スプレッドシート連携</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 2rem auto; padding: 0 1.5rem; background-color: #f4f7f6; }
-        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; }
-        input[type="text"], textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        textarea { height: 120px; resize: vertical; }
-        button { padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
-        button:hover { background: #0056b3; }
-        #data-list { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px dashed #ccc; }
-        .item { background: #ffffff; padding: 1.25rem; margin-bottom: 1rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .item strong { color: #007bff; }
-        .item small { color: #999; font-size: 0.85em; display: block; margin-top: 0.25rem; }
+        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; }
+        input, textarea { width: 100%; padding: 0.5rem; }
+        button { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; cursor: pointer; }
+        #data-list { margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem; }
+        .item { background: #f9f9f9; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <h1>今日の業務報告（日報）</h1>
+    <h1>スプレッドシート連携デモ</h1>
 
     <div class="form-group">
-        <label for="name">お名前</label>
-        <input type="text" id="name" placeholder="氏名を入力してください">
+        <label>お名前</label>
+        <input type="text" id="name" placeholder="名前を入力">
     </div>
     <div class="form-group">
-        <label for="message">日報内容</label>
-        <textarea id="message" placeholder="本日の業務内容、進捗、課題などを記入"></textarea>
+        <label>メッセージ</label>
+        <textarea id="message" placeholder="メッセージを入力"></textarea>
     </div>
-    <button onclick="sendReport()">日報を送信</button>
+    <button onclick="sendData()">送信する</button>
 
     <div id="data-list">
-        過去の報告を読み込み中...
+        読み込み中...
     </div>
 
     <script>
-        // ★ここにGASのウェブアプリURLを貼り付けます (あなたのURLでOK)
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
+        // ★ここにGASのURLを貼り付けてください
+        const GAS_URL = "ここにGASのウェブアプリURLを貼り付け";
 
-        // データ送信（POST）関数
-        function sendReport() {
+        // データ送信（POST）
+        function sendData() {
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
 
-            if(!name || !message) { 
-                alert("名前と日報内容の両方を入力してください。"); 
-                return; 
-            }
+            if(!name || !message) { alert("名前とメッセージを入力してください"); return; }
 
-            const dataPayload = { name: name, message: message };
+            const data = { name: name, message: message };
 
             fetch(GAS_URL, {
                 method: 'POST',
-                mode: 'no-cors', 
+                mode: 'no-cors', // 重要：CORSエラー回避のためno-corsを指定
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(dataPayload)
+                body: JSON.stringify(data)
             })
             .then(() => {
-                alert("日報の送信が成功しました！");
+                alert("送信しました！");
                 document.getElementById('name').value = "";
                 document.getElementById('message').value = "";
                 fetchData(); // リストを更新
             })
-            .catch(err => alert("日報送信中にエラーが発生しました: " + err));
+            .catch(err => alert("送信エラー: " + err));
         }
 
-        // データ取得（GET）関数
+        // データ取得（GET）
         function fetchData() {
-            const listContainer = document.getElementById('data-list');
-            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
-
             fetch(GAS_URL)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('GASからの応答がエラーです (' + response.status + ')');
-                }
-                // GASのdoGetが返すJSONをパース
-                return response.json(); 
-            })
+            .then(response => response.json())
             .then(data => {
-                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
+                const list = document.getElementById('data-list');
+                list.innerHTML = "<h2>受信したメッセージ一覧</h2>";
                 
-                // 最新の報告を上に表示
+                // 新しい順に表示するために逆順にする
                 data.reverse().forEach(row => {
-                    // スプレッドシートの列順: [0:日付, 1:名前, 2:メッセージ]
-                    const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+                    const date = new Date(row[0]).toLocaleString();
                     const name = row[1];
                     const msg = row[2];
                     
                     const div = document.createElement('div');
                     div.className = 'item';
-                    div.innerHTML = `<strong>${name}</strong> <small>報告日時: ${date}</small><br>${msg}`;
-                    listContainer.appendChild(div);
+                    div.innerHTML = `<strong>${name}</strong> <small>(${date})</small><br>${msg}`;
+                    list.appendChild(div);
                 });
-
-                if (data.length === 0) {
-                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
-                }
             })
             .catch(err => {
-                listContainer.innerHTML = "データの読み込みに失敗しました。GASのURLとデプロイ設定を確認してください。";
+                document.getElementById('data-list').innerHTML = "データの読み込みに失敗しました";
                 console.error(err);
             });
         }
 
-        // ページが完全に読み込まれたらデータを取得
+        // ページ読み込み時にデータを取得
         window.onload = fetchData;
     </script>
 </body>
