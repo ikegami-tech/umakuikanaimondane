@@ -3,32 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sysnipo - スプレッドシート連携 (ラジオボタン版)</title>
+    <title>日報フォーム (5項目・デザイン修正)</title>
     <style>
-        body { font-family: sans-serif; max-width: 650px; margin: 2rem auto; padding: 0 1rem; background-color: #f7f7f7; }
-        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        label { display: block; margin-bottom: 0.75rem; font-weight: bold; color: #555; }
-        input[type="text"], textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button.submit-btn { padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 16px; }
+        body { font-family: sans-serif; max-width: 700px; margin: 3rem auto; padding: 0 1rem; background-color: #ffffff; }
+        
+        /* フォーム全体のスタイル */
+        .form-container { 
+            border: 1px solid #e0e0e0; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        /* フォームグループ：ラベルと入力欄を横並びにする */
+        .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
 
-        /* ラジオボタンのスタイル */
-        .condition-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        /* ラベル（項目名）のスタイル */
+        label { 
+            display: block; 
+            width: 150px; /* ラベルの幅を固定 */
+            margin-right: 20px; 
+            padding-top: 10px; 
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            /* 画像のデザインにあるオレンジの縦線 */
+            border-left: 3px solid #ff7f00; 
+            padding-left: 10px; 
+        }
+        
+        /* 入力欄のコンテナ */
+        .input-wrapper { flex-grow: 1; }
+
+        /* テキスト入力欄 */
+        input[type="text"], textarea { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        textarea { height: 100px; resize: vertical; } /* テキストエリアを少し小さく */
+
+        /* ラジオボタンのスタイル (コンディション) */
+        .condition-group { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 5px; }
         .condition-label {
             background: #ffffff;
             border: 1px solid #ccc;
             border-radius: 6px;
-            padding: 8px 12px;
+            padding: 5px 10px;
             font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
+            transition: background 0.2s;
             display: flex;
             align-items: center;
-        }
-        .condition-label input[type="radio"] {
-            margin-right: 8px;
-            /* ラジオボタンのデフォルト表示を隠す (任意) */
-            /* appearance: none; */ 
         }
         .condition-label:has(input[type="radio"]:checked) {
             border-color: #007bff;
@@ -36,119 +64,64 @@
             font-weight: bold;
         }
 
-        #data-list { margin-top: 3rem; border-top: 1px dashed #ccc; padding-top: 1.5rem; }
-        .item { background: #ffffff; padding: 1.25rem; margin-bottom: 1rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .item strong { color: #333; }
-        .item small { color: #888; display: block; margin-top: 0.25rem; }
+
+        /* ボタンエリア */
+        .button-group { 
+            display: flex; 
+            justify-content: center; /* 中央揃えに変更 */
+            gap: 20px; 
+            margin-top: 30px; 
+        }
+        
+        /* リセットボタン (グレー) */
+        button.reset-btn { 
+            padding: 10px 30px; 
+            background: #9e9e9e; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        /* 送信ボタン (オレンジ) */
+        button.send-btn { 
+            padding: 10px 30px; 
+            background: #ff7f00; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button.send-btn:hover { background: #e07000; }
+
+        /* データリスト (今回は省略) */
+        #data-list { display: none; } /* フォームデザインに集中するため、一覧は非表示にします */
+
     </style>
 </head>
 <body>
 
-    <h1>日報・コンディション報告</h1>
+    <h1>日報入力フォーム</h1>
 
-    <div class="form-group">
-        <label>お名前</label>
-        <input type="text" id="name" placeholder="氏名を入力">
-    </div>
-    
-    <div class="form-group">
-        <label>今日のコンディション（一つ選んでください）</label>
-        <div class="condition-group">
-            <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
-            <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
-            <label class="condition-label"><input type="radio" name="condition" value="😊 普通">😊 普通</label>
-            <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中">🤔 考え中</label>
-            <label class="condition-label"><input type="radio" name="condition" value="😐 やや不調">😐 やや不調</label>
-            <label class="condition-label"><input type="radio" name="condition" value="😓 疲労">😓 疲労</label>
-            <label class="condition-label"><input type="radio" name="condition" value="🤒 体調不良">🤒 体調不良</label>
-            <label class="condition-label"><input type="radio" name="condition" value="🤢 二日酔い">🤢 二日酔い</label>
+    <div class="form-container">
+        
+        <div class="form-group">
+            <label for="name">お名前</label>
+            <div class="input-wrapper">
+                <input type="text" id="name" placeholder="氏名を入力してください">
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label>メッセージ（日報内容）</label>
-        <textarea id="message" placeholder="本日の業務内容や特記事項を入力"></textarea>
-    </div>
-    <button onclick="sendData()" class="submit-btn">送信する</button>
-
-    <div id="data-list">
-        読み込み中...
-    </div>
-
-    <script>
-        // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
-
-        // 選択されているラジオボタンの値を取得するヘルパー関数
-        function getSelectedCondition() {
-            const selected = document.querySelector('input[name="condition"]:checked');
-            return selected ? selected.value : '';
-        }
-
-        // データ送信（POST）
-        function sendData() {
-            const name = document.getElementById('name').value;
-            const condition = getSelectedCondition(); // ★ラジオボタンから値を取得
-            const message = document.getElementById('message').value;
-
-            if(!name || !condition || !message) { alert("名前、コンディション、メッセージを全て入力・選択してください"); return; }
-
-            // conditionも含めてデータをGASへ送る
-            const data = { name: name, condition: condition, message: message };
-
-            fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                alert("送信しました！");
-                document.getElementById('name').value = "";
-                // ラジオボタンの選択を解除
-                document.querySelector('input[name="condition"]:checked').checked = false;
-                document.getElementById('message').value = "";
-                fetchData(); // リストを更新
-            })
-            .catch(err => alert("送信エラー: " + err));
-        }
-
-        // データ取得（GET）
-        function fetchData() {
-            fetch(GAS_URL)
-            .then(response => response.json())
-            .then(data => {
-                const list = document.getElementById('data-list');
-                list.innerHTML = "<h2>受信したメッセージ一覧</h2>";
-                
-                // 新しい順に表示するために逆順にする
-                data.reverse().forEach(row => {
-                    // 列のインデックスは [0:日付, 1:名前, 2:コンディション, 3:メッセージ]
-                    const date = new Date(row[0]).toLocaleString();
-                    const name = row[1];
-                    const condition = row[2]; 
-                    const msg = row[3];      
-                    
-                    const div = document.createElement('div');
-                    div.className = 'item';
-                    // コンディションを表示に追加
-                    div.innerHTML = `<strong>${name} (${condition})</strong> <small>(${date})</small><br>${msg}`;
-                    list.appendChild(div);
-                });
-                if (data.length === 0) {
-                    list.innerHTML += "<p>まだデータがありません。</p>";
-                }
-            })
-            .catch(err => {
-                document.getElementById('data-list').innerHTML = "データの読み込みに失敗しました";
-                console.error(err);
-            });
-        }
-
-        // ページ読み込み時に実行
-        window.onload = fetchData;
-    </script>
-</body>
-</html>
+        <div class="form-group">
+            <label>コンディション</label>
+            <div class="input-wrapper condition-group">
+                <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
+                <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😊 普通">😊 普通</label>
+                <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中">🤔 考え中</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😐 やや不調">😐 やや不調</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😓 疲労">😓 疲労</label>
+                <label class="condition-label"><input type="radio" name="condition" value="😟 心配">😟 心配</label>
