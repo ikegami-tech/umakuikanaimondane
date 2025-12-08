@@ -164,7 +164,7 @@
 
     <script>
         // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
+        const GAS_URL = "ここにGASのウェブアプリURLを貼り付け"; 
 
         // 選択されているラジオボタンの値を取得
         function getSelectedCondition() {
@@ -179,26 +179,23 @@
             document.getElementById('progress').value = "";
             document.getElementById('tomorrow').value = "";
             document.getElementById('comment').value = "";
-            alert("入力内容をリセットしました。");
+            // alert("入力内容をリセットしました。"); // アラートはなくても良い
         }
 
         // データ送信（POST）
         function sendData() {
-            // 5つの項目全ての値を取得
             const name = document.getElementById('name').value;
             const condition = getSelectedCondition(); 
             const progress = document.getElementById('progress').value;
             const tomorrow = document.getElementById('tomorrow').value;
             const comment = document.getElementById('comment').value;
 
-            // 必須チェック
             if(!name || !condition || !progress || !tomorrow || !comment) { 
                 alert("全ての項目を入力・選択してください"); 
                 return; 
             }
 
-            // GASへ送るデータ (5項目)
-            const data = { 
+            const data = { 
                 name: name, 
                 condition: condition,
                 progress: progress,
@@ -217,15 +214,54 @@
             .then(() => {
                 alert("日報を送信完了しました！");
                 resetForm(); // 送信後にリセット
+                fetchData(); // ★ここで一覧を更新します
             })
             .catch(err => alert("送信エラー: " + err));
         }
 
-        // データ取得（GET） - 今回は省略
-        function fetchData() { /* 今回のフォームデザインに集中するため、GET機能は省略します */ }
+        // データ取得（GET）- 機能を復活
+        function fetchData() {
+            const listContainer = document.getElementById('data-list');
+            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
+            
+            fetch(GAS_URL)
+            .then(response => response.json())
+            .then(data => {
+                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
+                
+                // 新しい順に表示するために逆順にする
+                data.reverse().forEach(row => {
+                    // ★6つの列に対応 [0:日付, 1:名前, 2:コンディション, 3:進捗, 4:明日, 5:所見]
+                    const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+                    const name = row[1];
+                    const condition = row[2];
+                    const progress = row[3];
+                    const tomorrow = row[4];
+                    const comment = row[5];
+                    
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    // 6項目を表示に追加 (長すぎる内容は一部省略)
+                    div.innerHTML = `
+                        <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
+                        **今日の進捗**: ${progress.substring(0, 50)}...<br>
+                        **明日の業務**: ${tomorrow.substring(0, 50)}...<br>
+                        **所見**: ${comment.substring(0, 50)}...
+                    `;
+                    listContainer.appendChild(div);
+                });
+                if (data.length === 0) {
+                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
+                }
+            })
+            .catch(err => {
+                listContainer.innerHTML = "データの読み込みに失敗しました。GASのURLを確認してください。";
+                console.error(err);
+            });
+        }
 
-        // ページ読み込み時に実行
-        window.onload = fetchData; 
+        // ページ読み込み時にデータを取得
+        window.onload = fetchData;
     </script>
 </body>
 </html>
