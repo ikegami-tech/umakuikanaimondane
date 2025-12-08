@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sysnipo - スプレッドシート連携 (強化版)</title>
+    <title>Sysnipo - スプレッドシート連携 (ラジオボタン版)</title>
     <style>
         body { font-family: sans-serif; max-width: 650px; margin: 2rem auto; padding: 0 1rem; background-color: #f7f7f7; }
         h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; }
@@ -11,25 +11,29 @@
         label { display: block; margin-bottom: 0.75rem; font-weight: bold; color: #555; }
         input[type="text"], textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button.submit-btn { padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 16px; }
-        
-        /* コンディションボタンのスタイル */
-        .condition-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .condition-btn {
+
+        /* ラジオボタンのスタイル */
+        .condition-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .condition-label {
             background: #ffffff;
-            border: 2px solid #ccc;
-            border-radius: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
             padding: 8px 12px;
-            font-size: 1.5rem;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s;
-            flex-grow: 1; /* ボタンの幅を均等に広げる */
-            text-align: center;
+            transition: background 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
         }
-        .condition-btn:hover { background-color: #e6e6e6; }
-        .condition-btn.selected {
+        .condition-label input[type="radio"] {
+            margin-right: 8px;
+            /* ラジオボタンのデフォルト表示を隠す (任意) */
+            /* appearance: none; */ 
+        }
+        .condition-label:has(input[type="radio"]:checked) {
             border-color: #007bff;
             background-color: #e0f0ff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            font-weight: bold;
         }
 
         #data-list { margin-top: 3rem; border-top: 1px dashed #ccc; padding-top: 1.5rem; }
@@ -48,10 +52,20 @@
     </div>
     
     <div class="form-group">
-        <label>今日のコンディション（選択してください）</label>
-        <div class="condition-group" id="condition-buttons">
-            </div>
-        <input type="hidden" id="condition" value="">     </div>
+        <label>今日のコンディション（一つ選んでください）</label>
+        <div class="condition-group">
+            <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
+            <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
+            <label class="condition-label"><input type="radio" name="condition" value="😊 普通">😊 普通</label>
+            <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中">🤔 考え中</label>
+            <label class="condition-label"><input type="radio" name="condition" value="😐 やや不調">😐 やや不調</label>
+            <label class="condition-label"><input type="radio" name="condition" value="😓 疲労">😓 疲労</label>
+            <label class="condition-label"><input type="radio" name="condition" value="😟 心配">😟 心配</label>
+            <label class="condition-label"><input type="radio" name="condition" value="🤒 体調不良">🤒 体調不良</label>
+            <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感">🎉 達成感</label>
+            <label class="condition-label"><input type="radio" name="condition" value="💡 ひらめき">💡 ひらめき</label>
+        </div>
+    </div>
 
     <div class="form-group">
         <label>メッセージ（日報内容）</label>
@@ -65,47 +79,23 @@
 
     <script>
         // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
+        const GAS_URL = "ここにGASのウェブアプリURLを貼り付け"; 
 
-        // 10種類の絵文字
-        const EMOJIS = ['😄', '👍', '😊', '🤔', '😓', '😴', '😤', '🤒', '🎉', '💡'];
-        
-        // コンディションボタンの生成とイベント設定
-        function setupConditionButtons() {
-            const container = document.getElementById('condition-buttons');
-            const conditionInput = document.getElementById('condition');
-
-            EMOJIS.forEach(emoji => {
-                const button = document.createElement('button');
-                button.className = 'condition-btn';
-                button.type = 'button'; // フォーム送信を防ぐ
-                button.innerHTML = emoji;
-                
-                button.addEventListener('click', () => {
-                    // 全てのボタンの選択状態を解除
-                    document.querySelectorAll('.condition-btn').forEach(btn => {
-                        btn.classList.remove('selected');
-                    });
-                    
-                    // クリックされたボタンを選択状態にする
-                    button.classList.add('selected');
-                    
-                    // 選択された絵文字を隠しフィールドに保存
-                    conditionInput.value = emoji;
-                });
-                container.appendChild(button);
-            });
+        // 選択されているラジオボタンの値を取得するヘルパー関数
+        function getSelectedCondition() {
+            const selected = document.querySelector('input[name="condition"]:checked');
+            return selected ? selected.value : '';
         }
-        
+
         // データ送信（POST）
         function sendData() {
             const name = document.getElementById('name').value;
-            const condition = document.getElementById('condition').value; // ★新しいデータ
+            const condition = getSelectedCondition(); // ★ラジオボタンから値を取得
             const message = document.getElementById('message').value;
 
             if(!name || !condition || !message) { alert("名前、コンディション、メッセージを全て入力・選択してください"); return; }
 
-            // ★conditionも含めてデータをGASへ送る
+            // conditionも含めてデータをGASへ送る
             const data = { name: name, condition: condition, message: message };
 
             fetch(GAS_URL, {
@@ -119,8 +109,8 @@
             .then(() => {
                 alert("送信しました！");
                 document.getElementById('name').value = "";
-                document.getElementById('condition').value = ""; // 隠しフィールドをリセット
-                document.querySelectorAll('.condition-btn').forEach(btn => btn.classList.remove('selected')); // 選択状態解除
+                // ラジオボタンの選択を解除
+                document.querySelector('input[name="condition"]:checked').checked = false;
                 document.getElementById('message').value = "";
                 fetchData(); // リストを更新
             })
@@ -137,11 +127,11 @@
                 
                 // 新しい順に表示するために逆順にする
                 data.reverse().forEach(row => {
-                    // ★列のインデックスが変わります！ [0:日付, 1:名前, 2:コンディション, 3:メッセージ]
+                    // 列のインデックスは [0:日付, 1:名前, 2:コンディション, 3:メッセージ]
                     const date = new Date(row[0]).toLocaleString();
                     const name = row[1];
-                    const condition = row[2]; // ★新しいデータ
-                    const msg = row[3];      // ★インデックスが3に変わる
+                    const condition = row[2]; 
+                    const msg = row[3];      
                     
                     const div = document.createElement('div');
                     div.className = 'item';
@@ -160,10 +150,7 @@
         }
 
         // ページ読み込み時に実行
-        window.onload = () => {
-            setupConditionButtons(); // ボタンを初期化
-            fetchData(); // データ取得
-        };
+        window.onload = fetchData;
     </script>
 </body>
 </html>
