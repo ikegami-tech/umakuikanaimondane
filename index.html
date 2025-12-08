@@ -93,9 +93,12 @@
 /* 1行4つに並べるための特別な設定 */
 .condition-group .condition-label {
     /* 100% の幅から、間隔(gap)の分を引いて、4つに分ける計算 */
-    width: calc(25% - 4px); /* 4pxに修正 */
+    width: calc(25% - 6px); 
     box-sizing: border-box; 
-    justify-content: center; /* ボタン内のテキストを中央に寄せます */
+    
+    /* ★修正点: ここを 'center' から 'flex-start' に変えます */
+    /* これで、文字の長さに関係なく、左端にピシッと揃います */
+    justify-content: flex-start; 
 }
         /* 選択されたラジオボタンに枠線を付ける */
         .condition-label:has(input[type="radio"]:checked) {
