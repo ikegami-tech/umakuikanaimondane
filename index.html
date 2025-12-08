@@ -1,95 +1,169 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sysnipo - スプレッドシート連携</title>
-    <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; }
-        input, textarea { width: 100%; padding: 0.5rem; }
-        button { padding: 0.5rem 1rem; background: #007bff; color: white; border: none; cursor: pointer; }
-        #data-list { margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem; }
-        .item { background: #f9f9f9; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sysnipo - スプレッドシート連携 (強化版)</title>
+    <style>
+        body { font-family: sans-serif; max-width: 650px; margin: 2rem auto; padding: 0 1rem; background-color: #f7f7f7; }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.75rem; font-weight: bold; color: #555; }
+        input[type="text"], textarea { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button.submit-btn { padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 16px; }
+        
+        /* コンディションボタンのスタイル */
+        .condition-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .condition-btn {
+            background: #ffffff;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-grow: 1; /* ボタンの幅を均等に広げる */
+            text-align: center;
+        }
+        .condition-btn:hover { background-color: #e6e6e6; }
+        .condition-btn.selected {
+            border-color: #007bff;
+            background-color: #e0f0ff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        #data-list { margin-top: 3rem; border-top: 1px dashed #ccc; padding-top: 1.5rem; }
+        .item { background: #ffffff; padding: 1.25rem; margin-bottom: 1rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .item strong { color: #333; }
+        .item small { color: #888; display: block; margin-top: 0.25rem; }
+    </style>
 </head>
 <body>
 
-    <h1>スプレッドシート連携デモ</h1>
+    <h1>日報・コンディション報告</h1>
 
+    <div class="form-group">
+        <label>お名前</label>
+        <input type="text" id="name" placeholder="氏名を入力">
+    </div>
+    
     <div class="form-group">
-        <label>お名前</label>
-        <input type="text" id="name" placeholder="名前を入力">
-    </div>
-    <div class="form-group">
-        <label>メッセージ</label>
-        <textarea id="message" placeholder="メッセージを入力"></textarea>
-    </div>
-    <button onclick="sendData()">送信する</button>
+        <label>今日のコンディション（選択してください）</label>
+        <div class="condition-group" id="condition-buttons">
+            </div>
+        <input type="hidden" id="condition" value="">     </div>
 
-    <div id="data-list">
-        読み込み中...
-    </div>
+    <div class="form-group">
+        <label>メッセージ（日報内容）</label>
+        <textarea id="message" placeholder="本日の業務内容や特記事項を入力"></textarea>
+    </div>
+    <button onclick="sendData()" class="submit-btn">送信する</button>
 
-    <script>
-        // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "ここにGASのウェブアプリURLを貼り付け";
+    <div id="data-list">
+        読み込み中...
+    </div>
 
-        // データ送信（POST）
-        function sendData() {
-            const name = document.getElementById('name').value;
-            const message = document.getElementById('message').value;
+    <script>
+        // ★ここにGASのURLを貼り付けてください
+        const GAS_URL = "ここにGASのウェブアプリURLを貼り付け"; 
 
-            if(!name || !message) { alert("名前とメッセージを入力してください"); return; }
+        // 10種類の絵文字
+        const EMOJIS = ['😄', '👍', '😊', '🤔', '😓', '😴', '😤', '🤒', '🎉', '💡'];
+        
+        // コンディションボタンの生成とイベント設定
+        function setupConditionButtons() {
+            const container = document.getElementById('condition-buttons');
+            const conditionInput = document.getElementById('condition');
 
-            const data = { name: name, message: message };
-
-            fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors', // 重要：CORSエラー回避のためno-corsを指定
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                alert("送信しました！");
-                document.getElementById('name').value = "";
-                document.getElementById('message').value = "";
-                fetchData(); // リストを更新
-            })
-            .catch(err => alert("送信エラー: " + err));
-        }
-
-        // データ取得（GET）
-        function fetchData() {
-            fetch(GAS_URL)
-            .then(response => response.json())
-            .then(data => {
-                const list = document.getElementById('data-list');
-                list.innerHTML = "<h2>受信したメッセージ一覧</h2>";
+            EMOJIS.forEach(emoji => {
+                const button = document.createElement('button');
+                button.className = 'condition-btn';
+                button.type = 'button'; // フォーム送信を防ぐ
+                button.innerHTML = emoji;
                 
-                // 新しい順に表示するために逆順にする
-                data.reverse().forEach(row => {
-                    const date = new Date(row[0]).toLocaleString();
-                    const name = row[1];
-                    const msg = row[2];
+                button.addEventListener('click', () => {
+                    // 全てのボタンの選択状態を解除
+                    document.querySelectorAll('.condition-btn').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
                     
-                    const div = document.createElement('div');
-                    div.className = 'item';
-                    div.innerHTML = `<strong>${name}</strong> <small>(${date})</small><br>${msg}`;
-                    list.appendChild(div);
+                    // クリックされたボタンを選択状態にする
+                    button.classList.add('selected');
+                    
+                    // 選択された絵文字を隠しフィールドに保存
+                    conditionInput.value = emoji;
                 });
-            })
-            .catch(err => {
-                document.getElementById('data-list').innerHTML = "データの読み込みに失敗しました";
-                console.error(err);
+                container.appendChild(button);
             });
         }
+        
+        // データ送信（POST）
+        function sendData() {
+            const name = document.getElementById('name').value;
+            const condition = document.getElementById('condition').value; // ★新しいデータ
+            const message = document.getElementById('message').value;
 
-        // ページ読み込み時にデータを取得
-        window.onload = fetchData;
-    </script>
+            if(!name || !condition || !message) { alert("名前、コンディション、メッセージを全て入力・選択してください"); return; }
+
+            // ★conditionも含めてデータをGASへ送る
+            const data = { name: name, condition: condition, message: message };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert("送信しました！");
+                document.getElementById('name').value = "";
+                document.getElementById('condition').value = ""; // 隠しフィールドをリセット
+                document.querySelectorAll('.condition-btn').forEach(btn => btn.classList.remove('selected')); // 選択状態解除
+                document.getElementById('message').value = "";
+                fetchData(); // リストを更新
+            })
+            .catch(err => alert("送信エラー: " + err));
+        }
+
+        // データ取得（GET）
+        function fetchData() {
+            fetch(GAS_URL)
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('data-list');
+                list.innerHTML = "<h2>受信したメッセージ一覧</h2>";
+                
+                // 新しい順に表示するために逆順にする
+                data.reverse().forEach(row => {
+                    // ★列のインデックスが変わります！ [0:日付, 1:名前, 2:コンディション, 3:メッセージ]
+                    const date = new Date(row[0]).toLocaleString();
+                    const name = row[1];
+                    const condition = row[2]; // ★新しいデータ
+                    const msg = row[3];      // ★インデックスが3に変わる
+                    
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    // コンディションを表示に追加
+                    div.innerHTML = `<strong>${name} (${condition})</strong> <small>(${date})</small><br>${msg}`;
+                    list.appendChild(div);
+                });
+                if (data.length === 0) {
+                    list.innerHTML += "<p>まだデータがありません。</p>";
+                }
+            })
+            .catch(err => {
+                document.getElementById('data-list').innerHTML = "データの読み込みに失敗しました";
+                console.error(err);
+            });
+        }
+
+        // ページ読み込み時に実行
+        window.onload = () => {
+            setupConditionButtons(); // ボタンを初期化
+            fetchData(); // データ取得
+        };
+    </script>
 </body>
 </html>
