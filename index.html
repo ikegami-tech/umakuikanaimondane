@@ -379,41 +379,37 @@
                 btn.style.fontWeight = 'bold';
             }
         }
-        // ★新規追加：右クリックで「いいね」と「バッド」を切り替える機能
+        // ★修正：右クリックで切り替え（数字をリセットする機能付き）
         function changeToBad(event, btn) {
-            // 1. ブラウザの右クリックメニューが出るのを防ぐ（必須！）
-            event.preventDefault();
+            event.preventDefault(); // 右クリックメニューを出さない
+
+            // 1. まず、数字が付いていても無視するために、文字部分だけを取り出す
+            // "石井いいね👍 5" → ["石井いいね👍", "5"] に分けて、前の部分だけ使う
+            let textOnly = btn.innerText.split(' ')[0];
 
             // 2. 文字の中に「いいね」が入っているかチェック
-            if (btn.innerText.indexOf('いいね👍') !== -1) {
+            if (textOnly.indexOf('いいね👍') !== -1) {
                 
-                // ■「いいね」を「バッド」に書き換える
-                btn.innerText = btn.innerText.replace('いいね👍', 'バッド👎');
+                // ■「いいね」→「バッド」に書き換える
+                // 数字を捨てた textOnly を使うので、数字は消えます
+                btn.innerText = textOnly.replace('いいね👍', 'バッド👎');
                 
-                // バッドっぽい色（青紫）に変える
+                // バッドの色（青紫）に変える
                 btn.style.backgroundColor = '#f0f0ff';
                 btn.style.borderColor = '#4b0082';
                 btn.style.color = '#4b0082';
                 btn.style.fontWeight = 'bold';
 
-            } else if (btn.innerText.indexOf('バッド👎') !== -1) {
+            } else if (textOnly.indexOf('バッド👎') !== -1) {
                 
-                // ■「バッド」なら「いいね」に戻す
-                btn.innerText = btn.innerText.replace('バッド👎', 'いいね👍');
+                // ■「バッド」→「いいね」に戻す
+                btn.innerText = textOnly.replace('バッド👎', 'いいね👍');
                 
-                // 色を元に戻す（いいねの色、または初期状態へ）
-                // ※もし数字が付いているなら「いいね」の色にする
-                if (btn.innerText.indexOf(' 1') !== -1 || btn.innerText.match(/\d+$/)) {
-                    btn.style.backgroundColor = '#fff8f0';
-                    btn.style.borderColor = '#ff7f00';
-                    btn.style.color = '#ff7f00';
-                } else {
-                    // 数字がまだなければ真っ白に戻す
-                    btn.style.backgroundColor = '';
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                    btn.style.fontWeight = '';
-                }
+                // 数字がリセットされるので、色は「初期状態（白）」に戻す
+                btn.style.backgroundColor = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+                btn.style.fontWeight = '';
             }
         }
         window.onload = fetchData;
