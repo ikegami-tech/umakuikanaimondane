@@ -24,22 +24,11 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
-        
-        /* ラベルの基本スタイル */
         label { 
             display: block; width: 150px; margin-right: 20px; padding-top: 10px; 
             font-size: 16px; font-weight: bold; color: #333; 
             border-left: 4px solid #ff7f00; padding-left: 10px; 
         }
-
-        /* ★新規追加：ラベル内で要素を右寄せにするためのクラス */
-        .label-flex {
-            display: flex !important;       /* 元のdisplay:blockを上書き */
-            justify-content: space-between; /* 中身を両端に配置 */
-            align-items: center;            /* 上下中央揃え */
-            padding-right: 5px;             /* 右端に少し余白 */
-        }
-
         .input-wrapper { flex-grow: 1; }
         .form-group .input-wrapper { padding-left: 0; padding-right: 0; }
         input[type="text"], textarea { 
@@ -65,7 +54,7 @@
             border-color: #ff7f00; background-color: #fff8f0; font-weight: bold;
         }
 
-        /* --- メンバー追加エリアのデザイン --- */
+        /* --- ★新規追加：メンバー追加エリアのデザイン --- */
         .add-member-area {
             margin-top: 10px;
             display: none; /* 最初は隠しておく */
@@ -82,7 +71,7 @@
         }
         /* 追加ボタン（＋マーク） */
         .btn-plus {
-            background: #fff; color: #ff7f00; border: 1px solid #ff7f00; font-weight: bold;
+            background: #fff; color: #ff7f00; border: 1px solid #ff7f00; font-weight: bold; margin-left: 5px;
         }
         .btn-plus:hover { background: #ff7f00; color: #fff; }
 
@@ -164,8 +153,8 @@
 
     <div class="form-container">
         <div class="form-group">
-            <label class="label-flex">
-                <span>お名前</span>
+            <label>
+                お名前
                 <button class="btn-sm btn-plus" onclick="toggleAddMember()">＋追加</button>
             </label>
             <div class="input-wrapper">
@@ -223,10 +212,10 @@
 
     <script>
         // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwKtwQtaB0jVrI7eeXn1w_s-odrW97ld00nIkwTj7wQ8gvKy_UgCEZi88hX1mxUU-kn/exec"; 
 
         let allData = []; 
-        // メンバーリストを保存する変数
+        // ★新規：メンバーリストを保存する変数
         let memberList = [];
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1;
@@ -265,7 +254,6 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "送信中...";
 
-            // 日報送信は action: 'report' (デフォルト)
             const data = { 
                 action: 'report',
                 name: name, condition: condition, progress: progress, 
@@ -296,6 +284,7 @@
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
+                // ★修正：データ構造が変わったので取り出し方を変更
                 // data = { reports: [...], members: [...] } となっています
                 
                 // 1. 名簿データの処理
@@ -319,12 +308,13 @@
             });
         }
 
-        // メンバーのラジオボタンを作る関数
+        // ★新規：メンバーのラジオボタンを作る関数
         function renderMemberRadios() {
             const container = document.getElementById('name-radios');
             container.innerHTML = ""; // 一旦空にする
 
             memberList.forEach(name => {
+                // <label class="condition-label"><input type="radio" name="name" value="名前">名前</label> を作る
                 const label = document.createElement('label');
                 label.className = 'condition-label';
                 
@@ -340,7 +330,7 @@
             });
         }
 
-        // メンバー追加エリアの表示/非表示切り替え
+        // ★新規：メンバー追加エリアの表示/非表示切り替え
         function toggleAddMember() {
             const area = document.getElementById('add-member-form');
             if (area.style.display === 'flex') {
@@ -351,7 +341,7 @@
             }
         }
 
-        // 新しいメンバーを追加する関数
+        // ★新規：新しいメンバーを追加する関数
         function addNewMember() {
             const newNameInput = document.getElementById('new-member-name');
             const newName = newNameInput.value;
@@ -430,7 +420,8 @@
             const savedLikes = row[6] ? row[6] : ""; 
             const rowIndex = row[row.length - 1]; 
 
-            // いいねボタンもメンバーリストから自動生成する
+            // ★修正：いいねボタンもメンバーリストから自動生成する
+            // 誰のいいねボタンを作るか？ → memberList にある全員分作る
             let buttonsHtml = '';
             memberList.forEach(memberName => {
                 let btnText = memberName + "いいね👍"; // デフォルト
