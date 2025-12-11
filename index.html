@@ -24,11 +24,22 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
+        
+        /* ラベルの基本スタイル */
         label { 
             display: block; width: 150px; margin-right: 20px; padding-top: 10px; 
             font-size: 16px; font-weight: bold; color: #333; 
             border-left: 4px solid #ff7f00; padding-left: 10px; 
         }
+
+        /* ラベル内で要素を右寄せにするためのクラス */
+        .label-flex {
+            display: flex !important;       
+            justify-content: space-between; 
+            align-items: center;            
+            padding-right: 5px;             
+        }
+
         .input-wrapper { flex-grow: 1; }
         .form-group .input-wrapper { padding-left: 0; padding-right: 0; }
         input[type="text"], textarea { 
@@ -54,10 +65,10 @@
             border-color: #ff7f00; background-color: #fff8f0; font-weight: bold;
         }
 
-        /* --- ★新規追加：メンバー追加エリアのデザイン --- */
+        /* --- メンバー追加エリアのデザイン --- */
         .add-member-area {
             margin-top: 10px;
-            display: none; /* 最初は隠しておく */
+            display: none; 
             align-items: center;
             gap: 10px;
         }
@@ -71,7 +82,7 @@
         }
         /* 追加ボタン（＋マーク） */
         .btn-plus {
-            background: #fff; color: #ff7f00; border: 1px solid #ff7f00; font-weight: bold; margin-left: 5px;
+            background: #fff; color: #ff7f00; border: 1px solid #ff7f00; font-weight: bold;
         }
         .btn-plus:hover { background: #ff7f00; color: #fff; }
 
@@ -87,8 +98,35 @@
         }
 
         /* --- 報告一覧エリア --- */
-        #data-list { margin-top: 4rem; border-top: 1px solid #ccc; padding-top: 1.5rem; }
+        #data-list { margin-top: 4rem; padding-top: 1.5rem; }
         
+        /* ★修正：ヘッダーエリア（タイトルと検索窓を横並び） */
+        .list-header {
+            display: flex;
+            justify-content: space-between; /* 両端配置 */
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            flex-wrap: wrap; /* スマホで狭いときに折り返す */
+            gap: 10px;
+        }
+        .list-header h2 { margin: 0; }
+
+        /* ★新規追加：検索フィルターエリア */
+        .filter-area {
+            display: flex;
+            gap: 10px;
+        }
+        .filter-select, .filter-input {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .filter-select { width: 100px; } /* 名前選択の幅 */
+        .filter-input { width: 150px; }  /* テキスト入力の幅 */
+
         /* ページネーション */
         .Pagination {
             display: flex; align-items: center; justify-content: center; 
@@ -153,15 +191,12 @@
 
     <div class="form-container">
         <div class="form-group">
-            <label>
-                お名前
+            <label class="label-flex">
+                <span>お名前</span>
                 <button class="btn-sm btn-plus" onclick="toggleAddMember()">＋追加</button>
             </label>
             <div class="input-wrapper">
-                <div id="name-radios" class="condition-group">
-                    読み込み中...
-                </div>
-
+                <div id="name-radios" class="condition-group">読み込み中...</div>
                 <div id="add-member-form" class="add-member-area">
                     <input type="text" id="new-member-name" placeholder="新しい名前を入力">
                     <button class="btn-sm" style="background:#333; color:#fff;" onclick="addNewMember()">追加</button>
@@ -204,18 +239,29 @@
     </div>     
     
     <div id="data-list">
-        <h2>過去の報告一覧</h2>
-        読み込み中...
+        <div class="list-header">
+            <h2>過去の報告一覧</h2>
+            <div class="filter-area">
+                <select id="filter-name" class="filter-select" onchange="applyFilter()">
+                    <option value="">全員</option>
+                </select>
+                <input type="text" id="filter-text" class="filter-input" placeholder="検索..." oninput="applyFilter()">
+            </div>
+        </div>
+        
+        <div id="report-container">
+            読み込み中...
+        </div>
     </div>
 
     <div id="toast">送信完了しました！</div>
 
     <script>
         // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwKtwQtaB0jVrI7eeXn1w_s-odrW97ld00nIkwTj7wQ8gvKy_UgCEZi88hX1mxUU-kn/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
 
-        let allData = []; 
-        // ★新規：メンバーリストを保存する変数
+        let allData = []; // GASから取得した全データ
+        let currentData = []; // ★新規：フィルター後の表示用データ
         let memberList = [];
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1;
@@ -276,61 +322,90 @@
             });
         }
 
-        // データ取得（日報 ＆ メンバー）
+        // データ取得
         function fetchData() {
-            const listContainer = document.getElementById('data-list');
-            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
+            const reportContainer = document.getElementById('report-container');
+            reportContainer.innerHTML = "<p>データを取得中...</p>";
             
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                // ★修正：データ構造が変わったので取り出し方を変更
-                // data = { reports: [...], members: [...] } となっています
-                
                 // 1. 名簿データの処理
                 if (data.members) {
                     memberList = data.members;
-                    renderMemberRadios(); // ラジオボタンを作る
+                    renderMemberRadios(); // 入力フォームのラジオボタン作成
+                    renderFilterOptions(); // ★新規：検索フィルターのプルダウン作成
                 }
 
                 // 2. 日報データの処理
                 allData = (data.reports || []).reverse();
+                currentData = allData; // 最初は全データを表示対象にする
                 
-                if (allData.length === 0) {
-                    listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>まだ報告が登録されていません。</p>";
+                if (currentData.length === 0) {
+                    reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>";
                     return;
                 }
-                renderPage(1);
+                
+                applyFilter(); // ★修正：初期表示時もフィルターを通す（最初は全員表示）
             })
             .catch(err => {
-                listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データの読み込みに失敗しました。</p>";
+                reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>";
                 console.error(err);
             });
         }
 
-        // ★新規：メンバーのラジオボタンを作る関数
+        // ★新規：フィルター用のプルダウンメニュー作成
+        function renderFilterOptions() {
+            const select = document.getElementById('filter-name');
+            // 一旦中身を「全員」だけにする
+            select.innerHTML = '<option value="">全員</option>';
+            
+            memberList.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.innerText = name;
+                select.appendChild(option);
+            });
+        }
+
+        // ★新規：フィルター実行機能
+        function applyFilter() {
+            const nameVal = document.getElementById('filter-name').value;
+            const textVal = document.getElementById('filter-text').value.toLowerCase(); // 小文字にして検索
+
+            // allDataから条件に合うものを抽出して currentData に入れる
+            currentData = allData.filter(row => {
+                const name = row[1];
+                const content = (row[3] + row[4] + row[5]).toLowerCase(); // 進捗＋明日＋所見
+
+                // 名前チェック（空なら全員、選ばれていれば一致するか）
+                const nameMatch = (nameVal === "") || (name === nameVal);
+                
+                // テキストチェック（空なら全件、入力あれば含まれるか）
+                const textMatch = (textVal === "") || (content.includes(textVal));
+
+                return nameMatch && textMatch;
+            });
+
+            // ページを1ページ目に戻して再描画
+            renderPage(1);
+        }
+
+        // メンバーのラジオボタン作成（入力フォーム用）
         function renderMemberRadios() {
             const container = document.getElementById('name-radios');
-            container.innerHTML = ""; // 一旦空にする
-
+            container.innerHTML = ""; 
             memberList.forEach(name => {
-                // <label class="condition-label"><input type="radio" name="name" value="名前">名前</label> を作る
                 const label = document.createElement('label');
                 label.className = 'condition-label';
-                
                 const input = document.createElement('input');
-                input.type = 'radio';
-                input.name = 'name';
-                input.value = name;
-                
+                input.type = 'radio'; input.name = 'name'; input.value = name;
                 label.appendChild(input);
                 label.appendChild(document.createTextNode(name));
-                
                 container.appendChild(label);
             });
         }
 
-        // ★新規：メンバー追加エリアの表示/非表示切り替え
         function toggleAddMember() {
             const area = document.getElementById('add-member-form');
             if (area.style.display === 'flex') {
@@ -341,56 +416,54 @@
             }
         }
 
-        // ★新規：新しいメンバーを追加する関数
         function addNewMember() {
             const newNameInput = document.getElementById('new-member-name');
             const newName = newNameInput.value;
-            
-            if (!newName) {
-                alert("名前を入力してください");
-                return;
-            }
+            if (!newName) { alert("名前を入力してください"); return; }
 
-            // ローカル（画面上）ですぐに追加してあげる
             memberList.push(newName);
             renderMemberRadios();
-            toggleAddMember(); // 入力欄を閉じる
-            newNameInput.value = ""; // 入力欄を空にする
+            renderFilterOptions(); // ★修正：フィルターの選択肢も更新
+            toggleAddMember(); 
+            newNameInput.value = ""; 
 
-            // GASに送信して「名簿」シートに保存する
-            const data = {
-                action: 'addMember',
-                newName: newName
-            };
-
+            const data = { action: 'addMember', newName: newName };
             fetch(GAS_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
-            }).then(() => {
-                console.log("メンバー追加を送信しました");
-            });
+            }).then(() => console.log("メンバー追加送信"));
         }
 
-        // ページ表示
+        // ページ表示（★修正：currentDataを使うように変更）
         function renderPage(pageNumber) {
             currentPage = pageNumber;
-            const listContainer = document.getElementById('data-list');
-            listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
+            const reportContainer = document.getElementById('report-container');
+            reportContainer.innerHTML = ""; // クリア
+
+            if (currentData.length === 0) {
+                reportContainer.innerHTML = "<p>該当する報告はありません。</p>";
+                return;
+            }
 
             const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
             const endIndex = startIndex + ITEMS_PER_PAGE;
-            const pageData = allData.slice(startIndex, endIndex);
+            const pageData = currentData.slice(startIndex, endIndex);
 
             pageData.forEach(row => { createReportItem(row); });
             renderPagination();
         }
 
-        // ページネーション作成
+        // ページネーション作成（★修正：currentDataを使うように変更）
         function renderPagination() {
-            const listContainer = document.getElementById('data-list');
-            const totalPages = Math.ceil(allData.length / ITEMS_PER_PAGE);
+            // 既存のページネーションがあれば削除（再作成のため）
+            const oldPagination = document.querySelector('.Pagination');
+            if (oldPagination) oldPagination.remove();
+
+            const reportContainer = document.getElementById('report-container');
+            const totalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE);
+            
             if (totalPages <= 1) return;
 
             const paginationDiv = document.createElement('div');
@@ -404,37 +477,31 @@
                 btn.onclick = function() { renderPage(i); };
                 paginationDiv.appendChild(btn);
             }
-            listContainer.appendChild(paginationDiv);
+            // リストの直後に追加（HTML構造上、report-containerの後ろに配置したいが、今回は中に入れる）
+            // コンテナの中の最後に追加
+            reportContainer.appendChild(paginationDiv);
         }
 
         // 1件分のHTML作成
         function createReportItem(row) {
-            const listContainer = document.getElementById('data-list');
+            const reportContainer = document.getElementById('report-container');
             const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
             const name = row[1];
             const condition = row[2];
             const progress = row[3];
             const tomorrow = row[4];
             const comment = row[5];
-            
             const savedLikes = row[6] ? row[6] : ""; 
             const rowIndex = row[row.length - 1]; 
 
-            // ★修正：いいねボタンもメンバーリストから自動生成する
-            // 誰のいいねボタンを作るか？ → memberList にある全員分作る
             let buttonsHtml = '';
             memberList.forEach(memberName => {
-                let btnText = memberName + "いいね👍"; // デフォルト
-                
-                // 保存データがあれば復元
+                let btnText = memberName + "いいね👍"; 
                 if (savedLikes) {
                     const parts = savedLikes.split(',');
                     const found = parts.find(p => p.trim().startsWith(memberName));
-                    if (found) {
-                        btnText = found.trim();
-                    }
+                    if (found) btnText = found.trim();
                 }
-                
                 buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `;
             });
 
@@ -445,7 +512,6 @@
                 <div class="like-buttons" data-row-index="${rowIndex}">
                     ${buttonsHtml}
                 </div>
-                
                 <div class="report-header-area">
                     <span style="font-size: 1.3em; font-weight: bold;">${name}</span>
                     <span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span>
@@ -459,10 +525,9 @@
             const btns = div.querySelectorAll('.like-btn');
             btns.forEach(btn => updateButtonColor(btn));
 
-            listContainer.appendChild(div);
+            reportContainer.appendChild(div);
         }
 
-        // ボタンの色更新
         function updateButtonColor(btn) {
             const text = btn.innerText;
             if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) {
@@ -484,7 +549,6 @@
             }
         }
 
-        // いいね機能
         function addLike(btn) {
             let text = btn.innerText;
             let parts = text.split(' '); 
@@ -501,7 +565,6 @@
             triggerDebounceSave(btn); 
         }
 
-        // バッド切り替え機能
         function changeToBad(event, btn) {
             event.preventDefault();
             let textOnly = btn.innerText.split(' ')[0];
