@@ -163,23 +163,22 @@
             color: #fff;
         }
 
-        /* 日報アイテム */
+        /* 日報アイテム（枠のデザイン） */
         .item { 
             position: relative;
             background: #e0f7ff; 
-            padding: 1.25rem; 
+            padding: 2rem 1.5rem; /* パディングを少し増やしてゆったりさせる */
             margin-bottom: 2rem; 
-            border-radius: 4px; 
+            border-radius: 8px;   /* 丸みを少し強く */
             line-height: 1.6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* 影をつけて浮き上がらせる */
         }
-        .item strong { color: #000; font-weight: bold; }
-        .item small { color: #888; display: block; margin-top: 0.25rem; }
             
         /* いいねボタンエリア */
         .like-buttons {
             position: absolute; 
-            top: 10px;          
-            right: 10px;        
+            top: 15px;          
+            right: 15px;        
             display: flex;      
             gap: 5px;           
         }
@@ -219,6 +218,52 @@
             opacity: 1;               
             bottom: 50px;             
         }
+
+        /* -------------------------------------------------- */
+        /* ★新規追加：報告一覧の中身をフォーム風にするデザイン */
+        
+        /* 1つの行（見出し＋内容）の枠 */
+        .report-row {
+            display: flex;              /* 横並びにする */
+            align-items: flex-start;    /* 上揃え */
+            margin-bottom: 15px;        /* 下に隙間 */
+            border-bottom: 1px dashed #ccc; /* 薄い点線で区切る */
+            padding-bottom: 15px;       /* 点線との隙間 */
+        }
+        
+        /* 最後の行だけ線消す */
+        .report-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        /* 左側の見出し（フォームのラベルと同じデザイン） */
+        .report-label {
+            display: block;
+            width: 150px;           /* 幅を固定 */
+            min-width: 150px;       /* 縮まないようにする */
+            margin-right: 20px;     /* 右の隙間 */
+            font-weight: bold;
+            color: #333;
+            border-left: 4px solid #ff7f00; /* オレンジの縦線 */
+            padding-left: 10px;
+            font-size: 16px;
+        }
+
+        /* 右側の文章 */
+        .report-content {
+            flex-grow: 1;           /* 残りの幅いっぱい使う */
+            white-space: pre-wrap;  /* 改行をそのまま表示する */
+            line-height: 1.6;
+        }
+
+        /* ヘッダー（名前とか日付の場所）のデザイン */
+        .report-header-area {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff7f00; /* オレンジの実線 */
+        }
+        /* -------------------------------------------------- */
 
     </style>
 </head>
@@ -349,8 +394,7 @@
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                // 1. スプレッドシートのデータを逆順（新しい順）にして保存
-                // これにより [最新, その前, ... 古い] という順番になります
+                // 1. データを逆順（新しい順）にして保存
                 allData = data.reverse();
                 
                 if (allData.length === 0) {
@@ -367,30 +411,27 @@
             });
         }
 
-        // ★修正：指定されたページのデータを表示する関数
+        // 指定されたページのデータを表示する関数
         function renderPage(pageNumber) {
             currentPage = pageNumber;
             const listContainer = document.getElementById('data-list');
             
-            // リストの中身をクリア（上書き）して、タイトルだけにする
+            // リストの中身をクリアして、タイトルだけにする
             listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
 
-            // ■ どのデータを表示するか計算する
-            // 1ページ目 (1-1)*10 = 0番目 から 10個
-            // 2ページ目 (2-1)*10 = 10番目 から 10個
-            // 3ページ目 (3-1)*10 = 20番目 から 10個
+            // 表示するデータの範囲を計算
             const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
             const endIndex = startIndex + ITEMS_PER_PAGE;
             
-            // allData（全員分）から、計算した範囲だけを切り取る
+            // データを切り出す
             const pageData = allData.slice(startIndex, endIndex);
 
-            // 切り出したデータ（最大10件）を画面に表示
+            // 切り出したデータを画面に表示
             pageData.forEach(row => {
                 createReportItem(row);
             });
 
-            // ページ番号ボタン（1 2 3...）を表示
+            // ページネーションボタンを表示
             renderPagination();
         }
 
@@ -398,7 +439,7 @@
         function renderPagination() {
             const listContainer = document.getElementById('data-list');
             
-            // 全体のページ数を計算（例: 25件 ÷ 10 = 2.5 → 3ページ）
+            // 全体のページ数を計算
             const totalPages = Math.ceil(allData.length / ITEMS_PER_PAGE);
             
             if (totalPages <= 1) return;
@@ -416,9 +457,7 @@
                 }
 
                 btn.onclick = function() {
-                    renderPage(i); // 押されたページ番号を表示
-                    // お好みで、ページ切り替え時に上までスクロールさせる場合は以下のコメントを外してください
-                    // document.getElementById('data-list').scrollIntoView({behavior: 'smooth'});
+                    renderPage(i); 
                 };
 
                 paginationDiv.appendChild(btn);
@@ -427,10 +466,12 @@
             listContainer.appendChild(paginationDiv);
         }
 
-        // 1件分のHTMLを作って画面に追加する関数
+        // ★修正：1件分のHTMLを作って画面に追加する関数（フォーム風レイアウト）
         function createReportItem(row) {
             const listContainer = document.getElementById('data-list');
             
+            const btnArea = document.getElementById('load-more-area');
+
             const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
             const name = row[1];
             const condition = row[2];
@@ -441,6 +482,7 @@
             const div = document.createElement('div');
             div.className = 'item';
             
+            // 新しいフォーム風デザイン
             div.innerHTML = `
                 <div class="like-buttons">
                     <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">石井いいね👍</button>
@@ -448,15 +490,33 @@
                     <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">池上いいね👍</button>
                 </div>
                 
-                <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
-                <div style="margin-top:10px;">
-                    **今日の進捗**: ${progress.substring(0, 70)}...<br>
-                    **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
-                    **所見**: ${comment.substring(0, 70)}...
+                <div class="report-header-area">
+                    <span style="font-size: 1.3em; font-weight: bold;">${name}</span>
+                    <span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span>
+                    <div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div>
+                </div>
+
+                <div class="report-row">
+                    <div class="report-label">今日の進捗</div>
+                    <div class="report-content">${progress}</div>
+                </div>
+
+                <div class="report-row">
+                    <div class="report-label">明日の業務</div>
+                    <div class="report-content">${tomorrow}</div>
+                </div>
+
+                <div class="report-row">
+                    <div class="report-label">所見</div>
+                    <div class="report-content">${comment}</div>
                 </div>
             `;
             
-            listContainer.appendChild(div);
+            if (btnArea) {
+                listContainer.insertBefore(div, btnArea);
+            } else {
+                listContainer.appendChild(div);
+            }
         }
 
         // いいねボタン機能
