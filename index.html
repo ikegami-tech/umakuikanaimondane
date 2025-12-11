@@ -80,7 +80,7 @@
     border: 1px solid transparent; /* 初期は透明 */
     border-radius: 6px;
     padding: 5px 8px;
-    font-size: 1rem;
+    font-size: 0.95rem; /* ★4文字対策:文字サイズ調整 */
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -88,20 +88,18 @@
 }
 /* 1行4つに並べるための特別な設定 */
 .condition-group .condition-label {
-    /* 100% の幅から、間隔(gap)の分を引いて、4つに分ける計算 */
     width: calc(25% - 6px); 
     box-sizing: border-box; 
-    
-    /* 左端に揃える設定 */
     justify-content: flex-start; 
-
-    /* ★修正点: 4文字でも改行させないための設定を追加 */
-    white-space: nowrap;  /* 「改行禁止」の命令です */
-    
-    /* ★微調整: 4文字が枠からはみ出さないように調整 */
-    padding: 5px 2px;     /* 左右の余白を8px→2pxに減らして、文字のスペースを確保 */
-    font-size: 0.95rem;   /* 文字サイズをほんの少しだけ小さくして収まりやすくする */
+    white-space: nowrap; /* ★4文字対策:改行禁止 */
+    padding: 5px 2px;    /* ★4文字対策:余白調整 */
 }
+        /* 選択されたラジオボタンに枠線を付ける */
+        .condition-label:has(input[type="radio"]:checked) {
+            border-color: #ff7f00; /* オレンジの線 */
+            background-color: #fff8f0; /* 薄いオレンジ背景 */
+            font-weight: bold;
+        }
 
 
         /* ボタンエリア */
@@ -136,43 +134,55 @@
         }
         button.send-btn:hover { background: #e07000; }
 
-        /* 過去の報告一覧 */
+        /* 過去の報告一覧エリア */
         #data-list { 
             margin-top: 4rem; 
-            /* border-top は下の .list-header に移動したので削除してもOKですが、そのままでも大丈夫です */
-            /* border-top: 1px solid #ccc; */ 
+            border-top: 1px solid #ccc; 
             padding-top: 1.5rem; 
         }
         
-        /* ★新規追加：タイトルとボタンを横並びにするヘッダーエリア */
-        .list-header {
-            display: flex;              /* 横並びにする */
-            justify-content: space-between; /* 両端に配置する */
-            align-items: center;        /* 上下の中心を揃える */
-            margin-bottom: 20px;
-            border-bottom: 2px solid #ddd; /* タイトルの下に線を引く */
-            padding-bottom: 10px;
-        }
-        .list-header h2 {
-            margin: 0; /* 余計な隙間をなくす */
+        /* -------------------------------------------------- */
+        /* ★修正：もっと見るボタンのエリア（中央寄せ） */
+        .Pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* 画面の中央に配置 */
+            margin-top: 30px;        /* 上との間隔 */
+            margin-bottom: 50px;     /* 下との間隔 */
         }
 
-        /* ★新規追加：もっと見るボタンのデザイン */
-        button.load-more-btn {
-            padding: 5px 20px;       /* サイズを少し小さめに */
+        /* ★修正：ボタンのデザイン（いただいたコードを調整） */
+        .Pagination-Item-Link {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            
+            /* 文字が入るように幅と高さを固定せず、余白で調整します */
+            padding: 10px 30px; 
+            
             background: #fff;
-            color: #ff7f00;
-            border: 2px solid #ff7f00;
-            cursor: pointer;
-            border-radius: 20px;
+            border: solid 2px #111;
             font-size: 14px;
+            color: #111;
             font-weight: bold;
-            transition: 0.2s;
+            transition: all 0.15s linear;
+            cursor: pointer;
+            border-radius: 4px;
         }
-        button.load-more-btn:hover {
-            background: #ff7f00;
+
+        .Pagination-Item-Link.isActive {
+            background: #111;
+            color: #fff;
+            pointer-events: none;
+        }
+
+        /* マウスを乗せたとき */
+        .Pagination-Item-Link:not(.isActive):hover {
+            background: #111;
             color: #fff;
         }
+        /* -------------------------------------------------- */
 
         .item { 
             position: relative;
@@ -325,43 +335,42 @@
             .catch(err => alert("送信エラー: " + err));
         }
 
-        // ★修正：データ取得機能（ボタンをタイトルの横に配置）
+        // ★修正：データ取得機能（ボタンを一番下に配置）
         function fetchData() {
             const listContainer = document.getElementById('data-list');
-            // 最初はヘッダー（空）と読み込み中メッセージ
-            listContainer.innerHTML = '<div class="list-header"><h2>過去の報告一覧</h2></div><p>データを取得中...</p>';
+            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
             
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                // 1. データを逆順（新しい順）にして保存
                 allData = data.reverse();
-
-                // 2. ボタンのHTMLを作る（データが11件以上ある場合のみ）
-                let buttonHtml = '';
-                if (allData.length > 10) {
-                    // id="header-btn" をつけて、後で消せるようにする
-                    buttonHtml = '<button id="header-btn" class="load-more-btn" onclick="showAllReports()">過去のデータをすべて見る ▼</button>';
-                }
-
-                // 3. ヘッダーエリア（タイトル＋ボタン）を描画する
-                listContainer.innerHTML = `
-                    <div class="list-header">
-                        <h2>過去の報告一覧</h2>
-                        ${buttonHtml}
-                    </div>
-                `;
+                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
 
                 if (allData.length === 0) {
                     listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
                     return;
                 }
 
-                // 4. 最初の10件を表示する
+                // 最初の10件を表示
                 const first10 = allData.slice(0, 10);
                 first10.forEach(row => {
                     createReportItem(row);
                 });
+
+                // ★データが10件より多ければ、一番下にボタンを作る
+                if (allData.length > 10) {
+                    const btnDiv = document.createElement('div');
+                    btnDiv.className = 'Pagination'; // ★中央寄せのクラス
+                    btnDiv.id = 'load-more-area';
+                    
+                    // ★ご希望のデザインのボタンを作成
+                    btnDiv.innerHTML = `
+                        <button class="Pagination-Item-Link" onclick="showAllReports()">
+                            過去のデータをすべて見る ▼
+                        </button>
+                    `;
+                    listContainer.appendChild(btnDiv);
+                }
             })
             .catch(err => {
                 listContainer.innerHTML = "データの読み込みに失敗しました。";
@@ -369,18 +378,16 @@
             });
         }
 
-        // ★修正：残りのデータを表示して、ヘッダーのボタンを消す
+        // ★修正：残りのデータを表示して、一番下のボタンを消す
         function showAllReports() {
-            // 11件目から最後までを表示
             const remainingData = allData.slice(10);
             remainingData.forEach(row => {
                 createReportItem(row);
             });
 
-            // ヘッダーにあるボタンを消す
-            const btn = document.getElementById('header-btn');
-            if (btn) {
-                btn.style.display = 'none'; // ボタンを非表示にする
+            const btnArea = document.getElementById('load-more-area');
+            if (btnArea) {
+                btnArea.remove();
             }
         }
 
@@ -388,6 +395,9 @@
         function createReportItem(row) {
             const listContainer = document.getElementById('data-list');
             
+            // ボタンエリア（Pagination）があればその前に挿入する
+            const btnArea = document.getElementById('load-more-area');
+
             const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
             const name = row[1];
             const condition = row[2];
@@ -413,7 +423,11 @@
                 </div>
             `;
             
-            listContainer.appendChild(div);
+            if (btnArea) {
+                listContainer.insertBefore(div, btnArea);
+            } else {
+                listContainer.appendChild(div);
+            }
         }
 
         // いいねボタン機能
