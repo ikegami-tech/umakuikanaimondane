@@ -348,30 +348,35 @@
         }
         // ★修正：いいねボタンを押したときの動き（ON/OFF切り替え機能付き）
         function addLike(btn) {
-            // ボタンの文字の中に「 1」が含まれているかチェック
-            // indexOf(...) === -1 というのは「見つからなかった」という意味です
-            if (btn.innerText.indexOf(' 1') === -1) {
+            // 1. 今のボタンの文字を取得
+            let text = btn.innerText;
+
+            // 2. 文字を「半角スペース」で区切ってみる
+            // 例: "石井いいね👍 1" なら ["石井いいね👍", "1"] になります
+            let parts = text.split(' '); 
+            
+            // 3. 区切った最後の一言を取り出して、数字に変換してみる
+            let lastPart = parts[parts.length - 1]; 
+            let count = parseInt(lastPart); // parseIntは「文字を整数にする」命令です
+
+            // 4. それが数字かどうかで動きを変える
+            if (!isNaN(count)) {
+                // ■ 数字だった場合（＝2回目以降のクリック）
+                count = count + 1; // 数字を1増やす
+                parts.pop();       // 古い数字を削除する
                 
-                // ■ パターンA：まだ押されていない時（ONにする）
-                btn.innerText = btn.innerText + ' 1'; // 文字の後ろに「 1」を追加
-                
-                // 押したことがわかるように色を変える
+                // 「名前」と「新しい数字」をくっつけてボタンに戻す
+                btn.innerText = parts.join(' ') + ' ' + count;
+
+            } else {
+                // ■ 数字じゃなかった場合（＝初めてのクリック）
+                btn.innerText = text + ' 1'; // 単純に「 1」を足す
+
+                // 色をオレンジに変える（初回だけでOK）
                 btn.style.backgroundColor = '#fff8f0';
                 btn.style.borderColor = '#ff7f00';
                 btn.style.color = '#ff7f00';
                 btn.style.fontWeight = 'bold';
-                
-            } else {
-                
-                // ■ パターンB：すでに押されている時（OFFに戻す）
-                // 文字から「 1」を削除する（空白に置き換える）
-                btn.innerText = btn.innerText.replace(' 1', '');
-                
-                // 色を元に戻す（設定を空っぽにすると、最初のCSSのデザインに戻ります）
-                btn.style.backgroundColor = '';
-                btn.style.borderColor = '';
-                btn.style.color = '';
-                btn.style.fontWeight = '';
             }
         }
         window.onload = fetchData;
