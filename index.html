@@ -346,38 +346,44 @@
                 console.error(err);
             });
         }
-        // ★修正：いいねボタンを押したときの動き（ON/OFF切り替え機能付き）
+        // ★修正：いいねボタンを押したときの動き（色判定の強化版）
         function addLike(btn) {
             // 1. 今のボタンの文字を取得
             let text = btn.innerText;
 
-            // 2. 文字を「半角スペース」で区切ってみる
-            // 例: "石井いいね👍 1" なら ["石井いいね👍", "1"] になります
+            // 2. 文字を「半角スペース」で区切る
             let parts = text.split(' '); 
             
-            // 3. 区切った最後の一言を取り出して、数字に変換してみる
+            // 3. 最後の部分が数字かどうかチェック
             let lastPart = parts[parts.length - 1]; 
-            let count = parseInt(lastPart); // parseIntは「文字を整数にする」命令です
+            let count = parseInt(lastPart);
 
-            // 4. それが数字かどうかで動きを変える
+            // 4. 数字の計算（カウントアップ）
             if (!isNaN(count)) {
-                // ■ 数字だった場合（＝2回目以降のクリック）
-                count = count + 1; // 数字を1増やす
-                parts.pop();       // 古い数字を削除する
-                
-                // 「名前」と「新しい数字」をくっつけてボタンに戻す
-                btn.innerText = parts.join(' ') + ' ' + count;
-
+                // ■ 数字だった場合（2回目以降）
+                count = count + 1; // 1増やす
+                parts.pop();       // 古い数字を消す
+                btn.innerText = parts.join(' ') + ' ' + count; // 新しい数字をくっつける
             } else {
-                // ■ 数字じゃなかった場合（＝初めてのクリック）
-                btn.innerText = text + ' 1'; // 単純に「 1」を足す
+                // ■ 数字じゃなかった場合（初回）
+                btn.innerText = text + ' 1'; // 「 1」を足す
+            }
 
-                // 色をオレンジに変える（初回だけでOK）
+            // 5. 【重要】最後に必ず色を確認して塗り直す！
+            // ボタンの文字に「バッド」が含まれているかどうかで色を決める
+            if (btn.innerText.indexOf('バッド') !== -1) {
+                // バッドの色（青紫）
+                btn.style.backgroundColor = '#f0f0ff';
+                btn.style.borderColor = '#4b0082';
+                btn.style.color = '#4b0082';
+            } else {
+                // いいねの色（オレンジ）
                 btn.style.backgroundColor = '#fff8f0';
                 btn.style.borderColor = '#ff7f00';
                 btn.style.color = '#ff7f00';
-                btn.style.fontWeight = 'bold';
             }
+            // 文字を太くする
+            btn.style.fontWeight = 'bold';
         }
         // ★修正：右クリックで切り替え（数字をリセットする機能付き）
         function changeToBad(event, btn) {
