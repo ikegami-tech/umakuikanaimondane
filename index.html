@@ -143,6 +143,8 @@
         /* 過去の報告一覧 */
         #data-list { margin-top: 4rem; border-top: 1px solid #ccc; padding-top: 1.5rem; }
         .item { 
+            position: relative;
+                
             background: #e0f7ff; 
             padding: 1.25rem; 
             /* 修正しました: 下側のスペースを増やして、次の日報との間隔を広げます */
@@ -152,6 +154,30 @@
         }
         .item strong { color: #000; font-weight: bold; }
         .item small { color: #888; display: block; margin-top: 0.25rem; }
+            
+         /* ★新規追加：いいねボタンを右上に配置するエリア */
+        .like-buttons {
+            position: absolute; /* 枠の絶対位置に固定 */
+            top: 10px;          /* 上から10px */
+            right: 10px;        /* 右から10px */
+            display: flex;      /* ボタンを横並びにする */
+            gap: 5px;           /* ボタン同士の間隔 */
+        }
+
+        /* ★新規追加：いいねボタンのデザイン */
+        .like-btn {
+            font-size: 11px;
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 15px; /* 丸っこくする */
+            background-color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .like-btn:hover {
+            background-color: #ffecd1; /* マウスを乗せたときの色 */
+            border-color: #ff7f00;
+        }
 
     </style>
 </head>
@@ -293,12 +319,22 @@
                     const div = document.createElement('div');
                     div.className = 'item';
                     
-                    div.innerHTML = `
+                    // ★修正：いいねボタンのHTMLを追加しました
+                    div.innerHTML = `
+                        <div class="like-buttons">
+                            <button class="like-btn" onclick="alert('石井いいね！が押されました（機能開発中）')">石井いいね👍</button>
+                            <button class="like-btn" onclick="alert('渡辺いいね！が押されました（機能開発中）')">渡辺いいね👍</button>
+                            <button class="like-btn" onclick="alert('池上いいね！が押されました（機能開発中）')">池上いいね👍</button>
+                        </div>
+                        
                         <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
-                        **今日の進捗**: ${progress.substring(0, 70)}...<br>
-                        **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
-                        **所見**: ${comment.substring(0, 70)}...
+                        <div style="margin-top:10px;">
+                            **今日の進捗**: ${progress.substring(0, 70)}...<br>
+                            **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
+                            **所見**: ${comment.substring(0, 70)}...
+                        </div>
                     `;
+                        
                     listContainer.appendChild(div);
                 });
                 if (data.length === 0) {
