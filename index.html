@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日報フォーム</title>
+    <title>システム課</title>
     <style>
         /* --- 基本スタイル --- */
         h1 { text-align: center; margin-bottom: 30px; }    
@@ -145,12 +145,12 @@
 </head>
 <body>
 
-    <h1 id="page-title">日報入力フォーム</h1>
+    <h1 id="page-title">システム課日報</h1>
 
     <div class="form-container" id="form-container">
         <div class="form-group">
             <label class="label-flex">
-                <span>お名前</span>
+                <span>名前</span>
                 <button class="btn-sm btn-plus" onclick="toggleAddMember()">＋追加</button>
             </label>
             <div class="input-wrapper">
@@ -164,7 +164,7 @@
         </div>
 
         <div class="form-group">
-            <label>コンディション</label>
+            <label>今日の体調</label>
             <div class="input-wrapper condition-group">
                 <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
                 <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
@@ -192,7 +192,7 @@
         </div>
 
         <div class="form-group">
-            <label>資料添付</label>
+            <label>資料添付(現在使えません)</label>
             <div class="input-wrapper">
                 <input type="file" id="file-attach">
                 <div id="current-file-msg" style="font-size:12px; color:blue; display:none;">※新しいファイルを添付すると上書きされます</div>
