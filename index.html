@@ -22,19 +22,22 @@
             padding: 2rem; 
             border-radius: 8px; 
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            /* 編集モードのときに枠の色を変えてわかりやすくする */
+            transition: border-color 0.3s;
         }
+        /* 編集モード時のスタイル */
+        .form-container.editing {
+            border: 2px solid #007bff;
+            background-color: #f0f8ff !important;
+        }
+
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
-        
         label { 
             display: block; width: 150px; margin-right: 20px; padding-top: 10px; 
             font-size: 16px; font-weight: bold; color: #333; 
             border-left: 4px solid #ff7f00; padding-left: 10px; 
         }
-        .label-flex { 
-            display: flex !important; justify-content: space-between; 
-            align-items: center; padding-right: 5px; 
-        }
-
+        .label-flex { display: flex !important; justify-content: space-between; align-items: center; padding-right: 5px; }
         .input-wrapper { flex-grow: 1; }
         .form-group .input-wrapper { padding-left: 0; padding-right: 0; }
         input[type="text"], textarea { 
@@ -42,8 +45,6 @@
             border-radius: 4px; box-sizing: border-box; font-size: 16px; 
         }
         textarea { height: 100px; resize: vertical; }
-
-        /* ファイル選択 */
         input[type="file"] { padding: 10px 0; font-size: 14px; }
 
         /* --- ラジオボタン --- */
@@ -64,6 +65,13 @@
         button.send-btn { padding: 10px 30px; background: #ff7f00; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
         button.send-btn:hover { background: #e07000; }
         button.send-btn:disabled { background: #ccc; color: #666; cursor: not-allowed; border: none; }
+        
+        /* 編集モードのときのボタン色（青にする） */
+        button.send-btn.update-mode { background: #007bff; }
+        button.send-btn.update-mode:hover { background: #0056b3; }
+
+        /* キャンセルボタン（編集中のみ表示） */
+        #cancel-edit-btn { display: none; padding: 10px 30px; background: #999; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
 
         /* --- 一覧エリア --- */
         #data-list { margin-top: 4rem; padding-top: 1.5rem; }
@@ -83,11 +91,48 @@
 
         /* 日報カード */
         .item { position: relative; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); padding: 2rem 1.5rem; margin-bottom: 2rem; line-height: 1.6; }
+        
         .like-buttons { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
         .like-btn { font-size: 11px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 15px; background-color: #fff; cursor: pointer; transition: 0.2s; }
         .like-btn:hover { background-color: #ffecd1; border-color: #ff7f00; }
 
-        /* レイアウト */
+        /* ★新規：削除ボタン（左上）のデザイン */
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 30px;
+            height: 30px;
+            background: #ff4d4d; /* 赤色 */
+            color: white;
+            border-radius: 50%;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10;
+        }
+        .delete-btn:hover { background: #cc0000; }
+
+        /* ★新規：編集ボタン（右下）のデザイン */
+        .edit-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            padding: 5px 15px;
+            background: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .edit-btn:hover { background: #007bff; color: #fff; }
+
+        /* フォーム風レイアウト */
         .report-row { display: flex; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; }
         .report-row:last-child { border-bottom: none; margin-bottom: 0; }
         .report-label { display: block; width: 150px; min-width: 150px; margin-right: 20px; font-weight: bold; color: #333; border-left: 4px solid #ff7f00; padding-left: 10px; font-size: 16px; }
@@ -100,9 +145,9 @@
 </head>
 <body>
 
-    <h1>日報入力フォーム</h1>
+    <h1 id="page-title">日報入力フォーム</h1>
 
-    <div class="form-container">
+    <div class="form-container" id="form-container">
         <div class="form-group">
             <label class="label-flex">
                 <span>お名前</span>
@@ -150,10 +195,12 @@
             <label>資料添付</label>
             <div class="input-wrapper">
                 <input type="file" id="file-attach">
+                <div id="current-file-msg" style="font-size:12px; color:blue; display:none;">※新しいファイルを添付すると上書きされます</div>
             </div>
         </div>
 
         <div class="button-group">
+            <button id="cancel-edit-btn" onclick="cancelEdit()">キャンセル</button>
             <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
         </div>
     </div>     
@@ -182,6 +229,11 @@
         let currentPage = 1;
         let saveTimers = {};
 
+        // ★新規：編集モードかどうかのフラグ
+        let isEditing = false;
+        let editingRowIndex = null;
+        let currentEditingFileUrl = "";
+
         function getSelectedCondition() {
             const selected = document.querySelector('input[name="condition"]:checked');
             return selected ? selected.value : '';
@@ -198,8 +250,10 @@
             document.getElementById('tomorrow').value = "";
             document.getElementById('comment').value = "";
             document.getElementById('file-attach').value = ""; 
+            cancelEdit(); // 編集モードも解除
         }
 
+        // データ送信（新規 or 更新）
         async function sendData() {
             const name = getSelectedName();
             const condition = getSelectedCondition(); 
@@ -216,11 +270,20 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "送信中...";
 
+            // 基本データ
             let data = { 
-                action: 'report',
                 name: name, condition: condition, progress: progress, 
                 tomorrow: tomorrow, comment: comment 
             };
+
+            // ★修正：編集モードなら action='edit'、そうでなければ 'report'
+            if (isEditing) {
+                data.action = 'edit';
+                data.rowIndex = editingRowIndex;
+                data.currentFileUrl = currentEditingFileUrl; // 元のURLも渡す
+            } else {
+                data.action = 'report';
+            }
 
             if (fileInput.files.length > 0) {
                 try {
@@ -231,7 +294,7 @@
                     data.fileData = fileData;
                 } catch (e) {
                     alert("ファイルの読み込みに失敗しました");
-                    submitBtn.disabled = false; submitBtn.innerText = "送信";
+                    submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信";
                     return;
                 }
             }
@@ -243,12 +306,16 @@
                 body: JSON.stringify(data)
             })
             .then(() => {
-                showToast(); resetForm(); fetchData(); 
+                const msgBox = document.getElementById("toast");
+                msgBox.innerText = isEditing ? "修正しました！" : "送信完了しました！";
+                showToast(); 
+                resetForm(); 
+                fetchData(); 
                 submitBtn.disabled = false; submitBtn.innerText = "送信";
             })
             .catch(err => {
                 alert("送信エラー: " + err);
-                submitBtn.disabled = false; submitBtn.innerText = "送信";
+                submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信";
             });
         }
 
@@ -279,7 +346,6 @@
                 }
                 allData = (data.reports || []).reverse();
                 currentData = allData;
-                
                 if (currentData.length === 0) {
                     reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>";
                     return;
@@ -290,6 +356,97 @@
                 reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>";
                 console.error(err);
             });
+        }
+
+        // ★新規：削除機能
+        function deleteReport(rowIndex) {
+            if (!confirm("本当に削除しますか？\n（この操作は取り消せません）")) {
+                return;
+            }
+            
+            const data = { action: 'delete', rowIndex: rowIndex };
+            // 一時的にローディング表示にする（削除中の連打防止）
+            document.getElementById('report-container').style.opacity = "0.5";
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                const msgBox = document.getElementById("toast");
+                msgBox.innerText = "削除しました";
+                showToast();
+                document.getElementById('report-container').style.opacity = "1";
+                fetchData(); // データを再取得
+            })
+            .catch(err => {
+                alert("削除エラー: " + err);
+                document.getElementById('report-container').style.opacity = "1";
+            });
+        }
+
+        // ★新規：編集モードにする機能
+        function editReport(rowIndex) {
+            // allDataの中から、行番号(rowIndex)が一致するデータを探す
+            // rowの最後の要素が行番号
+            const targetRow = allData.find(row => row[row.length - 1] == rowIndex);
+            
+            if (!targetRow) { alert("データが見つかりません"); return; }
+
+            // 1. フォームに入力値をセット
+            // 名前
+            const nameRadios = document.querySelectorAll('input[name="name"]');
+            nameRadios.forEach(r => r.checked = (r.value === targetRow[1]));
+            // コンディション
+            const condRadios = document.querySelectorAll('input[name="condition"]');
+            condRadios.forEach(r => r.checked = (r.value === targetRow[2]));
+            // テキストエリア
+            document.getElementById('progress').value = targetRow[3];
+            document.getElementById('tomorrow').value = targetRow[4];
+            document.getElementById('comment').value = targetRow[5];
+            
+            // ファイルURLの保持
+            currentEditingFileUrl = targetRow[7];
+            if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) {
+                document.getElementById('current-file-msg').style.display = 'block';
+            } else {
+                document.getElementById('current-file-msg').style.display = 'none';
+            }
+
+            // 2. モードを「編集」に切り替え
+            isEditing = true;
+            editingRowIndex = rowIndex;
+
+            // 3. 見た目の変更
+            document.getElementById('page-title').innerText = "日報の修正・更新";
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.innerText = "更新";
+            submitBtn.classList.add('update-mode');
+            document.getElementById('cancel-edit-btn').style.display = 'block';
+            document.getElementById('form-container').classList.add('editing');
+
+            // 4. ページ上部にスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ★新規：編集キャンセル
+        function cancelEdit() {
+            isEditing = false;
+            editingRowIndex = null;
+            currentEditingFileUrl = "";
+            
+            document.getElementById('page-title').innerText = "日報入力フォーム";
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.innerText = "送信";
+            submitBtn.classList.remove('update-mode');
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+            document.getElementById('form-container').classList.remove('editing');
+            document.getElementById('current-file-msg').style.display = 'none';
+            
+            // フォームの中身もクリアしたい場合は以下を有効化
+            // document.getElementById('progress').value = ""; ...など
         }
 
         function renderFilterOptions() {
@@ -370,7 +527,6 @@
             reportContainer.appendChild(paginationDiv);
         }
 
-        // ★修正：エラー対応を強化したHTML生成関数
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container');
             const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
@@ -380,7 +536,7 @@
             const tomorrow = row[4];
             const comment = row[5];
             const savedLikes = row[6] ? row[6] : ""; 
-            const fileUrl = row[7] ? row[7] : ""; // スプレッドシートH列の値
+            const fileUrl = row[7] ? row[7] : ""; 
             const rowIndex = row[row.length - 1]; 
 
             let buttonsHtml = '';
@@ -394,34 +550,20 @@
                 buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `;
             });
 
-            // ★重要修正：URLが正しいかチェックして表示を変える
             let fileHtml = "";
             if (fileUrl) {
                 if (fileUrl.indexOf("http") === 0) {
-                    // 正しいURLの場合（httpから始まる）
-                    fileHtml = `
-                    <div class="report-row">
-                        <div class="report-label">添付資料</div>
-                        <div class="report-content">
-                            <a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a>
-                        </div>
-                    </div>`;
+                    fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`;
                 } else {
-                    // エラーメッセージの場合（保存エラーなど）
-                    fileHtml = `
-                    <div class="report-row">
-                        <div class="report-label">添付エラー</div>
-                        <div class="report-content" style="color:red; font-weight:bold;">
-                            ${fileUrl} <br>
-                            <small style="color:#666;">※GoogleドライブのフォルダIDを確認してください</small>
-                        </div>
-                    </div>`;
+                    fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`;
                 }
             }
 
             const div = document.createElement('div');
             div.className = 'item';
             div.innerHTML = `
+                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
+
                 <div class="like-buttons" data-row-index="${rowIndex}">
                     ${buttonsHtml}
                 </div>
@@ -434,6 +576,8 @@
                 <div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div>
                 <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
                 ${fileHtml}
+
+                <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
             `;
             const btns = div.querySelectorAll('.like-btn');
             btns.forEach(btn => updateButtonColor(btn));
