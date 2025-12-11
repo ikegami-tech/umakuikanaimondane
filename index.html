@@ -7,44 +7,65 @@
     <style>
         /* --- 基本スタイル --- */
         h1 { text-align: center; margin-bottom: 30px; }    
-        body { font-family: sans-serif; max-width: 700px; margin: 3rem auto; padding: 0 1rem; background-color: #f0f8ff; }
+        body { 
+            font-family: sans-serif; 
+            max-width: 700px; 
+            margin: 3rem auto; 
+            padding: 0 1rem; 
+            background-color: #f0f8ff; 
+        }
         
         /* --- フォーム関連 --- */
-        .form-container { background-color: transparent !important; border: 1px solid #e0e0e0; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
+        .form-container { 
+            background-color: transparent !important; 
+            border: 1px solid #e0e0e0; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
-        label { display: block; width: 150px; margin-right: 20px; padding-top: 10px; font-size: 16px; font-weight: bold; color: #333; border-left: 4px solid #ff7f00; padding-left: 10px; }
-        .label-flex { display: flex !important; justify-content: space-between; align-items: center; padding-right: 5px; }
-        .input-wrapper { flex-grow: 1; }
-        .form-group .input-wrapper { padding-left: 0; padding-right: 0; }
-        input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-        textarea { height: 100px; resize: vertical; }
-
-        /* ★新規追加：ファイル選択のデザイン */
-        input[type="file"] {
-            padding: 10px 0;
-            font-size: 14px;
+        
+        label { 
+            display: block; width: 150px; margin-right: 20px; padding-top: 10px; 
+            font-size: 16px; font-weight: bold; color: #333; 
+            border-left: 4px solid #ff7f00; padding-left: 10px; 
+        }
+        .label-flex { 
+            display: flex !important; justify-content: space-between; 
+            align-items: center; padding-right: 5px; 
         }
 
-        /* --- ラジオボタン共通デザイン --- */
+        .input-wrapper { flex-grow: 1; }
+        .form-group .input-wrapper { padding-left: 0; padding-right: 0; }
+        input[type="text"], textarea { 
+            width: 100%; padding: 10px; border: 1px solid #ccc; 
+            border-radius: 4px; box-sizing: border-box; font-size: 16px; 
+        }
+        textarea { height: 100px; resize: vertical; }
+
+        /* ファイル選択 */
+        input[type="file"] { padding: 10px 0; font-size: 14px; }
+
+        /* --- ラジオボタン --- */
         .condition-group { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 5px; line-height: 1.2; margin-left: -4px; }
         .condition-label { border: 1px solid transparent; border-radius: 6px; padding: 5px 8px; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; margin-left: 4px; }
         .condition-group .condition-label { width: calc(25% - 6px); box-sizing: border-box; justify-content: flex-start; white-space: nowrap; padding: 5px 2px; }
         .condition-label:has(input[type="radio"]:checked) { border-color: #ff7f00; background-color: #fff8f0; font-weight: bold; }
 
-        /* --- メンバー追加エリア --- */
+        /* --- メンバー追加 --- */
         .add-member-area { margin-top: 10px; display: none; align-items: center; gap: 10px; }
         .add-member-area input { width: 200px; padding: 5px; }
         .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
         .btn-plus { background: #fff; color: #ff7f00; border: 1px solid #ff7f00; font-weight: bold; }
         .btn-plus:hover { background: #ff7f00; color: #fff; }
 
-        /* --- ボタンエリア --- */
+        /* --- ボタン --- */
         .button-group { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
         button.send-btn { padding: 10px 30px; background: #ff7f00; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
         button.send-btn:hover { background: #e07000; }
         button.send-btn:disabled { background: #ccc; color: #666; cursor: not-allowed; border: none; }
 
-        /* --- 報告一覧エリア --- */
+        /* --- 一覧エリア --- */
         #data-list { margin-top: 4rem; padding-top: 1.5rem; }
         .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
         .list-header h2 { margin: 0; }
@@ -66,14 +87,13 @@
         .like-btn { font-size: 11px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 15px; background-color: #fff; cursor: pointer; transition: 0.2s; }
         .like-btn:hover { background-color: #ffecd1; border-color: #ff7f00; }
 
-        /* フォーム風レイアウト */
+        /* レイアウト */
         .report-row { display: flex; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; }
         .report-row:last-child { border-bottom: none; margin-bottom: 0; }
         .report-label { display: block; width: 150px; min-width: 150px; margin-right: 20px; font-weight: bold; color: #333; border-left: 4px solid #ff7f00; padding-left: 10px; font-size: 16px; }
         .report-content { flex-grow: 1; white-space: pre-wrap; line-height: 1.6; }
         .report-header-area { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #ff7f00; }
 
-        /* トースト */
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
     </style>
@@ -177,11 +197,9 @@
             document.getElementById('progress').value = "";
             document.getElementById('tomorrow').value = "";
             document.getElementById('comment').value = "";
-            document.getElementById('file-attach').value = ""; // ファイルもクリア
+            document.getElementById('file-attach').value = ""; 
         }
 
-        // データ送信（日報）
-        // ★修正：非同期処理(async/await)を使って、ファイルの読み込みを待てるようにします
         async function sendData() {
             const name = getSelectedName();
             const condition = getSelectedCondition(); 
@@ -198,20 +216,16 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "送信中...";
 
-            // 送信データ作成
             let data = { 
                 action: 'report',
                 name: name, condition: condition, progress: progress, 
                 tomorrow: tomorrow, comment: comment 
             };
 
-            // ★新規：ファイルがある場合、読み込んでデータに追加
             if (fileInput.files.length > 0) {
                 try {
                     const file = fileInput.files[0];
-                    // ファイルをBase64文字列（暗号）に変換するのを待つ
                     const fileData = await readFileAsBase64(file);
-                    
                     data.fileName = file.name;
                     data.mimeType = file.type;
                     data.fileData = fileData;
@@ -222,7 +236,6 @@
                 }
             }
 
-            // GASへ送信
             fetch(GAS_URL, {
                 method: 'POST',
                 mode: 'no-cors', 
@@ -239,12 +252,10 @@
             });
         }
 
-        // ★新規：ファイルをBase64（文字）に変換する関数
         function readFileAsBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => {
-                    // data:image/png;base64,..... という文字列から、カンマより後ろだけ取り出す
                     const result = reader.result;
                     const base64 = result.split(',')[1];
                     resolve(base64);
@@ -254,7 +265,6 @@
             });
         }
 
-        // データ取得
         function fetchData() {
             const reportContainer = document.getElementById('report-container');
             reportContainer.innerHTML = "<p>データを取得中...</p>";
@@ -318,12 +328,8 @@
 
         function toggleAddMember() {
             const area = document.getElementById('add-member-form');
-            if (area.style.display === 'flex') {
-                area.style.display = 'none';
-            } else {
-                area.style.display = 'flex';
-                document.getElementById('new-member-name').focus();
-            }
+            if (area.style.display === 'flex') { area.style.display = 'none'; } 
+            else { area.style.display = 'flex'; document.getElementById('new-member-name').focus(); }
         }
 
         function addNewMember() {
@@ -364,6 +370,7 @@
             reportContainer.appendChild(paginationDiv);
         }
 
+        // ★修正：エラー対応を強化したHTML生成関数
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container');
             const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
@@ -373,8 +380,7 @@
             const tomorrow = row[4];
             const comment = row[5];
             const savedLikes = row[6] ? row[6] : ""; 
-            // ★新規：ファイルURL (H列=7番目) を取得
-            const fileUrl = row[7] ? row[7] : ""; 
+            const fileUrl = row[7] ? row[7] : ""; // スプレッドシートH列の値
             const rowIndex = row[row.length - 1]; 
 
             let buttonsHtml = '';
@@ -388,16 +394,29 @@
                 buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `;
             });
 
-            // ★新規：ファイルがあればリンクを表示するHTMLを作る
+            // ★重要修正：URLが正しいかチェックして表示を変える
             let fileHtml = "";
             if (fileUrl) {
-                fileHtml = `
-                <div class="report-row">
-                    <div class="report-label">添付資料</div>
-                    <div class="report-content">
-                        <a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a>
-                    </div>
-                </div>`;
+                if (fileUrl.indexOf("http") === 0) {
+                    // 正しいURLの場合（httpから始まる）
+                    fileHtml = `
+                    <div class="report-row">
+                        <div class="report-label">添付資料</div>
+                        <div class="report-content">
+                            <a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a>
+                        </div>
+                    </div>`;
+                } else {
+                    // エラーメッセージの場合（保存エラーなど）
+                    fileHtml = `
+                    <div class="report-row">
+                        <div class="report-label">添付エラー</div>
+                        <div class="report-content" style="color:red; font-weight:bold;">
+                            ${fileUrl} <br>
+                            <small style="color:#666;">※GoogleドライブのフォルダIDを確認してください</small>
+                        </div>
+                    </div>`;
+                }
             }
 
             const div = document.createElement('div');
@@ -414,7 +433,8 @@
                 <div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div>
                 <div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div>
                 <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
-                ${fileHtml} `;
+                ${fileHtml}
+            `;
             const btns = div.querySelectorAll('.like-btn');
             btns.forEach(btn => updateButtonColor(btn));
             reportContainer.appendChild(div);
