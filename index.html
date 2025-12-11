@@ -367,10 +367,9 @@
                 body: JSON.stringify(data)
             })
             .then(() => {
-                // ★修正：alertではなくトースト通知を表示
                 showToast();
                 resetForm(); 
-                fetchData(); // リストを更新
+                fetchData(); 
             })
             .catch(err => alert("送信エラー: " + err));
         }
@@ -400,15 +399,17 @@
             });
         }
 
-        // 指定されたページのデータを表示する関数
+        // ★新規追加：指定されたページのデータを表示する関数
         function renderPage(pageNumber) {
             currentPage = pageNumber;
             const listContainer = document.getElementById('data-list');
             
-            // 一旦中身をタイトルだけにする（リセット）
+            // ★ここがポイント：一旦中身をタイトルだけにする（リセット）
+            // これにより、前のページのデータが消えて、新しいページのデータだけが表示されます
             listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
 
             // 表示するデータの範囲を計算
+            // 例：1ページ目なら 0番目〜10番目、2ページ目なら 10番目〜20番目
             const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
             const endIndex = startIndex + ITEMS_PER_PAGE;
             
@@ -420,38 +421,46 @@
                 createReportItem(row);
             });
 
-            // ページネーションボタンを表示
+            // ページネーションボタンを一番下に表示
             renderPagination();
         }
 
-        // ページ番号ボタン（1 2 3...）を作る関数
+        // ★新規追加：ページ番号ボタン（1 2 3...）を作る関数
         function renderPagination() {
             const listContainer = document.getElementById('data-list');
             
-            // 全体のページ数を計算
+            // 全体のページ数を計算（例: 25件 ÷ 10 = 2.5 → 3ページ）
             const totalPages = Math.ceil(allData.length / ITEMS_PER_PAGE);
             
+            // 1ページしかなければボタンは不要
             if (totalPages <= 1) return;
 
+            // ボタンを入れる枠を作る
             const paginationDiv = document.createElement('div');
             paginationDiv.className = 'Pagination';
 
+            // 1ページ目から最後のページまでボタンを作る
             for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('a'); 
+                const btn = document.createElement('a'); // <a>タグ風のボタンにする
                 btn.className = 'Pagination-Item-Link';
                 btn.innerText = i;
                 
+                // 現在のページなら isActive クラスをつける（黒くなる）
                 if (i === currentPage) {
                     btn.classList.add('isActive');
                 }
 
+                // クリックされたらそのページを表示する
                 btn.onclick = function() {
-                    renderPage(i);
+                    renderPage(i); // 押されたページ番号を表示
+                    // ページ上部にスクロールする（お好みで）
+                    // document.getElementById('data-list').scrollIntoView({behavior: 'smooth'});
                 };
 
                 paginationDiv.appendChild(btn);
             }
 
+            // リストの一番下に追加
             listContainer.appendChild(paginationDiv);
         }
 
@@ -534,12 +543,10 @@
             }
         }
 
-        // ★新規追加：完了メッセージを表示する関数
+        // 完了メッセージを表示する関数
         function showToast() {
             var x = document.getElementById("toast");
-            x.className = "show"; // クラスを付与して表示
-            
-            // 2.5秒後にクラスを外して非表示にする
+            x.className = "show"; 
             setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
         }
 
