@@ -517,4 +517,135 @@
         function renderPage(pageNumber) {
             currentPage = pageNumber;
             const reportContainer = document.getElementById('report-container');
-            report
+            reportContainer.innerHTML = ""; 
+            if (currentData.length === 0) { reportContainer.innerHTML = "<p>該当する報告はありません。</p>"; return; }
+            const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const pageData = currentData.slice(startIndex, endIndex);
+            pageData.forEach(row => { createReportItem(row); });
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const oldPagination = document.querySelector('.Pagination');
+            if (oldPagination) oldPagination.remove();
+            const reportContainer = document.getElementById('report-container');
+            const totalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE);
+            if (totalPages <= 1) return;
+            const paginationDiv = document.createElement('div'); paginationDiv.className = 'Pagination';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('a'); btn.className = 'Pagination-Item-Link'; btn.innerText = i;
+                if (i === currentPage) btn.classList.add('isActive');
+                btn.onclick = function() { renderPage(i); };
+                paginationDiv.appendChild(btn);
+            }
+            reportContainer.appendChild(paginationDiv);
+        }
+
+        function createReportItem(row) {
+            const reportContainer = document.getElementById('report-container');
+            const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+            const name = row[1];
+            const condition = row[2];
+            const progress = row[3];
+            const tomorrow = row[4];
+            const comment = row[5];
+            const savedLikes = row[6] ? row[6] : ""; 
+            const fileUrl = row[7] ? row[7] : ""; 
+            const rowIndex = row[row.length - 1]; 
+
+            let buttonsHtml = '';
+            memberList.forEach(memberName => {
+                let btnText = memberName + "いいね👍"; 
+                if (savedLikes) {
+                    const parts = savedLikes.split(',');
+                    const found = parts.find(p => p.trim().startsWith(memberName));
+                    if (found) btnText = found.trim();
+                }
+                buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `;
+            });
+
+            let fileHtml = "";
+            if (fileUrl) {
+                if (fileUrl.indexOf("http") === 0) {
+                    fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`;
+                } else {
+                    fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`;
+                }
+            }
+
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.innerHTML = `
+                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
+                <div class="like-buttons" data-row-index="${rowIndex}">
+                    ${buttonsHtml}
+                </div>
+                <div class="report-header-area">
+                    <span style="font-size: 1.3em; font-weight: bold;">${name}</span>
+                    <span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span>
+                    <div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div>
+                </div>
+                <div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div>
+                <div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div>
+                <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
+                ${fileHtml}
+                <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
+            `;
+            const btns = div.querySelectorAll('.like-btn');
+            btns.forEach(btn => updateButtonColor(btn));
+            reportContainer.appendChild(div);
+        }
+
+        function updateButtonColor(btn) {
+            const text = btn.innerText;
+            if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) {
+                if (text.indexOf('バッド') !== -1) {
+                    btn.style.backgroundColor = '#f0f0ff'; btn.style.borderColor = '#4b0082'; btn.style.color = '#4b0082';
+                } else {
+                    btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00';
+                }
+                btn.style.fontWeight = 'bold';
+            } else {
+                btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = '';
+            }
+        }
+
+        function addLike(btn) {
+            let text = btn.innerText;
+            let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart);
+            if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; }
+            updateButtonColor(btn); triggerDebounceSave(btn); 
+        }
+
+        function changeToBad(event, btn) {
+            event.preventDefault(); let textOnly = btn.innerText.split(' ')[0];
+            if (textOnly.indexOf('いいね👍') !== -1) { btn.innerText = textOnly.replace('いいね👍', 'バッド👎'); } 
+            else if (textOnly.indexOf('バッド👎') !== -1) { btn.innerText = textOnly.replace('バッド👎', 'いいね👍'); }
+            updateButtonColor(btn); triggerDebounceSave(btn); 
+        }
+
+        function triggerDebounceSave(btn) {
+            const parentDiv = btn.closest('.like-buttons'); const rowIndex = parentDiv.getAttribute('data-row-index');
+            if (saveTimers[rowIndex]) { clearTimeout(saveTimers[rowIndex]); }
+            saveTimers[rowIndex] = setTimeout(() => { sendLikeToSheet(rowIndex, parentDiv); }, 2000); 
+        }
+
+        function sendLikeToSheet(rowIndex, parentDiv) {
+            const btns = parentDiv.querySelectorAll('.like-btn');
+            const likeData = Array.from(btns).map(b => b.innerText).join(',');
+            const data = { action: 'like', rowIndex: rowIndex, likeData: likeData };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; })
+            .catch(err => console.error("エラー", err));
+        }
+
+        function showToast() {
+            var x = document.getElementById("toast"); x.className = "show"; 
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
+        }
+
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
