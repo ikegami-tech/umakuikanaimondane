@@ -54,6 +54,27 @@
             border-color: #ff7f00; background-color: #fff8f0; font-weight: bold;
         }
 
+        /* --- ★新規追加：メンバー追加エリアのデザイン --- */
+        .add-member-area {
+            margin-top: 10px;
+            display: none; /* 最初は隠しておく */
+            align-items: center;
+            gap: 10px;
+        }
+        .add-member-area input {
+            width: 200px;
+            padding: 5px;
+        }
+        /* 小さいボタンのデザイン */
+        .btn-sm {
+            padding: 5px 10px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer;
+        }
+        /* 追加ボタン（＋マーク） */
+        .btn-plus {
+            background: #fff; color: #ff7f00; border: 1px solid #ff7f00; font-weight: bold; margin-left: 5px;
+        }
+        .btn-plus:hover { background: #ff7f00; color: #fff; }
+
         /* --- ボタンエリア --- */
         .button-group { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
         button.send-btn { 
@@ -132,11 +153,20 @@
 
     <div class="form-container">
         <div class="form-group">
-            <label>お名前</label>
-            <div class="input-wrapper condition-group">
-                <label class="condition-label"><input type="radio" name="name" value="石井">石井</label>
-                <label class="condition-label"><input type="radio" name="name" value="渡辺">渡辺</label>
-                <label class="condition-label"><input type="radio" name="name" value="池上">池上</label>
+            <label>
+                お名前
+                <button class="btn-sm btn-plus" onclick="toggleAddMember()">＋追加</button>
+            </label>
+            <div class="input-wrapper">
+                <div id="name-radios" class="condition-group">
+                    読み込み中...
+                </div>
+
+                <div id="add-member-form" class="add-member-area">
+                    <input type="text" id="new-member-name" placeholder="新しい名前を入力">
+                    <button class="btn-sm" style="background:#333; color:#fff;" onclick="addNewMember()">追加</button>
+                    <button class="btn-sm" onclick="toggleAddMember()">キャンセル</button>
+                </div>
             </div>
         </div>
 
@@ -182,13 +212,13 @@
 
     <script>
         // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyt4pkqHuyIK9qSovTgsH9TGQmB0NOuM6PUhvwdnbjrmwMrnKbE0V-ERsxemKK-JNbA0A/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
 
         let allData = []; 
+        // ★新規：メンバーリストを保存する変数
+        let memberList = [];
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1;
-        
-        // ★新規追加：いいね保存用のタイマー管理（行番号ごと）
         let saveTimers = {};
 
         function getSelectedCondition() {
@@ -224,7 +254,6 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "送信中...";
 
-            // 日報送信は action: 'report' (デフォルト)
             const data = { 
                 action: 'report',
                 name: name, condition: condition, progress: progress, 
@@ -247,7 +276,7 @@
             });
         }
 
-        // データ取得
+        // データ取得（日報 ＆ メンバー）
         function fetchData() {
             const listContainer = document.getElementById('data-list');
             listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
@@ -255,7 +284,18 @@
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                allData = data.reverse();
+                // ★修正：データ構造が変わったので取り出し方を変更
+                // data = { reports: [...], members: [...] } となっています
+                
+                // 1. 名簿データの処理
+                if (data.members) {
+                    memberList = data.members;
+                    renderMemberRadios(); // ラジオボタンを作る
+                }
+
+                // 2. 日報データの処理
+                allData = (data.reports || []).reverse();
+                
                 if (allData.length === 0) {
                     listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>まだ報告が登録されていません。</p>";
                     return;
@@ -265,6 +305,71 @@
             .catch(err => {
                 listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データの読み込みに失敗しました。</p>";
                 console.error(err);
+            });
+        }
+
+        // ★新規：メンバーのラジオボタンを作る関数
+        function renderMemberRadios() {
+            const container = document.getElementById('name-radios');
+            container.innerHTML = ""; // 一旦空にする
+
+            memberList.forEach(name => {
+                // <label class="condition-label"><input type="radio" name="name" value="名前">名前</label> を作る
+                const label = document.createElement('label');
+                label.className = 'condition-label';
+                
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'name';
+                input.value = name;
+                
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(name));
+                
+                container.appendChild(label);
+            });
+        }
+
+        // ★新規：メンバー追加エリアの表示/非表示切り替え
+        function toggleAddMember() {
+            const area = document.getElementById('add-member-form');
+            if (area.style.display === 'flex') {
+                area.style.display = 'none';
+            } else {
+                area.style.display = 'flex';
+                document.getElementById('new-member-name').focus();
+            }
+        }
+
+        // ★新規：新しいメンバーを追加する関数
+        function addNewMember() {
+            const newNameInput = document.getElementById('new-member-name');
+            const newName = newNameInput.value;
+            
+            if (!newName) {
+                alert("名前を入力してください");
+                return;
+            }
+
+            // ローカル（画面上）ですぐに追加してあげる
+            memberList.push(newName);
+            renderMemberRadios();
+            toggleAddMember(); // 入力欄を閉じる
+            newNameInput.value = ""; // 入力欄を空にする
+
+            // GASに送信して「名簿」シートに保存する
+            const data = {
+                action: 'addMember',
+                newName: newName
+            };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => {
+                console.log("メンバー追加を送信しました");
             });
         }
 
@@ -312,35 +417,33 @@
             const tomorrow = row[4];
             const comment = row[5];
             
-            // ★新規：保存されたいいねデータ (G列) を取得
-            // データは「石井いいね👍 1,渡辺いいね👍 2」のようにコンマ区切りの文字列を想定
             const savedLikes = row[6] ? row[6] : ""; 
-            const rowIndex = row[row.length - 1]; // GASから送られてきた行番号
+            const rowIndex = row[row.length - 1]; 
 
-            // ボタンの初期状態を作成する関数
-            const createBtn = (defaultText) => {
-                let text = defaultText;
-                // 保存データの中に、このボタンの名前（例：石井）が含まれていれば復元する
-                // 保存形式例: "石井バッド👎 3, 渡辺いいね👍 1"
+            // ★修正：いいねボタンもメンバーリストから自動生成する
+            // 誰のいいねボタンを作るか？ → memberList にある全員分作る
+            let buttonsHtml = '';
+            memberList.forEach(memberName => {
+                let btnText = memberName + "いいね👍"; // デフォルト
+                
+                // 保存データがあれば復元
                 if (savedLikes) {
                     const parts = savedLikes.split(',');
-                    const found = parts.find(p => p.trim().startsWith(defaultText.replace('いいね👍','')));
+                    const found = parts.find(p => p.trim().startsWith(memberName));
                     if (found) {
-                        text = found.trim();
+                        btnText = found.trim();
                     }
                 }
-                return text;
-            };
+                
+                buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `;
+            });
 
             const div = document.createElement('div');
             div.className = 'item';
             
-            // 行番号(rowIndex)をdata属性として埋め込む（保存時に使うため）
             div.innerHTML = `
                 <div class="like-buttons" data-row-index="${rowIndex}">
-                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${createBtn("石井いいね👍")}</button>
-                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${createBtn("渡辺いいね👍")}</button>
-                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${createBtn("池上いいね👍")}</button>
+                    ${buttonsHtml}
                 </div>
                 
                 <div class="report-header-area">
@@ -353,17 +456,15 @@
                 <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
             `;
             
-            // ★新規：復元したテキストに基づいて、ボタンの色を塗る
             const btns = div.querySelectorAll('.like-btn');
             btns.forEach(btn => updateButtonColor(btn));
 
             listContainer.appendChild(div);
         }
 
-        // ★新規：ボタンの色を状態に合わせて更新する関数（共通化）
+        // ボタンの色更新
         function updateButtonColor(btn) {
             const text = btn.innerText;
-            // 数字がついている、またはバッドになっている場合のみ色をつける
             if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) {
                 if (text.indexOf('バッド') !== -1) {
                     btn.style.backgroundColor = '#f0f0ff';
@@ -376,7 +477,6 @@
                 }
                 btn.style.fontWeight = 'bold';
             } else {
-                // 初期状態
                 btn.style.backgroundColor = '';
                 btn.style.borderColor = '';
                 btn.style.color = '';
@@ -397,8 +497,8 @@
             } else {
                 btn.innerText = text + ' 1';
             }
-            updateButtonColor(btn); // 色更新
-            triggerDebounceSave(btn); // ★保存処理（2秒待機）
+            updateButtonColor(btn); 
+            triggerDebounceSave(btn); 
         }
 
         // バッド切り替え機能
@@ -411,35 +511,28 @@
             } else if (textOnly.indexOf('バッド👎') !== -1) {
                 btn.innerText = textOnly.replace('バッド👎', 'いいね👍');
             }
-            updateButtonColor(btn); // 色更新
-            triggerDebounceSave(btn); // ★保存処理（2秒待機）
+            updateButtonColor(btn); 
+            triggerDebounceSave(btn); 
         }
 
-        // ★新規：2秒待ってから保存する機能（デバウンス）
         function triggerDebounceSave(btn) {
-            // 親要素から行番号を取得
             const parentDiv = btn.closest('.like-buttons');
             const rowIndex = parentDiv.getAttribute('data-row-index');
             
-            // もし前のタイマーが動いていたらキャンセル（リセット）
             if (saveTimers[rowIndex]) {
                 clearTimeout(saveTimers[rowIndex]);
             }
-
-            // 新しく2秒のタイマーをセット
             saveTimers[rowIndex] = setTimeout(() => {
                 sendLikeToSheet(rowIndex, parentDiv);
-            }, 2000); // 2000ミリ秒 = 2秒
+            }, 2000); 
         }
 
-        // ★新規：実際にシートに保存する機能
         function sendLikeToSheet(rowIndex, parentDiv) {
-            // 3つのボタンの今の状態を文字でつなげる（例："石井いいね👍 1,渡辺いいね👍,池上バッド👎 2"）
             const btns = parentDiv.querySelectorAll('.like-btn');
             const likeData = Array.from(btns).map(b => b.innerText).join(',');
 
             const data = {
-                action: 'like', // いいね更新アクション
+                action: 'like',
                 rowIndex: rowIndex,
                 likeData: likeData
             };
@@ -452,7 +545,7 @@
             })
             .then(() => {
                 console.log("いいねを保存しました: " + rowIndex);
-                delete saveTimers[rowIndex]; // タイマーリストから削除
+                delete saveTimers[rowIndex]; 
             })
             .catch(err => console.error("いいね保存エラー:", err));
         }
