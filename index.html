@@ -58,7 +58,7 @@
         }
         textarea { height: 100px; resize: vertical; }
 
-        /* コンディション（ラジオボタン） */
+        /* コンディション（＆お名前）のラジオボタン */
         .condition-group { 
             display: flex; 
             flex-wrap: wrap; 
@@ -119,12 +119,12 @@
             font-weight: bold;
         }
         button.send-btn:hover { background: #e07000; }
-
-        /* ★新規追加：送信中（ボタンが無効）のときのデザイン */
+        
+        /* 送信中（ボタンが無効）のときのデザイン */
         button.send-btn:disabled {
-            background: #ccc;       /* 灰色にする */
-            color: #666;            /* 文字を暗くする */
-            cursor: not-allowed;    /* マウスカーソルを「禁止」マークに */
+            background: #ccc;       
+            color: #666;            
+            cursor: not-allowed;    
             border: none;
         }
 
@@ -271,10 +271,13 @@
     <h1>日報入力フォーム</h1>
 
     <div class="form-container">
+        
         <div class="form-group">
-            <label for="name">お名前</label>
-            <div class="input-wrapper">
-                <textarea id="name" placeholder="氏名を入力してください" style="height: 60px; width: 14em;"></textarea>
+            <label>お名前</label>
+            <div class="input-wrapper condition-group">
+                <label class="condition-label"><input type="radio" name="name" value="石井">石井</label>
+                <label class="condition-label"><input type="radio" name="name" value="渡辺">渡辺</label>
+                <label class="condition-label"><input type="radio" name="name" value="池上">池上</label>
             </div>
         </div>
 
@@ -330,20 +333,28 @@
         // ★ここにGASのURLを貼り付けてください
         const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
 
-        // 全データを保存しておくための「箱」
         let allData = []; 
-        // 1ページに表示する件数
         const ITEMS_PER_PAGE = 10;
-        // 現在のページ（最初は1ページ目）
         let currentPage = 1;
 
+        // コンディションを取得する関数
         function getSelectedCondition() {
             const selected = document.querySelector('input[name="condition"]:checked');
             return selected ? selected.value : '';
         }
 
+        // ★新規追加：名前を取得する関数
+        function getSelectedName() {
+            const selected = document.querySelector('input[name="name"]:checked');
+            return selected ? selected.value : '';
+        }
+
+        // フォームのリセット
         function resetForm() {
-            document.getElementById('name').value = "";
+            // ★修正：名前のラジオボタンをクリア
+            const nameRadios = document.querySelectorAll('input[name="name"]');
+            nameRadios.forEach(radio => radio.checked = false);
+
             document.querySelector('input[name="condition"]:checked') ? document.querySelector('input[name="condition"]:checked').checked = false : null;
             document.getElementById('progress').value = "";
             document.getElementById('tomorrow').value = "";
@@ -352,7 +363,8 @@
 
         // データ送信（POST）
         function sendData() {
-            const name = document.getElementById('name').value;
+            // ★修正：名前を関数で取得
+            const name = getSelectedName();
             const condition = getSelectedCondition(); 
             const progress = document.getElementById('progress').value;
             const tomorrow = document.getElementById('tomorrow').value;
@@ -363,7 +375,6 @@
                 return; 
             }
 
-            // ★修正：送信ボタンを取得して無効化＆文字変更
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
             submitBtn.innerText = "送信中...";
@@ -387,14 +398,12 @@
                 resetForm(); 
                 fetchData(); 
                 
-                // ★修正：完了したらボタンを元に戻す
                 submitBtn.disabled = false;
                 submitBtn.innerText = "送信";
             })
             .catch(err => {
                 alert("送信エラー: " + err);
                 
-                // ★修正：エラー時もボタンを元に戻す
                 submitBtn.disabled = false;
                 submitBtn.innerText = "送信";
             });
@@ -408,7 +417,6 @@
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                // 1. データを逆順（新しい順）にして保存
                 allData = data.reverse();
                 
                 if (allData.length === 0) {
@@ -416,7 +424,6 @@
                     return;
                 }
 
-                // 2. 1ページ目（最新の10件）を表示する
                 renderPage(1);
             })
             .catch(err => {
@@ -425,35 +432,27 @@
             });
         }
 
-        // 指定されたページのデータを表示する関数
+        // ページ表示
         function renderPage(pageNumber) {
             currentPage = pageNumber;
             const listContainer = document.getElementById('data-list');
             
-            // リストの中身をクリアして、タイトルだけにする
             listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
 
-            // 表示するデータの範囲を計算
             const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
             const endIndex = startIndex + ITEMS_PER_PAGE;
-            
-            // データを切り出す
             const pageData = allData.slice(startIndex, endIndex);
 
-            // 切り出したデータを画面に表示
             pageData.forEach(row => {
                 createReportItem(row);
             });
 
-            // ページネーションボタンを表示
             renderPagination();
         }
 
-        // ページ番号ボタンを作る関数
+        // ページネーション作成
         function renderPagination() {
             const listContainer = document.getElementById('data-list');
-            
-            // 全体のページ数を計算
             const totalPages = Math.ceil(allData.length / ITEMS_PER_PAGE);
             
             if (totalPages <= 1) return;
@@ -480,7 +479,7 @@
             listContainer.appendChild(paginationDiv);
         }
 
-        // 1件分のHTMLを作って画面に追加する関数（フォーム風レイアウト）
+        // 1件分のHTML作成
         function createReportItem(row) {
             const listContainer = document.getElementById('data-list');
             
@@ -496,7 +495,6 @@
             const div = document.createElement('div');
             div.className = 'item';
             
-            // 新しいフォーム風デザイン
             div.innerHTML = `
                 <div class="like-buttons">
                     <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">石井いいね👍</button>
@@ -533,7 +531,7 @@
             }
         }
 
-        // いいねボタン機能
+        // いいね機能
         function addLike(btn) {
             let text = btn.innerText;
             let parts = text.split(' '); 
@@ -580,7 +578,6 @@
             }
         }
 
-        // 完了メッセージを表示する関数
         function showToast() {
             var x = document.getElementById("toast");
             x.className = "show"; 
