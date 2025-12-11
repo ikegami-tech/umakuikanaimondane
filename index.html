@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日報フォーム</title>
-    <style>
-        h1 { 
-            text-align: center;
-            margin-bottom: 30px; 
-        }    
-        body { 
-    font-family: sans-serif; 
-    max-width: 700px; 
-    margin: 3rem auto; 
-    padding: 0 1rem; 
-    background-color: #f0f8ff; /* ★全体背景は水色 */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日報フォーム</title>
+    <style>
+        h1 { 
+            text-align: center;
+            margin-bottom: 30px; 
+        }    
+        body { 
+    font-family: sans-serif; 
+    max-width: 700px; 
+    margin: 3rem auto; 
+    padding: 0 1rem; 
+    background-color: #f0f8ff; /* ★全体背景は水色 */
 }
-        /* フォーム全体のスタイル */
-        .form-container { 
+        /* フォーム全体のスタイル */
+        .form-container { 
             /* ★ここがポイント：背景を透明にしてbodyの色を透かす */
             background-color: transparent !important; /* 透明を優先させる */
             border: 1px solid #e0e0e0; 
             padding: 2rem; 
             border-radius: 8px; 
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-        /* フォームグループ：ラベルと入力欄を横並びにする */
-        .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
+        }
+        /* フォームグループ：ラベルと入力欄を横並びにする */
+        .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
 
-        /* ラベル（項目名）のスタイル - 画像のデザインに合わせる */
-        label { 
+        /* ラベル（項目名）のスタイル - 画像のデザインに合わせる */
+        label { 
             display: block; 
             width: 150px; /* ラベルの幅を固定 */
             margin-right: 20px; 
@@ -40,9 +40,9 @@
             /* 画像のデザインにあるオレンジの縦線 */
             border-left: 4px solid #ff7f00; /* 太さ調整 */
             padding-left: 10px; 
-        }
+        }
         
-       /* ■ 入力欄のコンテナ (input-wrapper) のスタイル */
+        /* ■ 入力欄のコンテナ (input-wrapper) のスタイル */
         .input-wrapper { 
             flex-grow: 1; /* ★元の設定 */
         }
@@ -55,8 +55,8 @@
             padding-right: 0;
         }
 
-        /* テキスト入力欄 */
-        input[type="text"], textarea { 
+        /* テキスト入力欄 */
+        input[type="text"], textarea { 
             width: 100%; 
             padding: 10px; 
             border: 1px solid #ccc; 
@@ -64,7 +64,7 @@
             box-sizing: border-box; 
             font-size: 16px; 
         }
-        textarea { height: 100px; resize: vertical; }
+        textarea { height: 100px; resize: vertical; }
 
         /* ラジオボタンのスタイル (コンディション) */
 .condition-group { 
@@ -73,8 +73,6 @@
     gap: 8px; 
     padding-top: 5px; 
     line-height: 1.2;
-    
-    /* ★修正点 1: ここにマージンの設定を入れます */
     margin-left: -4px;
 }
 /* condition-labelの基本スタイル */
@@ -86,18 +84,12 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    
-    /* ★修正点 2: ここにマージンの設定を入れます */
     margin-left: 4px;
 }
 /* 1行4つに並べるための特別な設定 */
 .condition-group .condition-label {
-    /* 100% の幅から、間隔(gap)の分を引いて、4つに分ける計算 */
     width: calc(25% - 6px); 
     box-sizing: border-box; 
-    
-    /* ★修正点: ここを 'center' から 'flex-start' に変えます */
-    /* これで、文字の長さに関係なく、左端にピシッと揃います */
     justify-content: flex-start; 
 }
         /* 選択されたラジオボタンに枠線を付ける */
@@ -110,27 +102,6 @@
 
         /* ボタンエリア */
         .button-group { 
-            /* ★新規追加：「もっと見る」ボタンのデザイン */
-        .load-more-container {
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 40px;
-        }
-        button.load-more-btn {
-            padding: 10px 40px;
-            background: #fff;
-            color: #ff7f00;
-            border: 2px solid #ff7f00;
-            cursor: pointer;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        button.load-more-btn:hover {
-            background: #ff7f00;
-            color: #fff;
-        }
             display: flex; 
             justify-content: center; 
             gap: 20px; 
@@ -138,7 +109,7 @@
         }
         
         /* リセットボタン (薄いグレー) */
-        button.reset-btn { 
+        button.reset-btn { 
             padding: 10px 30px; 
             background: #bdbdbd; /* 画像に合わせたグレー */
             color: white; 
@@ -149,7 +120,7 @@
         }
         
         /* 送信ボタン (オレンジ) */
-        button.send-btn { 
+        button.send-btn { 
             padding: 10px 30px; 
             background: #ff7f00; /* 画像に合わせたオレンジ */
             color: white; 
@@ -162,13 +133,47 @@
         button.send-btn:hover { background: #e07000; }
 
         /* 過去の報告一覧 */
-        #data-list { margin-top: 4rem; border-top: 1px solid #ccc; padding-top: 1.5rem; }
+        #data-list { 
+            margin-top: 4rem; 
+            /* border-top は下の .list-header に移動したので削除してもOKですが、そのままでも大丈夫です */
+            /* border-top: 1px solid #ccc; */ 
+            padding-top: 1.5rem; 
+        }
+        
+        /* ★新規追加：タイトルとボタンを横並びにするヘッダーエリア */
+        .list-header {
+            display: flex;              /* 横並びにする */
+            justify-content: space-between; /* 両端に配置する */
+            align-items: center;        /* 上下の中心を揃える */
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd; /* タイトルの下に線を引く */
+            padding-bottom: 10px;
+        }
+        .list-header h2 {
+            margin: 0; /* 余計な隙間をなくす */
+        }
+
+        /* ★新規追加：もっと見るボタンのデザイン */
+        button.load-more-btn {
+            padding: 5px 20px;       /* サイズを少し小さめに */
+            background: #fff;
+            color: #ff7f00;
+            border: 2px solid #ff7f00;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button.load-more-btn:hover {
+            background: #ff7f00;
+            color: #fff;
+        }
+
         .item { 
             position: relative;
-                
             background: #e0f7ff; 
             padding: 1.25rem; 
-            /* 修正しました: 下側のスペースを増やして、次の日報との間隔を広げます */
             margin-bottom: 2rem; 
             border-radius: 4px; 
             line-height: 1.6;
@@ -176,7 +181,7 @@
         .item strong { color: #000; font-weight: bold; }
         .item small { color: #888; display: block; margin-top: 0.25rem; }
             
-         /* ★新規追加：いいねボタンを右上に配置するエリア */
+         /* いいねボタンを右上に配置するエリア */
         .like-buttons {
             position: absolute; /* 枠の絶対位置に固定 */
             top: 10px;          /* 上から10px */
@@ -185,7 +190,7 @@
             gap: 5px;           /* ボタン同士の間隔 */
         }
 
-        /* ★新規追加：いいねボタンのデザイン */
+        /* いいねボタンのデザイン */
         .like-btn {
             font-size: 11px;
             padding: 4px 8px;
@@ -204,7 +209,7 @@
 </head>
 <body>
 
-    <h1>日報入力フォーム</h1>
+    <h1>日報入力フォーム</h1>
 
     <div class="form-container">
         
@@ -256,16 +261,16 @@
             <button onclick="sendData()" class="send-btn">送信</button>
         </div>
 
-    </div>     <div id="data-list">
+    </div>     <div id="data-list">
         <h2>過去の報告一覧</h2>
-        読み込み中...
-    </div>
+        読み込み中...
+    </div>
 
-    <script>
+    <script>
         // ★ここにGASのURLを貼り付けてください
         const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
 
-        // ★新規追加：全データを保存しておくための「箱」
+        // 全データを保存しておくための「箱」
         let allData = []; 
 
         function getSelectedCondition() {
@@ -316,38 +321,43 @@
             .catch(err => alert("送信エラー: " + err));
         }
 
-        // ★修正：データ取得機能（全データを取得して、最初の10件を表示）
+        // ★修正：データ取得機能（ボタンをタイトルの横に配置）
         function fetchData() {
             const listContainer = document.getElementById('data-list');
-            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
+            // 最初はヘッダー（空）と読み込み中メッセージ
+            listContainer.innerHTML = '<div class="list-header"><h2>過去の報告一覧</h2></div><p>データを取得中...</p>';
             
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                listContainer.innerHTML = "<h2>過去の報告一覧</h2>"; // Loading文字を消す
-                
-                // 1. データを逆順（新しい順）にして、箱(allData)に保存
+                // 1. データを逆順（新しい順）にして保存
                 allData = data.reverse();
+
+                // 2. ボタンのHTMLを作る（データが11件以上ある場合のみ）
+                let buttonHtml = '';
+                if (allData.length > 10) {
+                    // id="header-btn" をつけて、後で消せるようにする
+                    buttonHtml = '<button id="header-btn" class="load-more-btn" onclick="showAllReports()">過去のデータをすべて見る ▼</button>';
+                }
+
+                // 3. ヘッダーエリア（タイトル＋ボタン）を描画する
+                listContainer.innerHTML = `
+                    <div class="list-header">
+                        <h2>過去の報告一覧</h2>
+                        ${buttonHtml}
+                    </div>
+                `;
 
                 if (allData.length === 0) {
                     listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
                     return;
                 }
 
-                // 2. 最初の10件だけを取り出して表示する
+                // 4. 最初の10件を表示する
                 const first10 = allData.slice(0, 10);
                 first10.forEach(row => {
-                    createReportItem(row); // 表示用の関数を呼び出す
+                    createReportItem(row);
                 });
-
-                // 3. もしデータが10件より多ければ、「もっと見る」ボタンを作る
-                if (allData.length > 10) {
-                    const btnDiv = document.createElement('div');
-                    btnDiv.className = 'load-more-container';
-                    btnDiv.id = 'load-more-area';
-                    btnDiv.innerHTML = '<button class="load-more-btn" onclick="showAllReports()">過去のデータをすべて見る ▼</button>';
-                    listContainer.appendChild(btnDiv);
-                }
             })
             .catch(err => {
                 listContainer.innerHTML = "データの読み込みに失敗しました。";
@@ -355,31 +365,25 @@
             });
         }
 
-        // ★新規追加：残りのデータをすべて表示する機能
+        // ★修正：残りのデータを表示して、ヘッダーのボタンを消す
         function showAllReports() {
-            // 11件目（インデックス10）から最後までのデータを取り出す
+            // 11件目から最後までを表示
             const remainingData = allData.slice(10);
-            
-            // 残りのデータを順番に表示
             remainingData.forEach(row => {
                 createReportItem(row);
             });
 
-            // ボタンを消す
-            const btnArea = document.getElementById('load-more-area');
-            if (btnArea) {
-                btnArea.remove();
+            // ヘッダーにあるボタンを消す
+            const btn = document.getElementById('header-btn');
+            if (btn) {
+                btn.style.display = 'none'; // ボタンを非表示にする
             }
         }
 
-        // ★新規追加：1件分のHTMLを作って画面に追加する「共通の関数」
-        // (今まではfetchDataの中に書いてあった長いコードをここにまとめました)
+        // 1件分のHTMLを作って画面に追加する関数
         function createReportItem(row) {
             const listContainer = document.getElementById('data-list');
             
-            // もし「もっと見るボタン」があれば、その手前に挿入するためにボタンを取得
-            const btnArea = document.getElementById('load-more-area');
-
             const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
             const name = row[1];
             const condition = row[2];
@@ -405,15 +409,10 @@
                 </div>
             `;
             
-            // ボタンエリアがあればその前に、なければリストの最後に追加
-            if (btnArea) {
-                listContainer.insertBefore(div, btnArea);
-            } else {
-                listContainer.appendChild(div);
-            }
+            listContainer.appendChild(div);
         }
 
-        // いいねボタン機能（以前と同じ）
+        // いいねボタン機能
         function addLike(btn) {
             let text = btn.innerText;
             let parts = text.split(' '); 
@@ -440,7 +439,7 @@
             btn.style.fontWeight = 'bold';
         }
 
-        // バッド切り替え機能（以前と同じ）
+        // バッド切り替え機能
         function changeToBad(event, btn) {
             event.preventDefault();
             let textOnly = btn.innerText.split(' ')[0];
