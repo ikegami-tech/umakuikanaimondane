@@ -142,7 +142,7 @@
         }
         
         /* -------------------------------------------------- */
-        /* ★修正：ページネーション（番号ボタン）のエリア */
+        /* ページネーション（番号ボタン）のエリア */
         .Pagination {
             display: flex;
             align-items: center;
@@ -225,6 +225,31 @@
             border-color: #ff7f00;
         }
 
+        /* ★新規追加：完了メッセージ（トースト通知）のデザイン */
+        #toast {
+            visibility: hidden;       /* 最初は隠しておく */
+            min-width: 250px;         /* 横幅の最小サイズ */
+            background-color: #333;   /* 背景色（濃いグレー） */
+            color: #fff;              /* 文字色（白） */
+            text-align: center;       /* 文字を真ん中に */
+            border-radius: 4px;       /* 角を丸く */
+            padding: 16px;            /* 内側の余白 */
+            position: fixed;          /* 画面の決まった位置に固定 */
+            z-index: 1;               /* 他の要素より手前に表示 */
+            right: 30px;              /* 右から30pxの位置 */
+            bottom: 30px;             /* 下から30pxの位置 */
+            font-size: 16px;          /* 文字サイズ */
+            opacity: 0;               /* 最初は透明にしておく */
+            transition: opacity 0.5s, bottom 0.5s; /* ふわっと表示させるアニメーション */
+        }
+
+        /* 表示されたときのスタイル */
+        #toast.show {
+            visibility: visible;      /* 見えるようにする */
+            opacity: 1;               /* 透明度をなくす（くっきり表示） */
+            bottom: 50px;             /* 少しふわっと浮き上がる動き */
+        }
+
     </style>
 </head>
 <body>
@@ -281,10 +306,14 @@
             <button onclick="sendData()" class="send-btn">送信</button>
         </div>
 
-    </div>     <div id="data-list">
+    </div>     
+    
+    <div id="data-list">
         <h2>過去の報告一覧</h2>
         読み込み中...
     </div>
+
+    <div id="toast">送信完了しました！</div>
 
     <script>
         // ★ここにGASのURLを貼り付けてください
@@ -338,7 +367,8 @@
                 body: JSON.stringify(data)
             })
             .then(() => {
-                alert("日報を送信完了しました！");
+                // ★修正：alertではなくトースト通知を表示
+                showToast();
                 resetForm(); 
                 fetchData(); // リストを更新
             })
@@ -370,7 +400,7 @@
             });
         }
 
-        // ★新規追加：指定されたページのデータを表示する関数
+        // 指定されたページのデータを表示する関数
         function renderPage(pageNumber) {
             currentPage = pageNumber;
             const listContainer = document.getElementById('data-list');
@@ -379,7 +409,6 @@
             listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
 
             // 表示するデータの範囲を計算
-            // 例：1ページ目なら 0番目〜10番目、2ページ目なら 10番目〜20番目
             const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
             const endIndex = startIndex + ITEMS_PER_PAGE;
             
@@ -395,32 +424,27 @@
             renderPagination();
         }
 
-        // ★新規追加：ページ番号ボタン（1 2 3...）を作る関数
+        // ページ番号ボタン（1 2 3...）を作る関数
         function renderPagination() {
             const listContainer = document.getElementById('data-list');
             
-            // 全体のページ数を計算（例: 25件 ÷ 10 = 2.5 → 3ページ）
+            // 全体のページ数を計算
             const totalPages = Math.ceil(allData.length / ITEMS_PER_PAGE);
             
-            // 1ページしかなければボタンは不要
             if (totalPages <= 1) return;
 
-            // ボタンを入れる枠を作る
             const paginationDiv = document.createElement('div');
             paginationDiv.className = 'Pagination';
 
-            // 1ページ目から最後のページまでボタンを作る
             for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('a'); // <a>タグ風のボタンにする
+                const btn = document.createElement('a'); 
                 btn.className = 'Pagination-Item-Link';
                 btn.innerText = i;
                 
-                // 現在のページなら isActive クラスをつける（黒くなる）
                 if (i === currentPage) {
                     btn.classList.add('isActive');
                 }
 
-                // クリックされたらそのページを表示する
                 btn.onclick = function() {
                     renderPage(i);
                 };
@@ -428,7 +452,6 @@
                 paginationDiv.appendChild(btn);
             }
 
-            // リストの一番下に追加
             listContainer.appendChild(paginationDiv);
         }
 
@@ -455,9 +478,9 @@
                 
                 <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
                 <div style="margin-top:10px;">
-                    今日の進捗: ${progress.substring(0, 70)}...<br>
-                    明日の業務: ${tomorrow.substring(0, 70)}...<br>
-                    所見: ${comment.substring(0, 70)}...
+                    **今日の進捗**: ${progress.substring(0, 70)}...<br>
+                    **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
+                    **所見**: ${comment.substring(0, 70)}...
                 </div>
             `;
             
@@ -509,6 +532,15 @@
                 btn.style.color = '';
                 btn.style.fontWeight = '';
             }
+        }
+
+        // ★新規追加：完了メッセージを表示する関数
+        function showToast() {
+            var x = document.getElementById("toast");
+            x.className = "show"; // クラスを付与して表示
+            
+            // 2.5秒後にクラスを外して非表示にする
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
         }
 
         window.onload = fetchData;
