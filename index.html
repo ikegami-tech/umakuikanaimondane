@@ -142,39 +142,45 @@
         }
         
         /* -------------------------------------------------- */
-        /* ★修正：もっと見るボタンのエリア（中央寄せ） */
+        /* ★修正：ページネーション（番号ボタン）のエリア */
         .Pagination {
             display: flex;
             align-items: center;
             justify-content: center; /* 画面の中央に配置 */
-            margin-top: 30px;        /* 上との間隔 */
-            margin-bottom: 50px;     /* 下との間隔 */
+            margin-top: 40px;        /* 上との間隔 */
+            margin-bottom: 60px;     /* 下との間隔 */
+        }
+        
+        /* ボタン同士の間隔 */
+        .Pagination > * + * {
+            margin-left: 12px;
         }
 
-        /* ★修正：ボタンのデザイン（いただいたコードを調整） */
+        /* 番号ボタンのデザイン */
         .Pagination-Item-Link {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            
-            /* 文字が入るように幅と高さを固定せず、余白で調整します */
-            padding: 10px 30px; 
-            
+            width: 35px;
+            height: 35px;
             background: #fff;
-            border: solid 2px #111;
-            font-size: 14px;
-            color: #111;
+            font-size: 16px;       /* 文字サイズ調整 */
             font-weight: bold;
             transition: all 0.15s linear;
-            cursor: pointer;
-            border-radius: 4px;
+            cursor: pointer;       /* マウスを指マークに */
+            border: 1px solid #ccc; /* 薄い枠線を追加 */
+            border-radius: 4px;    /* 角を少し丸く */
+            text-decoration: none; /* 下線を消す */
+            color: #333;
         }
 
+        /* 今選ばれているページのボタン */
         .Pagination-Item-Link.isActive {
+            pointer-events: none; /* クリックできないようにする */
             background: #111;
             color: #fff;
-            pointer-events: none;
+            border-color: #111;
         }
 
         /* マウスを乗せたとき */
@@ -286,6 +292,10 @@
 
         // 全データを保存しておくための「箱」
         let allData = []; 
+        // 1ページに表示する件数
+        const ITEMS_PER_PAGE = 10;
+        // 現在のページ（最初は1ページ目）
+        let currentPage = 1;
 
         function getSelectedCondition() {
             const selected = document.querySelector('input[name="condition"]:checked');
@@ -335,7 +345,7 @@
             .catch(err => alert("送信エラー: " + err));
         }
 
-        // ★修正：データ取得機能（ボタンを一番下に配置）
+        // データ取得機能
         function fetchData() {
             const listContainer = document.getElementById('data-list');
             listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
@@ -343,61 +353,89 @@
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
+                // 1. データを逆順（新しい順）にして保存
                 allData = data.reverse();
-                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
-
+                
                 if (allData.length === 0) {
-                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
+                    listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>まだ報告が登録されていません。</p>";
                     return;
                 }
 
-                // 最初の10件を表示
-                const first10 = allData.slice(0, 10);
-                first10.forEach(row => {
-                    createReportItem(row);
-                });
-
-                // ★データが10件より多ければ、一番下にボタンを作る
-                if (allData.length > 10) {
-                    const btnDiv = document.createElement('div');
-                    btnDiv.className = 'Pagination'; // ★中央寄せのクラス
-                    btnDiv.id = 'load-more-area';
-                    
-                    // ★ご希望のデザインのボタンを作成
-                    btnDiv.innerHTML = `
-                        <button class="Pagination-Item-Link" onclick="showAllReports()">
-                            過去のデータをすべて見る ▼
-                        </button>
-                    `;
-                    listContainer.appendChild(btnDiv);
-                }
+                // 2. 1ページ目を表示する
+                renderPage(1);
             })
             .catch(err => {
-                listContainer.innerHTML = "データの読み込みに失敗しました。";
+                listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データの読み込みに失敗しました。</p>";
                 console.error(err);
             });
         }
 
-        // ★修正：残りのデータを表示して、一番下のボタンを消す
-        function showAllReports() {
-            const remainingData = allData.slice(10);
-            remainingData.forEach(row => {
+        // ★新規追加：指定されたページのデータを表示する関数
+        function renderPage(pageNumber) {
+            currentPage = pageNumber;
+            const listContainer = document.getElementById('data-list');
+            
+            // 一旦中身をタイトルだけにする（リセット）
+            listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
+
+            // 表示するデータの範囲を計算
+            // 例：1ページ目なら 0番目〜10番目、2ページ目なら 10番目〜20番目
+            const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            
+            // データを切り出す
+            const pageData = allData.slice(startIndex, endIndex);
+
+            // 切り出したデータを画面に表示
+            pageData.forEach(row => {
                 createReportItem(row);
             });
 
-            const btnArea = document.getElementById('load-more-area');
-            if (btnArea) {
-                btnArea.remove();
+            // ページネーションボタンを表示
+            renderPagination();
+        }
+
+        // ★新規追加：ページ番号ボタン（1 2 3...）を作る関数
+        function renderPagination() {
+            const listContainer = document.getElementById('data-list');
+            
+            // 全体のページ数を計算（例: 25件 ÷ 10 = 2.5 → 3ページ）
+            const totalPages = Math.ceil(allData.length / ITEMS_PER_PAGE);
+            
+            // 1ページしかなければボタンは不要
+            if (totalPages <= 1) return;
+
+            // ボタンを入れる枠を作る
+            const paginationDiv = document.createElement('div');
+            paginationDiv.className = 'Pagination';
+
+            // 1ページ目から最後のページまでボタンを作る
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('a'); // <a>タグ風のボタンにする
+                btn.className = 'Pagination-Item-Link';
+                btn.innerText = i;
+                
+                // 現在のページなら isActive クラスをつける（黒くなる）
+                if (i === currentPage) {
+                    btn.classList.add('isActive');
+                }
+
+                // クリックされたらそのページを表示する
+                btn.onclick = function() {
+                    renderPage(i);
+                };
+
+                paginationDiv.appendChild(btn);
             }
+
+            // リストの一番下に追加
+            listContainer.appendChild(paginationDiv);
         }
 
         // 1件分のHTMLを作って画面に追加する関数
         function createReportItem(row) {
             const listContainer = document.getElementById('data-list');
             
-            // ボタンエリア（Pagination）があればその前に挿入する
-            const btnArea = document.getElementById('load-more-area');
-
             const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
             const name = row[1];
             const condition = row[2];
@@ -423,11 +461,7 @@
                 </div>
             `;
             
-            if (btnArea) {
-                listContainer.insertBefore(div, btnArea);
-            } else {
-                listContainer.appendChild(div);
-            }
+            listContainer.appendChild(div);
         }
 
         // いいねボタン機能
