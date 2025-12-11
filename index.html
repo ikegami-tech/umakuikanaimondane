@@ -88,16 +88,20 @@
 }
 /* 1行4つに並べるための特別な設定 */
 .condition-group .condition-label {
+    /* 100% の幅から、間隔(gap)の分を引いて、4つに分ける計算 */
     width: calc(25% - 6px); 
     box-sizing: border-box; 
+    
+    /* 左端に揃える設定 */
     justify-content: flex-start; 
+
+    /* ★修正点: 4文字でも改行させないための設定を追加 */
+    white-space: nowrap;  /* 「改行禁止」の命令です */
+    
+    /* ★微調整: 4文字が枠からはみ出さないように調整 */
+    padding: 5px 2px;     /* 左右の余白を8px→2pxに減らして、文字のスペースを確保 */
+    font-size: 0.95rem;   /* 文字サイズをほんの少しだけ小さくして収まりやすくする */
 }
-        /* 選択されたラジオボタンに枠線を付ける */
-        .condition-label:has(input[type="radio"]:checked) {
-            border-color: #ff7f00; /* オレンジの線 */
-            background-color: #fff8f0; /* 薄いオレンジ背景 */
-            font-weight: bold;
-        }
 
 
         /* ボタンエリア */
