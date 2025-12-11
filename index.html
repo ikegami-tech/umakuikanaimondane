@@ -106,6 +106,8 @@
             border-radius: 6px; 
             font-size: 16px;
         }
+        
+        /* 送信ボタン */
         button.send-btn { 
             padding: 10px 30px; 
             background: #ff7f00; 
@@ -117,6 +119,14 @@
             font-weight: bold;
         }
         button.send-btn:hover { background: #e07000; }
+
+        /* ★新規追加：送信中（ボタンが無効）のときのデザイン */
+        button.send-btn:disabled {
+            background: #ccc;       /* 灰色にする */
+            color: #666;            /* 文字を暗くする */
+            cursor: not-allowed;    /* マウスカーソルを「禁止」マークに */
+            border: none;
+        }
 
         /* 過去の報告一覧エリア */
         #data-list { 
@@ -163,16 +173,13 @@
             color: #fff;
         }
 
-        /* ★修正：日報アイテム（枠のデザイン）- フォーム風に修正 */
+        /* 日報アイテム（枠のデザイン） */
         .item { 
             position: relative;
-            background-color: #fff; /* 背景を白に */
-            
-            /* 入力フォームと同じ枠線と影を追加 */
+            background-color: #fff;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-
             padding: 2rem 1.5rem; 
             margin-bottom: 2rem; 
             line-height: 1.6;
@@ -223,25 +230,18 @@
             bottom: 50px;             
         }
 
-        /* -------------------------------------------------- */
         /* 報告一覧の中身をフォーム風にするデザイン */
-        
-        /* ★修正：1つの行（見出し＋内容）の枠 - 区切り線を実線に変更 */
         .report-row {
             display: flex;              
             align-items: flex-start;    
             margin-bottom: 15px;        
-            border-bottom: 1px solid #e0e0e0; /* フォームの枠と同じ色の実線に変更 */
+            border-bottom: 1px solid #e0e0e0; 
             padding-bottom: 15px;       
         }
-        
-        /* 最後の行だけ線消す */
         .report-row:last-child {
             border-bottom: none;
             margin-bottom: 0;
         }
-
-        /* 左側の見出し（フォームのラベルと同じデザイン） */
         .report-label {
             display: block;
             width: 150px;           
@@ -253,21 +253,16 @@
             padding-left: 10px;
             font-size: 16px;
         }
-
-        /* 右側の文章 */
         .report-content {
             flex-grow: 1;           
             white-space: pre-wrap;  
             line-height: 1.6;
         }
-
-        /* ヘッダー（名前とか日付の場所）のデザイン */
         .report-header-area {
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 2px solid #ff7f00; 
         }
-        /* -------------------------------------------------- */
 
     </style>
 </head>
@@ -320,7 +315,7 @@
         </div>
 
         <div class="button-group">
-            <button onclick="sendData()" class="send-btn">送信</button>
+            <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
         </div>
     </div>     
     
@@ -368,6 +363,11 @@
                 return; 
             }
 
+            // ★修正：送信ボタンを取得して無効化＆文字変更
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "送信中...";
+
             const data = { 
                 name: name, 
                 condition: condition,
@@ -385,9 +385,19 @@
             .then(() => {
                 showToast();
                 resetForm(); 
-                fetchData(); // リストを更新
+                fetchData(); 
+                
+                // ★修正：完了したらボタンを元に戻す
+                submitBtn.disabled = false;
+                submitBtn.innerText = "送信";
             })
-            .catch(err => alert("送信エラー: " + err));
+            .catch(err => {
+                alert("送信エラー: " + err);
+                
+                // ★修正：エラー時もボタンを元に戻す
+                submitBtn.disabled = false;
+                submitBtn.innerText = "送信";
+            });
         }
 
         // データ取得機能
