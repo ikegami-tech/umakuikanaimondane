@@ -110,6 +110,27 @@
 
         /* ボタンエリア */
         .button-group { 
+            /* ★新規追加：「もっと見る」ボタンのデザイン */
+        .load-more-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+        button.load-more-btn {
+            padding: 10px 40px;
+            background: #fff;
+            color: #ff7f00;
+            border: 2px solid #ff7f00;
+            cursor: pointer;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button.load-more-btn:hover {
+            background: #ff7f00;
+            color: #fff;
+        }
             display: flex; 
             justify-content: center; 
             gap: 20px; 
@@ -241,8 +262,11 @@
     </div>
 
     <script>
-        // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
+        // ★ここにGASのURLを貼り付けてください
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
+
+        // ★新規追加：全データを保存しておくための「箱」
+        let allData = []; 
 
         function getSelectedCondition() {
             const selected = document.querySelector('input[name="condition"]:checked');
@@ -257,22 +281,20 @@
             document.getElementById('comment').value = "";
         }
 
-        // データ送信（POST）
-        function sendData() {
-            // 5つの項目全ての値を取得
-            const name = document.getElementById('name').value;
+        // データ送信（POST）
+        function sendData() {
+            const name = document.getElementById('name').value;
             const condition = getSelectedCondition(); 
             const progress = document.getElementById('progress').value;
             const tomorrow = document.getElementById('tomorrow').value;
             const comment = document.getElementById('comment').value;
 
-            if(!name || !condition || !progress || !tomorrow || !comment) { 
+            if(!name || !condition || !progress || !tomorrow || !comment) { 
                 alert("全ての項目を入力・選択してください"); 
                 return; 
             }
 
-            // GASへ送るデータ (5項目)
-            const data = { 
+            const data = { 
                 name: name, 
                 condition: condition,
                 progress: progress,
@@ -280,145 +302,165 @@
                 comment: comment
             };
 
-            fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                alert("日報を送信完了しました！");
-                resetForm(); 
-                fetchData(); // リストを更新
-            })
-            .catch(err => alert("送信エラー: " + err));
-        }
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert("日報を送信完了しました！");
+                resetForm(); 
+                fetchData(); // リストを更新
+            })
+            .catch(err => alert("送信エラー: " + err));
+        }
 
-        // データ取得（GET）- 過去の報告一覧機能
-        function fetchData() {
+        // ★修正：データ取得機能（全データを取得して、最初の10件を表示）
+        function fetchData() {
             const listContainer = document.getElementById('data-list');
-            listContainer.querySelector('h2').textContent = "過去の報告一覧"; // タイトルは残す
-            listContainer.innerHTML += "<p>データを取得中...</p>";
+            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
             
-            fetch(GAS_URL)
-            .then(response => response.json())
-            .then(data => {
-                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
-                
-                data.reverse().forEach(row => {
-                    // 6つの列に対応 [0:日付, 1:名前, 2:コンディション, 3:進捗, 4:明日, 5:所見]
-                    const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
-                    const name = row[1];
-                    const condition = row[2];
-                    const progress = row[3];
-                    const tomorrow = row[4];
-                    const comment = row[5];
-                    
-                    const div = document.createElement('div');
-                    div.className = 'item';
-                    
-                    // ★修正：onclick（左クリック）に加えて、oncontextmenu（右クリック）を追加
-                    div.innerHTML = `
-                        <div class="like-buttons">
-                            <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">石井いいね👍</button>
-                            <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">渡辺いいね👍</button>
-                            <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">池上いいね👍</button>
-                        </div>
-                        
-                        <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
-                        <div style="margin-top:10px;">
-                            **今日の進捗**: ${progress.substring(0, 70)}...<br>
-                            **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
-                            **所見**: ${comment.substring(0, 70)}...
-                        </div>
-                    `;
-                        
-                    listContainer.appendChild(div);
-                });
-                if (data.length === 0) {
-                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
-                }
-            })
-            .catch(err => {
-                listContainer.innerHTML = "データの読み込みに失敗しました。GASのURLを確認してください。";
-                console.error(err);
-            });
-        }
-        // ★修正：いいねボタンを押したときの動き（色判定の強化版）
-        function addLike(btn) {
-            // 1. 今のボタンの文字を取得
-            let text = btn.innerText;
+            fetch(GAS_URL)
+            .then(response => response.json())
+            .then(data => {
+                listContainer.innerHTML = "<h2>過去の報告一覧</h2>"; // Loading文字を消す
+                
+                // 1. データを逆順（新しい順）にして、箱(allData)に保存
+                allData = data.reverse();
 
-            // 2. 文字を「半角スペース」で区切る
-            let parts = text.split(' '); 
+                if (allData.length === 0) {
+                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
+                    return;
+                }
+
+                // 2. 最初の10件だけを取り出して表示する
+                const first10 = allData.slice(0, 10);
+                first10.forEach(row => {
+                    createReportItem(row); // 表示用の関数を呼び出す
+                });
+
+                // 3. もしデータが10件より多ければ、「もっと見る」ボタンを作る
+                if (allData.length > 10) {
+                    const btnDiv = document.createElement('div');
+                    btnDiv.className = 'load-more-container';
+                    btnDiv.id = 'load-more-area';
+                    btnDiv.innerHTML = '<button class="load-more-btn" onclick="showAllReports()">過去のデータをすべて見る ▼</button>';
+                    listContainer.appendChild(btnDiv);
+                }
+            })
+            .catch(err => {
+                listContainer.innerHTML = "データの読み込みに失敗しました。";
+                console.error(err);
+            });
+        }
+
+        // ★新規追加：残りのデータをすべて表示する機能
+        function showAllReports() {
+            // 11件目（インデックス10）から最後までのデータを取り出す
+            const remainingData = allData.slice(10);
             
-            // 3. 最後の部分が数字かどうかチェック
+            // 残りのデータを順番に表示
+            remainingData.forEach(row => {
+                createReportItem(row);
+            });
+
+            // ボタンを消す
+            const btnArea = document.getElementById('load-more-area');
+            if (btnArea) {
+                btnArea.remove();
+            }
+        }
+
+        // ★新規追加：1件分のHTMLを作って画面に追加する「共通の関数」
+        // (今まではfetchDataの中に書いてあった長いコードをここにまとめました)
+        function createReportItem(row) {
+            const listContainer = document.getElementById('data-list');
+            
+            // もし「もっと見るボタン」があれば、その手前に挿入するためにボタンを取得
+            const btnArea = document.getElementById('load-more-area');
+
+            const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+            const name = row[1];
+            const condition = row[2];
+            const progress = row[3];
+            const tomorrow = row[4];
+            const comment = row[5];
+            
+            const div = document.createElement('div');
+            div.className = 'item';
+            
+            div.innerHTML = `
+                <div class="like-buttons">
+                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">石井いいね👍</button>
+                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">渡辺いいね👍</button>
+                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">池上いいね👍</button>
+                </div>
+                
+                <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
+                <div style="margin-top:10px;">
+                    **今日の進捗**: ${progress.substring(0, 70)}...<br>
+                    **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
+                    **所見**: ${comment.substring(0, 70)}...
+                </div>
+            `;
+            
+            // ボタンエリアがあればその前に、なければリストの最後に追加
+            if (btnArea) {
+                listContainer.insertBefore(div, btnArea);
+            } else {
+                listContainer.appendChild(div);
+            }
+        }
+
+        // いいねボタン機能（以前と同じ）
+        function addLike(btn) {
+            let text = btn.innerText;
+            let parts = text.split(' '); 
             let lastPart = parts[parts.length - 1]; 
             let count = parseInt(lastPart);
 
-            // 4. 数字の計算（カウントアップ）
             if (!isNaN(count)) {
-                // ■ 数字だった場合（2回目以降）
-                count = count + 1; // 1増やす
-                parts.pop();       // 古い数字を消す
-                btn.innerText = parts.join(' ') + ' ' + count; // 新しい数字をくっつける
+                count = count + 1;
+                parts.pop();
+                btn.innerText = parts.join(' ') + ' ' + count;
             } else {
-                // ■ 数字じゃなかった場合（初回）
-                btn.innerText = text + ' 1'; // 「 1」を足す
+                btn.innerText = text + ' 1';
             }
 
-            // 5. 【重要】最後に必ず色を確認して塗り直す！
-            // ボタンの文字に「バッド」が含まれているかどうかで色を決める
             if (btn.innerText.indexOf('バッド') !== -1) {
-                // バッドの色（青紫）
                 btn.style.backgroundColor = '#f0f0ff';
                 btn.style.borderColor = '#4b0082';
                 btn.style.color = '#4b0082';
             } else {
-                // いいねの色（オレンジ）
                 btn.style.backgroundColor = '#fff8f0';
                 btn.style.borderColor = '#ff7f00';
                 btn.style.color = '#ff7f00';
             }
-            // 文字を太くする
             btn.style.fontWeight = 'bold';
         }
-        // ★修正：右クリックで切り替え（数字をリセットする機能付き）
-        function changeToBad(event, btn) {
-            event.preventDefault(); // 右クリックメニューを出さない
 
-            // 1. まず、数字が付いていても無視するために、文字部分だけを取り出す
-            // "石井いいね👍 5" → ["石井いいね👍", "5"] に分けて、前の部分だけ使う
+        // バッド切り替え機能（以前と同じ）
+        function changeToBad(event, btn) {
+            event.preventDefault();
             let textOnly = btn.innerText.split(' ')[0];
 
-            // 2. 文字の中に「いいね」が入っているかチェック
             if (textOnly.indexOf('いいね👍') !== -1) {
-                
-                // ■「いいね」→「バッド」に書き換える
-                // 数字を捨てた textOnly を使うので、数字は消えます
                 btn.innerText = textOnly.replace('いいね👍', 'バッド👎');
-                
-                // バッドの色（青紫）に変える
                 btn.style.backgroundColor = '#f0f0ff';
                 btn.style.borderColor = '#4b0082';
                 btn.style.color = '#4b0082';
                 btn.style.fontWeight = 'bold';
-
             } else if (textOnly.indexOf('バッド👎') !== -1) {
-                
-                // ■「バッド」→「いいね」に戻す
                 btn.innerText = textOnly.replace('バッド👎', 'いいね👍');
-                
-                // 数字がリセットされるので、色は「初期状態（白）」に戻す
                 btn.style.backgroundColor = '';
                 btn.style.borderColor = '';
                 btn.style.color = '';
                 btn.style.fontWeight = '';
             }
         }
-        window.onload = fetchData;
-    </script>
+
+        window.onload = fetchData;
+    </script>
 </body>
 </html>
