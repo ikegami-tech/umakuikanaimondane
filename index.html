@@ -319,12 +319,12 @@
                     const div = document.createElement('div');
                     div.className = 'item';
                     
-                    // ★修正：いいねボタンのHTMLを追加しました
+                    // ★修正：onclickの中身を alert から addLike(this) に変更
                     div.innerHTML = `
                         <div class="like-buttons">
-                            <button class="like-btn" onclick="alert('石井いいね！が押されました（機能開発中）')">石井いいね👍</button>
-                            <button class="like-btn" onclick="alert('渡辺いいね！が押されました（機能開発中）')">渡辺いいね👍</button>
-                            <button class="like-btn" onclick="alert('池上いいね！が押されました（機能開発中）')">池上いいね👍</button>
+                            <button class="like-btn" onclick="addLike(this)">石井いいね👍</button>
+                            <button class="like-btn" onclick="addLike(this)">渡辺いいね👍</button>
+                            <button class="like-btn" onclick="addLike(this)">池上いいね👍</button>
                         </div>
                         
                         <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
@@ -346,7 +346,19 @@
                 console.error(err);
             });
         }
-
+        // ★新規追加：いいねボタンを押したときの動き
+        function addLike(btn) {
+            // もし、まだ「1」がついていなければ
+            if (btn.innerText.indexOf(' 1') === -1) {
+                btn.innerText = btn.innerText + ' 1'; // 文字の後ろに「 1」を追加
+                
+                // おまけ：押したことがわかるように色も変える
+                btn.style.backgroundColor = '#fff8f0';
+                btn.style.borderColor = '#ff7f00';
+                btn.style.color = '#ff7f00';
+                btn.style.fontWeight = 'bold';
+            }
+        }
         window.onload = fetchData;
     </script>
 </body>
