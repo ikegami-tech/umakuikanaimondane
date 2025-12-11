@@ -142,39 +142,45 @@
         }
         
         /* -------------------------------------------------- */
-        /* ★修正：もっと見るボタンのエリア（中央寄せ） */
+        /* ★修正：ページネーション（番号ボタン）のエリア */
         .Pagination {
             display: flex;
             align-items: center;
             justify-content: center; /* 画面の中央に配置 */
-            margin-top: 30px;        /* 上との間隔 */
-            margin-bottom: 50px;     /* 下との間隔 */
+            margin-top: 40px;        /* 上との間隔 */
+            margin-bottom: 60px;     /* 下との間隔 */
+        }
+        
+        /* ボタン同士の間隔 */
+        .Pagination > * + * {
+            margin-left: 12px;
         }
 
-        /* ★修正：ボタンのデザイン（いただいたコードを調整） */
+        /* 番号ボタンのデザイン */
         .Pagination-Item-Link {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            
-            /* 文字が入るように幅と高さを固定せず、余白で調整します */
-            padding: 10px 30px; 
-            
+            width: 35px;
+            height: 35px;
             background: #fff;
-            border: solid 2px #111;
-            font-size: 14px;
-            color: #111;
+            font-size: 16px;       /* 文字サイズ調整 */
             font-weight: bold;
             transition: all 0.15s linear;
-            cursor: pointer;
-            border-radius: 4px;
+            cursor: pointer;       /* マウスを指マークに */
+            border: 1px solid #ccc; /* 薄い枠線を追加 */
+            border-radius: 4px;    /* 角を少し丸く */
+            text-decoration: none; /* 下線を消す */
+            color: #333;
         }
 
+        /* 今選ばれているページのボタン */
         .Pagination-Item-Link.isActive {
+            pointer-events: none; /* クリックできないようにする */
             background: #111;
             color: #fff;
-            pointer-events: none;
+            border-color: #111;
         }
 
         /* マウスを乗せたとき */
@@ -232,252 +238,3 @@
             <div class="input-wrapper">
                 <textarea id="name" placeholder="氏名を入力してください" style="height: 60px; width: 14em;"></textarea>
             </div>
-        </div>
-
-        <div class="form-group">
-            <label>コンディション</label>
-            <div class="input-wrapper condition-group">
-                <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
-                <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
-                <label class="condition-label"><input type="radio" name="condition" value="😊 普通">😊 普通</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中">🤔 考え中</label>
-                <label class="condition-label"><input type="radio" name="condition" value="😇 不調">😇 不調</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🫠 疲労">🫠 疲労</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🤢 二日酔い">🤢 二日酔い</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🫨 驚き">🫨 驚き</label>
-                <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感">🎉 達成感</label>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label for="progress">今日の進捗状況</label>
-            <div class="input-wrapper">
-                <textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="tomorrow">明日の業務内容</label>
-            <div class="input-wrapper">
-                <textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="comment">所見や感じたこと</label>
-            <div class="input-wrapper">
-                <textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea>
-            </div>
-        </div>
-
-
-        <div class="button-group">
-            <button onclick="sendData()" class="send-btn">送信</button>
-        </div>
-
-    </div>     <div id="data-list">
-        <h2>過去の報告一覧</h2>
-        読み込み中...
-    </div>
-
-    <script>
-        // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw_NeSZltlMfN517RARhqhZdvF5aU3SJjhWf0ScwX0PFCjYcx1Y5rWgmEXE2SQgSIl-yg/exec"; 
-
-        // 全データを保存しておくための「箱」
-        let allData = []; 
-
-        function getSelectedCondition() {
-            const selected = document.querySelector('input[name="condition"]:checked');
-            return selected ? selected.value : '';
-        }
-
-        function resetForm() {
-            document.getElementById('name').value = "";
-            document.querySelector('input[name="condition"]:checked') ? document.querySelector('input[name="condition"]:checked').checked = false : null;
-            document.getElementById('progress').value = "";
-            document.getElementById('tomorrow').value = "";
-            document.getElementById('comment').value = "";
-        }
-
-        // データ送信（POST）
-        function sendData() {
-            const name = document.getElementById('name').value;
-            const condition = getSelectedCondition(); 
-            const progress = document.getElementById('progress').value;
-            const tomorrow = document.getElementById('tomorrow').value;
-            const comment = document.getElementById('comment').value;
-
-            if(!name || !condition || !progress || !tomorrow || !comment) { 
-                alert("全ての項目を入力・選択してください"); 
-                return; 
-            }
-
-            const data = { 
-                name: name, 
-                condition: condition,
-                progress: progress,
-                tomorrow: tomorrow,
-                comment: comment
-            };
-
-            fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                alert("日報を送信完了しました！");
-                resetForm(); 
-                fetchData(); // リストを更新
-            })
-            .catch(err => alert("送信エラー: " + err));
-        }
-
-        // ★修正：データ取得機能（ボタンを一番下に配置）
-        function fetchData() {
-            const listContainer = document.getElementById('data-list');
-            listContainer.innerHTML = "<h2>過去の報告一覧</h2><p>データを取得中...</p>";
-            
-            fetch(GAS_URL)
-            .then(response => response.json())
-            .then(data => {
-                allData = data.reverse();
-                listContainer.innerHTML = "<h2>過去の報告一覧</h2>";
-
-                if (allData.length === 0) {
-                    listContainer.innerHTML += "<p>まだ報告が登録されていません。</p>";
-                    return;
-                }
-
-                // 最初の10件を表示
-                const first10 = allData.slice(0, 10);
-                first10.forEach(row => {
-                    createReportItem(row);
-                });
-
-                // ★データが10件より多ければ、一番下にボタンを作る
-                if (allData.length > 10) {
-                    const btnDiv = document.createElement('div');
-                    btnDiv.className = 'Pagination'; // ★中央寄せのクラス
-                    btnDiv.id = 'load-more-area';
-                    
-                    // ★ご希望のデザインのボタンを作成
-                    btnDiv.innerHTML = `
-                        <button class="Pagination-Item-Link" onclick="showAllReports()">
-                            過去のデータをすべて見る ▼
-                        </button>
-                    `;
-                    listContainer.appendChild(btnDiv);
-                }
-            })
-            .catch(err => {
-                listContainer.innerHTML = "データの読み込みに失敗しました。";
-                console.error(err);
-            });
-        }
-
-        // ★修正：残りのデータを表示して、一番下のボタンを消す
-        function showAllReports() {
-            const remainingData = allData.slice(10);
-            remainingData.forEach(row => {
-                createReportItem(row);
-            });
-
-            const btnArea = document.getElementById('load-more-area');
-            if (btnArea) {
-                btnArea.remove();
-            }
-        }
-
-        // 1件分のHTMLを作って画面に追加する関数
-        function createReportItem(row) {
-            const listContainer = document.getElementById('data-list');
-            
-            // ボタンエリア（Pagination）があればその前に挿入する
-            const btnArea = document.getElementById('load-more-area');
-
-            const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
-            const name = row[1];
-            const condition = row[2];
-            const progress = row[3];
-            const tomorrow = row[4];
-            const comment = row[5];
-            
-            const div = document.createElement('div');
-            div.className = 'item';
-            
-            div.innerHTML = `
-                <div class="like-buttons">
-                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">石井いいね👍</button>
-                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">渡辺いいね👍</button>
-                    <button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">池上いいね👍</button>
-                </div>
-                
-                <strong>${name} (${condition})</strong> <small>報告日時: ${date}</small><br>
-                <div style="margin-top:10px;">
-                    **今日の進捗**: ${progress.substring(0, 70)}...<br>
-                    **明日の業務**: ${tomorrow.substring(0, 70)}...<br>
-                    **所見**: ${comment.substring(0, 70)}...
-                </div>
-            `;
-            
-            if (btnArea) {
-                listContainer.insertBefore(div, btnArea);
-            } else {
-                listContainer.appendChild(div);
-            }
-        }
-
-        // いいねボタン機能
-        function addLike(btn) {
-            let text = btn.innerText;
-            let parts = text.split(' '); 
-            let lastPart = parts[parts.length - 1]; 
-            let count = parseInt(lastPart);
-
-            if (!isNaN(count)) {
-                count = count + 1;
-                parts.pop();
-                btn.innerText = parts.join(' ') + ' ' + count;
-            } else {
-                btn.innerText = text + ' 1';
-            }
-
-            if (btn.innerText.indexOf('バッド') !== -1) {
-                btn.style.backgroundColor = '#f0f0ff';
-                btn.style.borderColor = '#4b0082';
-                btn.style.color = '#4b0082';
-            } else {
-                btn.style.backgroundColor = '#fff8f0';
-                btn.style.borderColor = '#ff7f00';
-                btn.style.color = '#ff7f00';
-            }
-            btn.style.fontWeight = 'bold';
-        }
-
-        // バッド切り替え機能
-        function changeToBad(event, btn) {
-            event.preventDefault();
-            let textOnly = btn.innerText.split(' ')[0];
-
-            if (textOnly.indexOf('いいね👍') !== -1) {
-                btn.innerText = textOnly.replace('いいね👍', 'バッド👎');
-                btn.style.backgroundColor = '#f0f0ff';
-                btn.style.borderColor = '#4b0082';
-                btn.style.color = '#4b0082';
-                btn.style.fontWeight = 'bold';
-            } else if (textOnly.indexOf('バッド👎') !== -1) {
-                btn.innerText = textOnly.replace('バッド👎', 'いいね👍');
-                btn.style.backgroundColor = '';
-                btn.style.borderColor = '';
-                btn.style.color = '';
-                btn.style.fontWeight = '';
-            }
-        }
-
-        window.onload = fetchData;
-    </script>
-</body>
-</html>
