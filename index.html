@@ -346,17 +346,32 @@
                 console.error(err);
             });
         }
-        // ★新規追加：いいねボタンを押したときの動き
+        // ★修正：いいねボタンを押したときの動き（ON/OFF切り替え機能付き）
         function addLike(btn) {
-            // もし、まだ「1」がついていなければ
+            // ボタンの文字の中に「 1」が含まれているかチェック
+            // indexOf(...) === -1 というのは「見つからなかった」という意味です
             if (btn.innerText.indexOf(' 1') === -1) {
+                
+                // ■ パターンA：まだ押されていない時（ONにする）
                 btn.innerText = btn.innerText + ' 1'; // 文字の後ろに「 1」を追加
                 
-                // おまけ：押したことがわかるように色も変える
+                // 押したことがわかるように色を変える
                 btn.style.backgroundColor = '#fff8f0';
                 btn.style.borderColor = '#ff7f00';
                 btn.style.color = '#ff7f00';
                 btn.style.fontWeight = 'bold';
+                
+            } else {
+                
+                // ■ パターンB：すでに押されている時（OFFに戻す）
+                // 文字から「 1」を削除する（空白に置き換える）
+                btn.innerText = btn.innerText.replace(' 1', '');
+                
+                // 色を元に戻す（設定を空っぽにすると、最初のCSSのデザインに戻ります）
+                btn.style.backgroundColor = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+                btn.style.fontWeight = '';
             }
         }
         window.onload = fetchData;
