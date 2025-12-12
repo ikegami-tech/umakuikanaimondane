@@ -93,11 +93,10 @@
         .btn-delete-member { display: none; background: #fff; color: #007bff; border: 1px solid #007bff; font-weight: bold; }
         .btn-delete-member:hover { background: #007bff; color: #fff; }
 
-        /* ★修正：コピーボタンのデザイン（上に隙間を追加） */
+        /* コピーボタン（スタイル調整済み） */
         .btn-copy { 
             background: #fff; color: #28a745; border: 1px solid #28a745; 
             font-weight: bold; font-size: 13px; padding: 5px 12px; 
-            margin-top: 8px; /* ★上に隙間 */
             border-radius: 20px;
             cursor: pointer; transition: 0.2s;
         }
@@ -230,12 +229,16 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>今日の進捗状況</label>
+                        <label style="display: flex; flex-direction: column; gap: 8px;">
+                            <span>今日の進捗状況</span>
+                            <button type="button" class="btn-copy" onclick="copyLastTomorrow()" style="margin: 0; width: 100%; text-align: center; font-size: 11px;">前回のコピー</button>
+                        </label>
+                        
                         <div class="input-wrapper">
                             <textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea>
-                            <button type="button" class="btn-copy" onclick="copyLastTomorrow()">前回の続きをコピー</button>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label for="tomorrow">明日の業務内容</label>
                         <div class="input-wrapper"><textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea></div>
@@ -257,7 +260,7 @@
                         <button id="cancel-edit-btn" onclick="cancelEdit()">キャンセル</button>
                         <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
                     </div>
-                </div>     
+                </div>      
             </div>
 
             <div id="tab-history" class="content-section">
@@ -297,8 +300,8 @@
     <div id="toast">送信完了しました！</div>
 
     <script>
-        // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzjKLYxO4N3hhCEtpjM_duXiNe4jSmQfIO807XQfNGq-xJfk-Xz1SLrTnvJHUrJqzuixA/exec"; 
+        // ★重要：ここにあなたのGASウェブアプリのURLを貼り付けてください！
+        const GAS_URL = "ここにあなたのGASのURLを貼り付けてください"; 
 
         let allData = []; 
         let currentData = [];
