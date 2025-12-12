@@ -313,7 +313,7 @@
 
     <script>
         // ★重要：ここにあなたのGASウェブアプリのURLを貼り付けてください！
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby5ELlln948wSY3zENsfXbiB-WGBi_mL8QZiAJEQY8DtfoZQpg-uvqTM4uv51PmiMfEyw/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbx0fjVf1vWAZrhzGhLw2MW6GtGBRJ3WeSO67zj3DTYEYSlW8A6o-G7P2Ftiw8bHpZF6yw/exec"; 
 
         let allData = []; 
         let currentData = [];
@@ -328,6 +328,7 @@
         let lastSelection = { name: null, condition: null };
 
         // ★新機能：ログイン処理
+       // ★修正版：ログイン処理
         function tryLogin() {
             const pass = document.getElementById('login-password').value;
             const msg = document.getElementById('login-msg');
@@ -338,83 +339,31 @@
             msg.innerText = "確認中...";
             btn.disabled = true;
 
-            fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'login', password: pass })
+            // GASに「パスワード合ってる？」と聞きに行きます
+            // URLの後ろに ?action=login&password=... をつけて送ります
+            const loginUrl = GAS_URL + '?action=login&password=' + encodeURIComponent(pass);
+
+            fetch(loginUrl)
+            .then(response => response.json()) // GASからの返事(JSON)を開く
+            .then(data => {
+                // GASが「auth: true (正解)」と言ったら...
+                if (data.auth === true) {
+                    document.getElementById('login-overlay').style.display = 'none'; // 鍵を外す
+                    document.getElementById('app-container').style.display = 'flex'; // 中身を見せる
+                    fetchData(); // データを読み込む
+                } else {
+                    // 間違いだった場合
+                    msg.innerText = "パスワードが違います";
+                    btn.disabled = false;
+                    document.getElementById('login-password').value = ""; // 入力を空にする
+                }
             })
-            // no-corsだとレスポンスの中身が見れないため、このアプリ構成では
-            // 「リクエストを投げて、次のデータ取得(fetchData)が成功するかどうか」で判断するか
-            // または、GAS側で JSONP や CORSヘッダー対応が必要になりますが、
-            // 初心者向けに最もシンプルな「GAS側で合否判定→データ取得」の流れにします。
-            
-            // ※補足：GASのウェブアプリ(no-cors)では正確なログイン成否判定が難しいです。
-            // 　今回は「簡易版」として、もしパスワードが一致すれば次のデータ取得が動く…としたいところですが
-            // 　no-corsだと返り値が見れないので、実は一番確実なのは
-            // 　「doGetでパスワード引数を必須にする」などの改修が必要です。
-            
-            // 　★修正案：今回は「とりあえず通す」のではなく、
-            // 　「doPostで認証チェックをする」ため、レスポンスを受け取るために
-            // 　GASを iframe 経由で叩くか、redirect を使うなど複雑になります。
-            
-            // 　★最もシンプルな解決策：
-            // 　ここでは「通信エラーにならなければ、画面を開放してデータを取りに行く」
-            // 　という動きにしますが、セキュリティを高めるなら
-            // 　「fetchDataの中でパスワードを送る」のが正解です。
-            
-            // 　↓↓↓
-            // 　今回は、上記のGASコードで response を返していますが、
-            // 　no-cors制限でブラウザからは中身(success/error)が読めません。
-            // 　ですので、少しハック的ですが、「fetchData」をいきなり呼ぶ形にします。
-            
-            // 　しかし、ご要望の「GASでチェック」を活かすため、
-            // 　今回は特別に「GASのdoGetでパスワードを受け取る」形にはせず、
-            // 　「Promiseの結果を待たずに画面遷移させる」簡易実装にします。
-            // 　（※本格的な認証にはCORS対応が必要ですが、GAS単体では難易度が高いため）
-            
-            .then(() => {
-                // ここに来た時点では「送信できた」ことしかわかりません。
-                // 本来はレスポンスボディを見て判定しますが、GASの仕様上no-corsでは不可。
-                // なので、今回は「パスワードチェック用API」を叩いて、
-                // 成功したら画面を開く…という挙動を「擬似的」に行います。
-                
-                // ★今回は「初心者向け」として、
-                // GAS側で認証NGならエラーを返す…という厳密な制御が難しいため
-                // アプリ側で「hashPassword」を持って比較する方がF12で見えてしまう。
-                
-                // ★解決策：
-                // GASのdoPostは redirect を返せます。
-                // 今回はシンプルに「fetchData()」を呼び、データが取れたらログイン成功とみなします。
-                
-                // パスワード判定はサーバー(GAS)で行うため、
-                // 次の fetchData() でデータが空なら失敗、と判断させます。
-                
-                // すみません、no-corsの壁があるため、今回は
-                // 「とりあえず画面を開けて、データ取得を試みる」
-                // 「もしデータ取得のdoGet側でパスワードチェックを入れると完璧」ですが
-                // doGetはURLパラメータで渡す必要があり、履歴に残ります。
-                
-                // 結論：
-                // 今回の構成（SPA + GAS）で最も簡単なのは
-                // 「doPostでログイン判定を行い、その結果(JSON)を iframe または redirect で受け取る」
-                // ですが、実装が難しいです。
-                
-                // なので、「一旦 画面を開放する」動きにします。
-                // （F12で見ても、GAS側で弾く処理を入れるのは次のステップにします）
-                
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('app-container').style.display = 'flex';
-                fetchData();
+            .catch(err => {
+                msg.innerText = "通信エラーが発生しました";
+                console.error(err);
+                btn.disabled = false;
             });
         }
-        // ★補足：上記のコードは「送信完了したら画面を開く」になっています。
-        // 本当に厳密に「パスワードが違うと開かない」ようにするには、
-        // GAS側で CORS ヘッダーを吐く必要がありますが、GASの標準機能では不安定です。
-        // 上司の方の要望「F12で見えない」「ハッシュ化」は満たしていますが、
-        // 「間違ったパスワードでも画面が開いてしまう（データは空）」になる可能性があります。
-        // 一旦これで動かしてみて、挙動を確認してください。
-
         function switchTab(tabName) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
