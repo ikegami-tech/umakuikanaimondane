@@ -216,15 +216,15 @@
                     <div class="form-group">
                         <label>体調</label>
                         <div class="input-wrapper condition-group">
-                            <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調">😄 絶好調</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="👍 良い">👍 良い</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="😊 普通">😊 普通</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中">🤔 考え中</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="😇 不調">😇 不調</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🫠 疲労">🫠 疲労</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🤢 二日酔い">🤢 二日酔い</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🫨 驚き">🫨 驚き</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感">🎉 達成感</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調" onclick="toggleRadio(this, 'condition')">😄 絶好調</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="👍 良い" onclick="toggleRadio(this, 'condition')">👍 良い</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="😊 普通" onclick="toggleRadio(this, 'condition')">😊 普通</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中" onclick="toggleRadio(this, 'condition')">🤔 考え中</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="😇 不調" onclick="toggleRadio(this, 'condition')">😇 不調</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="🫠 疲労" onclick="toggleRadio(this, 'condition')">🫠 疲労</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="🤢 二日酔い" onclick="toggleRadio(this, 'condition')">🤢 二日酔い</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="🫨 驚き" onclick="toggleRadio(this, 'condition')">🫨 驚き</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感" onclick="toggleRadio(this, 'condition')">🎉 達成感</label>
                         </div>
                     </div>
                     
@@ -301,7 +301,7 @@
 
     <script>
         // ★重要：ここにあなたのGASウェブアプリのURLを貼り付けてください！
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxMDXFLPQc2kq9qivCCaNboa7X-1PA81XcXEMvRF4KV4IhD_e402_P8Y1LW8-1VzeBuvg/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzbjmDj-pz1kGEQAn2qu-ozID5RJdZvTIIkfHNkcedwvptfNuINIYIRqeY47J7tQTI1vw/exec"; 
 
         let allData = []; 
         let currentData = [];
@@ -313,6 +313,9 @@
         let editingRowIndex = null;
         let currentEditingFileUrl = "";
         let targetReportDate = null;
+        
+        // ★追加：現在選ばれている値を記憶しておく変数（トグル用）
+        let lastSelection = { name: null, condition: null };
 
         function switchTab(tabName) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
@@ -330,10 +333,7 @@
         }
 
         function setupAutoSave() {
-            const condRadios = document.querySelectorAll('input[name="condition"]');
-            condRadios.forEach(radio => {
-                radio.addEventListener('change', function() { saveSelection('saved_condition', this.value); });
-            });
+            // 体調の自動保存は toggleRadio 関数側で行うため、ここでは name="condition" のリスナー設定は削除しました
 
             const textFields = ['progress', 'tomorrow', 'comment'];
             textFields.forEach(id => {
@@ -346,13 +346,19 @@
             const savedName = localStorage.getItem('saved_name');
             if (savedName) {
                 const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`);
-                if (nameRadio) nameRadio.checked = true;
+                if (nameRadio) {
+                    nameRadio.checked = true;
+                    lastSelection.name = savedName; // ★記憶する
+                }
             }
 
             const savedCondition = localStorage.getItem('saved_condition');
             if (savedCondition) {
                 const condRadio = document.querySelector(`input[name="condition"][value="${savedCondition}"]`);
-                if (condRadio) condRadio.checked = true;
+                if (condRadio) {
+                    condRadio.checked = true;
+                    lastSelection.condition = savedCondition; // ★記憶する
+                }
             }
 
             const savedProgress = localStorage.getItem('saved_progress');
@@ -363,6 +369,23 @@
 
             const savedComment = localStorage.getItem('saved_comment');
             if (savedComment) document.getElementById('comment').value = savedComment;
+        }
+        
+        // ★新機能：ラジオボタンの選択・解除を切り替える関数
+        function toggleRadio(radio, type) {
+            // type には 'name' か 'condition' が入ります
+            
+            // 「前回選んだもの」と「今回クリックしたもの」が同じだったら...
+            if (lastSelection[type] === radio.value) {
+                // チェックを外す！
+                radio.checked = false;
+                lastSelection[type] = null; // 記憶を消す
+                saveSelection('saved_' + type, ''); // 保存データも消す
+            } else {
+                // 違うものを選んだ場合は、記憶を上書きする
+                lastSelection[type] = radio.value;
+                saveSelection('saved_' + type, radio.value); // 保存する
+            }
         }
 
         function getSelectedCondition() {
@@ -387,6 +410,9 @@
             document.getElementById('file-attach').value = ""; 
             cancelEdit(); 
             resetDate();
+            
+            // 記憶変数もリセット
+            lastSelection = { name: null, condition: null };
             
             localStorage.removeItem('saved_name');
             localStorage.removeItem('saved_condition');
@@ -426,7 +452,15 @@
             const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
             if (targetName) {
                 const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
-                nameRadios.forEach(r => r.checked = (r.value === targetName));
+                nameRadios.forEach(r => {
+                    if (r.value === targetName) {
+                        r.checked = true;
+                        // トグル用の記憶も更新
+                        lastSelection.name = targetName;
+                    } else {
+                        r.checked = false;
+                    }
+                });
                 saveSelection('saved_name', targetName);
             }
         }
@@ -440,7 +474,7 @@
         function deleteMember() {
             const name = getSelectedManagerName();
             if (!name) return;
-            if (!confirm(`「${name}」さんを名簿から削除しますか？\n（過去の日報もすべて消えてしまいます）`)) return;
+            if (!confirm(`「${name}」さんを名簿から削除しますか？\n（過去の日報も削除されます）`)) return;
             memberList = memberList.filter(m => m !== name);
             renderMemberRadios(); renderFilterOptions(); updateManagerButtonState();
             const data = { action: 'deleteMember', targetName: name };
@@ -544,10 +578,14 @@
             const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
             nameRadios.forEach(r => r.checked = (r.value === targetRow[1]));
             saveSelection('saved_name', targetRow[1]); 
+            // 編集モードに入ったときもトグル用の記憶を更新
+            lastSelection.name = targetRow[1];
 
             const condRadios = document.querySelectorAll('input[name="condition"]');
             condRadios.forEach(r => r.checked = (r.value === targetRow[2]));
             saveSelection('saved_condition', targetRow[2]);
+            // 編集モードに入ったときもトグル用の記憶を更新
+            lastSelection.condition = targetRow[2];
 
             document.getElementById('progress').value = targetRow[3];
             document.getElementById('tomorrow').value = targetRow[4];
@@ -612,7 +650,10 @@
             memberList.forEach(name => {
                 const label1 = document.createElement('label'); label1.className = 'condition-label';
                 const input1 = document.createElement('input'); input1.type = 'radio'; input1.name = 'name'; input1.value = name;
-                input1.onchange = function() { saveSelection('saved_name', this.value); };
+                
+                // ★修正：onclickでトグル関数を呼び出す設定を追加
+                input1.onclick = function() { toggleRadio(this, 'name'); };
+                
                 label1.appendChild(input1); label1.appendChild(document.createTextNode(name));
                 inputContainer.appendChild(label1);
 
