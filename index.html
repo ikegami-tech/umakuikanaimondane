@@ -56,6 +56,8 @@
             transition: 0.2s; width: 100%;
         }
         .menu-btn:hover, .menu-btn.active { background: #ff7f00; }
+        
+        /* ログアウトボタン */
         .menu-btn.logout { margin-top: auto; background: #444; border: 1px solid #666; }
         .menu-btn.logout:hover { background: #ff4d4d; border-color: #ff4d4d; }
 
@@ -219,6 +221,9 @@
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
             <button class="menu-btn" onclick="openCheckModal()">📅 記入確認</button>
+            
+            <button class="menu-btn" onclick="switchTab('password')">🔑 パスワード変更</button>
+            
             <button class="menu-btn logout" onclick="logout()">🚪 ログアウト</button>
         </div>
 
@@ -305,6 +310,30 @@
                     <div id="report-container">読み込み中...</div>
                 </div>
             </div>
+
+            <div id="tab-password" class="content-section">
+                <h1>パスワード変更</h1>
+                <div class="manager-container">
+                    <p style="margin-bottom:20px;">新しいパスワードを設定します。</p>
+                    <div class="form-group">
+                        <label>現在のパスワード</label>
+                        <div class="input-wrapper"><input type="password" id="cp-current" placeholder="今のパスワード"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>新しいパスワード</label>
+                        <div class="input-wrapper"><input type="password" id="cp-new" placeholder="新しいパスワード"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>確認入力</label>
+                        <div class="input-wrapper"><input type="password" id="cp-confirm" placeholder="もう一度入力"></div>
+                    </div>
+                    <div class="button-group">
+                        <button onclick="changePassword()" class="send-btn">変更する</button>
+                    </div>
+                    <p id="cp-msg" style="color:red; text-align:center; margin-top:15px;"></p>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -330,7 +359,7 @@
 
     <script>
         // ★重要：ここにあなたのGASウェブアプリのURLを貼り付けてください！
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyO8UM1y4HrZMsVAHf-f09bvajC7l_fTVoHWqincaJ075M_lQcxYfYplweJvJTiS9RSqQ/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby-OOCFsTSnylldU-pCMnqbAFd7720jo50kj_BfaWtNrdQoJ1-r3BLxa0TJrq-tMaclbg/exec"; 
 
         // --- 画面切り替え ---
         function showLogin() {
@@ -394,6 +423,45 @@
             });
         }
 
+        // --- パスワード変更処理（★新機能） ---
+        function changePassword() {
+            const currentPass = document.getElementById('cp-current').value;
+            const newPass = document.getElementById('cp-new').value;
+            const confirmPass = document.getElementById('cp-confirm').value;
+            const msg = document.getElementById('cp-msg');
+            const myId = localStorage.getItem('login_user_id'); // ログイン中のIDを取得
+
+            if (!currentPass || !newPass || !confirmPass) {
+                msg.innerText = "すべての項目を入力してください"; return;
+            }
+            if (newPass !== confirmPass) {
+                msg.innerText = "新しいパスワードが一致しません"; return;
+            }
+            
+            msg.innerText = "変更中...";
+            
+            const data = { 
+                action: 'changePassword', 
+                id: myId, 
+                currentPass: currentPass, 
+                newPass: newPass 
+            };
+
+            // 結果を知りたいのでdoGetを使いたいところですが、セキュリティ上POST推奨なのでPOST送信
+            // no-corsなので成功したとみなして処理します
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(() => {
+                alert("パスワード変更リクエストを送信しました。\n(現在のパスワードが正しい場合のみ変更されます)");
+                document.getElementById('cp-current').value = "";
+                document.getElementById('cp-new').value = "";
+                document.getElementById('cp-confirm').value = "";
+                msg.innerText = "";
+            })
+            .catch(err => {
+                msg.innerText = "エラーが発生しました";
+            });
+        }
+
         // --- ログアウト処理 ---
         function logout() {
             if(!confirm("ログアウトしますか？")) return;
@@ -437,7 +505,6 @@
             const btn = document.getElementById('login-btn');
             if(!id || !pass) { msg.innerText = "IDとパスワードを入力してください"; return; }
             msg.innerText = "確認中..."; btn.disabled = true;
-            // ★キャッシュ対策：時刻(t)をパラメータに追加
             const loginUrl = GAS_URL + '?action=login&id=' + encodeURIComponent(id) + '&password=' + encodeURIComponent(pass) + '&t=' + new Date().getTime();
             fetch(loginUrl).then(response => response.json()).then(data => {
                 if (data.auth === true) {
@@ -461,7 +528,6 @@
             document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
         }
 
-        /* --- 以下、基本機能 --- */
         function switchTab(tabName) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
@@ -470,6 +536,8 @@
             if(tabName === 'member') buttons[0].classList.add('active');
             if(tabName === 'input') buttons[1].classList.add('active');
             if(tabName === 'history') buttons[2].classList.add('active');
+            // パスワード変更タブのボタン（4番目にあると想定）
+            if(tabName === 'password') { /* 特になし */ }
         }
         function saveSelection(key, value) { localStorage.setItem(key, value); }
         function setupAutoSave() {
@@ -544,7 +612,6 @@
         function readFileAsBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => { const result = reader.result; const base64 = result.split(',')[1]; resolve(base64); }; reader.onerror = error => reject(error); reader.readAsDataURL(file); }); }
         function fetchData() {
             const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "<p>データを取得中...</p>";
-            // ★キャッシュ対策：読み込み時もパラメータ付与
             fetch(GAS_URL + '?t=' + new Date().getTime()).then(response => response.json()).then(data => {
                 if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections(); }
                 allData = (data.reports || []).reverse(); currentData = allData;
