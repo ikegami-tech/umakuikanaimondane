@@ -85,8 +85,15 @@
         .btn-delete-member { display: none; background: #fff; color: #007bff; border: 1px solid #007bff; font-weight: bold; }
         .btn-delete-member:hover { background: #007bff; color: #fff; }
 
-        /* ★新規：コピーボタンのデザイン（緑色） */
-        .btn-copy { background: #fff; color: #28a745; border: 1px solid #28a745; font-weight: bold; font-size: 12px; padding: 4px 10px; }
+        /* コピーボタンのデザイン（緑色） */
+        .btn-copy { 
+            background: #fff; color: #28a745; border: 1px solid #28a745; 
+            font-weight: bold; font-size: 13px; padding: 5px 12px; 
+            margin-bottom: 8px; /* 下に少し隙間を作る */
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
         .btn-copy:hover { background: #28a745; color: #fff; }
 
         /* --- ボタン --- */
@@ -216,11 +223,11 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="label-flex">
-                            <span>今日の進捗状況</span>
-                            <button type="button" class="btn-sm btn-copy" onclick="copyLastTomorrow()">前回の続きをコピー</button>
-                        </label>
-                        <div class="input-wrapper"><textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea></div>
+                        <label>今日の進捗状況</label>
+                        <div class="input-wrapper">
+                            <button type="button" class="btn-copy" onclick="copyLastTomorrow()">前回の続きをコピー</button>
+                            <textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="tomorrow">明日の業務内容</label>
@@ -331,7 +338,7 @@
             resetDate(); 
         }
 
-        // ★新規：前回の内容をコピーする機能
+        // 前回の内容をコピーする機能
         function copyLastTomorrow() {
             const name = getSelectedName();
             if (!name) {
@@ -339,12 +346,10 @@
                 return;
             }
 
-            // allDataは新しい順に並んでいるので、findで見つかる最初のデータが「前回の報告」
-            // row = [日付, 名前, コンディション, 進捗, 明日, 所見, いいね, URL, 行番号]
             const lastReport = allData.find(row => row[1] === name);
 
             if (lastReport) {
-                const tomorrowTask = lastReport[4]; // 5番目が「明日の業務」
+                const tomorrowTask = lastReport[4]; 
                 if (!tomorrowTask) {
                     alert("前回の報告に「明日の業務」が記入されていませんでした");
                     return;
