@@ -12,24 +12,40 @@
             background-color: #f0f8ff; height: 100vh; display: flex;
         }
 
-        /* --- ログイン画面 --- */
-        #login-overlay {
+        /* --- オーバーレイ（ログイン・登録・リセット共通） --- */
+        .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #333; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
+            display: none; /* 初期は非表示（JSで制御） */
+            flex-direction: column; justify-content: center; align-items: center; color: white;
         }
-        .login-box {
+        /* 初期表示用 */
+        #login-overlay { display: flex; } 
+
+        .auth-box {
             background: white; color: #333; padding: 30px; border-radius: 8px;
-            text-align: center; width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-align: center; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .login-box input {
-            width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;
+        .auth-box h2 { margin-top: 0; margin-bottom: 15px; font-size: 20px; }
+        .auth-box p { margin-bottom: 15px; font-size: 14px; color: #666; }
+        .auth-box input {
+            width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;
         }
-        .login-box button {
-            width: 100%; padding: 10px; background: #ff7f00; color: white; border: none;
-            border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;
+        .auth-box button {
+            width: 100%; padding: 10px; margin-top: 15px; border: none;
+            border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
         }
-        .login-box button:hover { background: #e07000; }
+        .btn-primary { background: #ff7f00; color: white; }
+        .btn-primary:hover { background: #e07000; }
+        .btn-secondary { background: #666; color: white; margin-top: 10px !important; }
+        .btn-secondary:hover { background: #444; }
+
+        .auth-link {
+            display: block; margin-top: 15px; color: #007bff; text-decoration: underline; cursor: pointer; font-size: 14px;
+        }
+        .auth-link:hover { color: #0056b3; }
+        
+        .msg-area { color: red; margin-top: 10px; font-size: 14px; min-height: 20px; }
 
         /* --- アプリ本体 --- */
         .app-container { display: none; width: 100%; height: 100%; }
@@ -61,8 +77,6 @@
             max-width: 700px; margin: 0 auto; transition: border-color 0.3s;
         }
         .form-container.editing { border: 2px solid #007bff; background-color: #f8fbff !important; }
-        
-        /* 以前の past-mode は不要になりましたが、互換性のため残しておきます */
         .form-container.past-mode { border: 2px solid #ff4d4d; background-color: #fff5f5 !important; }
 
         .manager-container {
@@ -78,7 +92,7 @@
             border-left: 4px solid #ff7f00; padding-left: 10px; 
         }
         .input-wrapper { flex-grow: 1; }
-        input[type="text"], input[type="date"], textarea { 
+        input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
         }
         textarea { height: 100px; resize: vertical; }
@@ -164,14 +178,41 @@
 </head>
 <body>
 
-    <div id="login-overlay">
-        <div class="login-box">
+    <div id="login-overlay" class="overlay">
+        <div class="auth-box">
             <h2>🔑 ログイン</h2>
-            <p>IDとパスワードを入力してください</p>
             <input type="text" id="login-id" placeholder="ログインID">
-            <input type="password" id="login-password" placeholder="パスワード" onkeydown="if(event.key==='Enter') tryLogin()">
-            <button onclick="tryLogin()" id="login-btn">ログイン</button>
-            <p id="login-msg" style="color:red; margin-top:10px; font-size:14px; min-height:20px;"></p>
+            <input type="password" id="login-password" placeholder="パスワード">
+            <button onclick="tryLogin()" class="btn-primary" id="login-btn">ログイン</button>
+            <div class="msg-area" id="login-msg"></div>
+            
+            <a class="auth-link" onclick="showRegister()">新規登録の方はこちら</a>
+            <a class="auth-link" onclick="showReset()">パスワードを変更したい方はこちら</a>
+        </div>
+    </div>
+
+    <div id="register-overlay" class="overlay">
+        <div class="auth-box">
+            <h2>📝 新規ユーザー登録</h2>
+            <input type="text" id="reg-id" placeholder="ログインID（半角英数）">
+            <input type="text" id="reg-name" placeholder="お名前">
+            <input type="email" id="reg-email" placeholder="メールアドレス">
+            <input type="password" id="reg-pass" placeholder="パスワード">
+            <button onclick="tryRegister()" class="btn-primary" id="reg-btn">登録する</button>
+            <button onclick="showLogin()" class="btn-secondary">戻る</button>
+            <div class="msg-area" id="reg-msg"></div>
+        </div>
+    </div>
+
+    <div id="reset-overlay" class="overlay">
+        <div class="auth-box">
+            <h2>🔒 パスワードリセット</h2>
+            <p style="text-align:left;">登録したIDとメールアドレスを入力してください。<br>仮パスワードを送信します。</p>
+            <input type="text" id="reset-id" placeholder="ログインID">
+            <input type="email" id="reset-email" placeholder="登録メールアドレス">
+            <button onclick="tryReset()" class="btn-primary" id="reset-btn">送信する</button>
+            <button onclick="showLogin()" class="btn-secondary">戻る</button>
+            <div class="msg-area" id="reset-msg"></div>
         </div>
     </div>
 
@@ -192,14 +233,8 @@
                         <h3 style="margin:0;">現在のメンバー</h3>
                         <button id="delete-member-btn" class="btn-sm btn-delete-member" onclick="deleteMember()">選択したメンバーを削除</button>
                     </div>
-                    <p style="margin-bottom:15px; color:#666; font-size:14px;">追加したい場合は「＋追加」ボタンを、削除したい場合はメンバーを選んで「削除」ボタンを押してください。</p>
+                    <p style="margin-bottom:15px; color:#666; font-size:14px;">ユーザー登録すると自動でここに追加されます。</p>
                     <div id="manage-member-radios" class="condition-group">読み込み中...</div>
-                    <div style="margin-top:20px;"><button class="btn-sm btn-plus" onclick="toggleAddMember()">＋追加</button></div>
-                    <div id="add-member-form" class="add-member-area">
-                        <input type="text" id="new-member-name" placeholder="新しい名前を入力">
-                        <button class="btn-sm" style="background:#333; color:#fff;" onclick="addNewMember()">追加</button>
-                        <button class="btn-sm" onclick="toggleAddMember()">キャンセル</button>
-                    </div>
                 </div>
             </div>
 
@@ -210,14 +245,10 @@
                         <span id="date-alert-text"></span>
                         <button onclick="resetDate()" style="background:white; color:#ff4d4d; border:none; border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold;">今日に戻す</button>
                     </div>
-
                     <div class="form-group">
                         <label>日付</label>
-                        <div class="input-wrapper">
-                            <input type="date" id="report-date">
-                        </div>
+                        <div class="input-wrapper"><input type="date" id="report-date"></div>
                     </div>
-
                     <div class="form-group">
                         <label>名前</label>
                         <div class="input-wrapper"><div id="name-radios" class="condition-group">読み込み中...</div></div>
@@ -302,43 +333,98 @@
 
     <script>
         // ★重要：ここにあなたのGASウェブアプリのURLを貼り付けてください！
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbytwDZFxqmKNQYeOM_OjTTpuNY2CwidyPnUE84diMx117om_skoZXESW_qUCr7GcgT1Tw/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxTfKSY5N6IKvMUf7fk5nrlpKc0161B9d60HY3KE_YEbNQH4eqRBLIwaQQRnvUPuTnC2g/exec"; 
 
-        let allData = []; 
-        let currentData = [];
-        let memberList = [];
+        // --- 画面切り替え ---
+        function showLogin() {
+            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+            document.getElementById('login-overlay').style.display = 'flex';
+        }
+        function showRegister() {
+            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+            document.getElementById('register-overlay').style.display = 'flex';
+        }
+        function showReset() {
+            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+            document.getElementById('reset-overlay').style.display = 'flex';
+        }
+
+        // --- 新規登録処理 ---
+        function tryRegister() {
+            const id = document.getElementById('reg-id').value;
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            const msg = document.getElementById('reg-msg');
+            const btn = document.getElementById('reg-btn');
+
+            if(!id || !name || !email || !pass) { msg.innerText = "すべての項目を入力してください"; return; }
+            msg.innerText = "登録中..."; btn.disabled = true;
+
+            const data = { action: 'register', id: id, name: name, email: email, password: pass };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(() => {
+                alert("登録しました！ログイン画面に戻ります。");
+                location.reload(); // リロードしてスッキリさせる
+            })
+            .catch(err => {
+                msg.innerText = "エラーが発生しました"; btn.disabled = false;
+            });
+        }
+
+        // --- パスワードリセット処理 ---
+        function tryReset() {
+            const id = document.getElementById('reset-id').value;
+            const email = document.getElementById('reset-email').value;
+            const msg = document.getElementById('reset-msg');
+            const btn = document.getElementById('reset-btn');
+
+            if(!id || !email) { msg.innerText = "IDとメールアドレスを入力してください"; return; }
+            msg.innerText = "送信中..."; btn.disabled = true;
+
+            // GASは値を返せないので、POSTで送って成功とみなす（エラーならGAS側でログが出るのみだが、今回は簡易実装）
+            // ※本格的にはdoPostで成功/失敗を判定したいがno-corsの壁があるため、
+            //  今回は「送信完了しました」と表示する仕様にします。
+            
+            // ★重要：今回はdoPostで処理します
+            const data = { action: 'resetPassword', id: id, email: email };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(() => {
+                // GAS側でチェックNGでもここに来てしまうのがno-corsの弱点ですが、
+                // ユーザーには「合致していればメールが届きます」と伝えるのがセキュリティ的にも正解です。
+                alert("リセットリクエストを送信しました。\nIDとメールアドレスが一致していれば、仮パスワードがメールで届きます。");
+                showLogin();
+                // フォームクリア
+                document.getElementById('reset-id').value = "";
+                document.getElementById('reset-email').value = "";
+                msg.innerText = "";
+                btn.disabled = false;
+            })
+            .catch(err => {
+                msg.innerText = "通信エラー"; btn.disabled = false;
+            });
+        }
+
+        // --- 変数と基本ロジック ---
+        let allData = [], currentData = [], memberList = [];
         const ITEMS_PER_PAGE = 10;
-        let currentPage = 1;
-        let saveTimers = {};
-        let isEditing = false;
-        let editingRowIndex = null;
-        let currentEditingFileUrl = "";
-        let targetReportDate = null;
-        let lastSelection = { name: null, condition: null };
-        let loggedInUser = null; 
+        let currentPage = 1, saveTimers = {}, isEditing = false, editingRowIndex = null, currentEditingFileUrl = "", targetReportDate = null, lastSelection = { name: null, condition: null }, loggedInUser = null; 
 
-        // --- ログインセッション管理 ---
         function checkLoginSession() {
             const savedId = localStorage.getItem('login_user_id');
             const savedTime = localStorage.getItem('login_time');
             const savedName = localStorage.getItem('login_user_name');
-
             if (savedId && savedTime && savedName) {
                 const now = new Date().getTime();
-                const diff = now - parseInt(savedTime);
-                const tenMinutes = 10 * 60 * 1000; 
-
-                if (diff < tenMinutes) {
+                if ((now - parseInt(savedTime)) < 10 * 60 * 1000) {
                     loggedInUser = savedName;
-                    document.getElementById('login-overlay').style.display = 'none';
+                    document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
                     document.getElementById('app-container').style.display = 'flex';
                     fetchData(); 
                     return; 
                 }
             }
-            localStorage.removeItem('login_user_id');
-            localStorage.removeItem('login_user_name');
-            localStorage.removeItem('login_time');
+            localStorage.removeItem('login_user_id'); localStorage.removeItem('login_user_name'); localStorage.removeItem('login_time');
         }
 
         function tryLogin() {
@@ -346,46 +432,23 @@
             const pass = document.getElementById('login-password').value;
             const msg = document.getElementById('login-msg');
             const btn = document.getElementById('login-btn');
-            
             if(!id || !pass) { msg.innerText = "IDとパスワードを入力してください"; return; }
-            msg.innerText = "確認中...";
-            btn.disabled = true;
-
+            msg.innerText = "確認中..."; btn.disabled = true;
             const loginUrl = GAS_URL + '?action=login&id=' + encodeURIComponent(id) + '&password=' + encodeURIComponent(pass);
-
-            fetch(loginUrl)
-            .then(response => response.json())
-            .then(data => {
+            fetch(loginUrl).then(response => response.json()).then(data => {
                 if (data.auth === true) {
                     const now = new Date().getTime();
-                    localStorage.setItem('login_user_id', id);
-                    localStorage.setItem('login_user_name', data.name);
-                    localStorage.setItem('login_time', now);
-
-                    document.getElementById('login-overlay').style.display = 'none';
+                    localStorage.setItem('login_user_id', id); localStorage.setItem('login_user_name', data.name); localStorage.setItem('login_time', now);
+                    document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
                     document.getElementById('app-container').style.display = 'flex';
-                    loggedInUser = data.name;
-                    fetchData(); 
+                    loggedInUser = data.name; fetchData(); 
                 } else {
-                    msg.innerText = data.message;
-                    btn.disabled = false;
-                    document.getElementById('login-password').value = "";
+                    msg.innerText = data.message; btn.disabled = false; document.getElementById('login-password').value = "";
                 }
-            })
-            .catch(err => {
-                msg.innerText = "通信エラーが発生しました";
-                console.error(err);
-                btn.disabled = false;
-            });
+            }).catch(err => { msg.innerText = "通信エラー"; console.error(err); btn.disabled = false; });
         }
 
-        // --- 起動時処理 ---
-        window.onload = function() {
-            checkLoginSession(); 
-            setTodayDate(); // ★起動時に今日の日付をセット
-        };
-
-        // ★新機能：今日の日付をセットする関数
+        window.onload = function() { checkLoginSession(); setTodayDate(); };
         function setTodayDate() {
             const today = new Date();
             const yyyy = today.getFullYear();
@@ -394,7 +457,7 @@
             document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
         }
 
-        // --- 以下、基本機能 ---
+        /* --- 以下、既存機能（省略なし） --- */
         function switchTab(tabName) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
@@ -404,519 +467,143 @@
             if(tabName === 'input') buttons[1].classList.add('active');
             if(tabName === 'history') buttons[2].classList.add('active');
         }
-
         function saveSelection(key, value) { localStorage.setItem(key, value); }
-
         function setupAutoSave() {
             const textFields = ['progress', 'tomorrow', 'comment'];
-            textFields.forEach(id => {
-                const element = document.getElementById(id);
-                element.addEventListener('input', function() { saveSelection('saved_' + id, this.value); });
-            });
+            textFields.forEach(id => { document.getElementById(id).addEventListener('input', function() { saveSelection('saved_' + id, this.value); }); });
         }
-
         function restoreSelections() {
             if (loggedInUser) {
                  const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`);
-                 if (nameRadio) { 
-                     nameRadio.checked = true; 
-                     lastSelection.name = loggedInUser;
-                     saveSelection('saved_name', loggedInUser);
-                 }
+                 if (nameRadio) { nameRadio.checked = true; lastSelection.name = loggedInUser; saveSelection('saved_name', loggedInUser); }
             } else {
                 const savedName = localStorage.getItem('saved_name');
-                if (savedName) {
-                    const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`);
-                    if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; }
-                }
+                if (savedName) { const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; } }
             }
             const savedCondition = localStorage.getItem('saved_condition');
-            if (savedCondition) {
-                const condRadio = document.querySelector(`input[name="condition"][value="${savedCondition}"]`);
-                if (condRadio) { condRadio.checked = true; lastSelection.condition = savedCondition; }
-            }
-            const savedProgress = localStorage.getItem('saved_progress');
-            if (savedProgress) document.getElementById('progress').value = savedProgress;
-            const savedTomorrow = localStorage.getItem('saved_tomorrow');
-            if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
-            const savedComment = localStorage.getItem('saved_comment');
-            if (savedComment) document.getElementById('comment').value = savedComment;
+            if (savedCondition) { const condRadio = document.querySelector(`input[name="condition"][value="${savedCondition}"]`); if (condRadio) { condRadio.checked = true; lastSelection.condition = savedCondition; } }
+            const savedProgress = localStorage.getItem('saved_progress'); if (savedProgress) document.getElementById('progress').value = savedProgress;
+            const savedTomorrow = localStorage.getItem('saved_tomorrow'); if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
+            const savedComment = localStorage.getItem('saved_comment'); if (savedComment) document.getElementById('comment').value = savedComment;
         }
-        
         function toggleRadio(radio, type) {
-            if (lastSelection[type] === radio.value) {
-                radio.checked = false; lastSelection[type] = null; saveSelection('saved_' + type, '');
-            } else {
-                lastSelection[type] = radio.value; saveSelection('saved_' + type, radio.value);
-            }
+            if (lastSelection[type] === radio.value) { radio.checked = false; lastSelection[type] = null; saveSelection('saved_' + type, ''); } 
+            else { lastSelection[type] = radio.value; saveSelection('saved_' + type, radio.value); }
         }
-
-        function getSelectedCondition() {
-            const selected = document.querySelector('input[name="condition"]:checked');
-            return selected ? selected.value : '';
-        }
-        function getSelectedName() {
-            const selected = document.querySelector('#name-radios input[name="name"]:checked');
-            return selected ? selected.value : '';
-        }
-        function getSelectedManagerName() {
-            const selected = document.querySelector('#manage-member-radios input[name="manager-name"]:checked');
-            return selected ? selected.value : '';
-        }
-
+        function getSelectedCondition() { const selected = document.querySelector('input[name="condition"]:checked'); return selected ? selected.value : ''; }
+        function getSelectedName() { const selected = document.querySelector('#name-radios input[name="name"]:checked'); return selected ? selected.value : ''; }
+        function getSelectedManagerName() { const selected = document.querySelector('#manage-member-radios input[name="manager-name"]:checked'); return selected ? selected.value : ''; }
         function resetForm() {
             document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false);
-            if (loggedInUser) {
-                const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`);
-                if (nameRadio) nameRadio.checked = true;
-            }
+            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) nameRadio.checked = true; }
             document.querySelectorAll('input[name="condition"]').forEach(radio => radio.checked = false);
-            document.getElementById('progress').value = "";
-            document.getElementById('tomorrow').value = "";
-            document.getElementById('comment').value = "";
-            document.getElementById('file-attach').value = ""; 
-            
-            // 日付もリセット
-            setTodayDate();
-
-            cancelEdit(); resetDate();
-            if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } 
-            else { lastSelection = { name: null, condition: null }; }
-            localStorage.removeItem('saved_condition');
-            localStorage.removeItem('saved_progress');
-            localStorage.removeItem('saved_tomorrow');
-            localStorage.removeItem('saved_comment');
+            document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
+            setTodayDate(); cancelEdit(); resetDate();
+            if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } else { lastSelection = { name: null, condition: null }; }
+            localStorage.removeItem('saved_condition'); localStorage.removeItem('saved_progress'); localStorage.removeItem('saved_tomorrow'); localStorage.removeItem('saved_comment');
         }
-
         function copyLastTomorrow() {
-            const name = getSelectedName();
-            if (!name) { alert("まずは名前を選択してください"); return; }
+            const name = getSelectedName(); if (!name) { alert("まずは名前を選択してください"); return; }
             const lastReport = allData.find(row => row[1] === name);
             if (lastReport) {
-                const tomorrowTask = lastReport[4]; 
-                if (!tomorrowTask) { alert("前回の報告に「明日の業務」が記入されていませんでした"); return; }
-                if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) {
-                    document.getElementById('progress').value = tomorrowTask;
-                    saveSelection('saved_progress', tomorrowTask);
-                    const msgBox = document.getElementById("toast"); msgBox.innerText = "コピーしました！"; showToast();
-                }
+                const tomorrowTask = lastReport[4]; if (!tomorrowTask) { alert("前回の報告に「明日の業務」が記入されていませんでした"); return; }
+                if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) { document.getElementById('progress').value = tomorrowTask; saveSelection('saved_progress', tomorrowTask); document.getElementById("toast").innerText = "コピーしました！"; showToast(); }
             } else { alert("前回の報告データが見つかりませんでした"); }
         }
-
-        function resetDate() {
-            targetReportDate = null;
-            document.getElementById('date-alert').style.display = 'none';
-            document.getElementById('form-container').classList.remove('past-mode');
-            setTodayDate(); // 今日へ戻す
-        }
-
+        function resetDate() { targetReportDate = null; document.getElementById('date-alert').style.display = 'none'; document.getElementById('form-container').classList.remove('past-mode'); setTodayDate(); }
         function startReportForDate(year, month, day) {
-            // カレンダーからクリックされた場合、日付欄を更新する
-            const mm = ('0' + (month + 1)).slice(-2);
-            const dd = ('0' + day).slice(-2);
-            const dateStr = `${year}-${mm}-${dd}`;
-            
-            document.getElementById('report-date').value = dateStr;
-            
-            targetReportDate = `${year}/${month + 1}/${day}`; // 互換性のため維持
-            closeCheckModal();
-            switchTab('input');
-            
-            // アラート表示
-            document.getElementById('date-alert').style.display = 'flex';
-            document.getElementById('date-alert-text').innerText = `${targetReportDate} の日報を作成中`;
-            document.getElementById('form-container').classList.add('past-mode');
-            
+            const mm = ('0' + (month + 1)).slice(-2); const dd = ('0' + day).slice(-2);
+            document.getElementById('report-date').value = `${year}-${mm}-${dd}`;
+            targetReportDate = `${year}/${month + 1}/${day}`; 
+            closeCheckModal(); switchTab('input');
+            document.getElementById('date-alert').style.display = 'flex'; document.getElementById('date-alert-text').innerText = `${targetReportDate} の日報を作成中`; document.getElementById('form-container').classList.add('past-mode');
             const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
-            if (targetName) {
-                const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
-                nameRadios.forEach(r => {
-                    if (r.value === targetName) { r.checked = true; lastSelection.name = targetName; } else { r.checked = false; }
-                });
-                saveSelection('saved_name', targetName);
-            }
+            if (targetName) { const nameRadios = document.querySelectorAll('#name-radios input[name="name"]'); nameRadios.forEach(r => { if (r.value === targetName) { r.checked = true; lastSelection.name = targetName; } else { r.checked = false; } }); saveSelection('saved_name', targetName); }
         }
-
-        function updateManagerButtonState() {
-            const name = getSelectedManagerName();
-            const deleteBtn = document.getElementById('delete-member-btn');
-            if (name) deleteBtn.style.display = 'block'; else deleteBtn.style.display = 'none';
-        }
-
+        function updateManagerButtonState() { const name = getSelectedManagerName(); const deleteBtn = document.getElementById('delete-member-btn'); if (name) deleteBtn.style.display = 'block'; else deleteBtn.style.display = 'none'; }
         function deleteMember() {
-            const name = getSelectedManagerName();
-            if (!name) return;
+            const name = getSelectedManagerName(); if (!name) return;
             if (!confirm(`「${name}」さんを名簿から削除しますか？\n（日報データは削除されません）`)) return;
-            memberList = memberList.filter(m => m !== name);
-            renderMemberRadios(); renderFilterOptions(); updateManagerButtonState();
+            memberList = memberList.filter(m => m !== name); renderMemberRadios(); renderFilterOptions(); updateManagerButtonState();
             const data = { action: 'deleteMember', targetName: name };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => { const msgBox = document.getElementById("toast"); msgBox.innerText = "メンバーを削除しました"; showToast(); });
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
-
         async function sendData() {
-            const dateVal = document.getElementById('report-date').value; // ★日付取得
-            const name = getSelectedName();
-            const condition = getSelectedCondition(); 
-            const progress = document.getElementById('progress').value;
-            const tomorrow = document.getElementById('tomorrow').value;
-            const comment = document.getElementById('comment').value;
-            const fileInput = document.getElementById('file-attach');
-
+            const dateVal = document.getElementById('report-date').value; const name = getSelectedName(); const condition = getSelectedCondition(); const progress = document.getElementById('progress').value; const tomorrow = document.getElementById('tomorrow').value; const comment = document.getElementById('comment').value; const fileInput = document.getElementById('file-attach');
             if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { alert("全ての項目を入力・選択してください"); return; }
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true; submitBtn.innerText = "送信中...";
-
-            let data = { 
-                targetDate: dateVal, // ★日付を送信データに追加
-                name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment 
-            };
-
-            if (isEditing) {
-                data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; 
-            } else {
-                data.action = 'report';
-            }
-
-            if (fileInput.files.length > 0) {
-                try {
-                    const file = fileInput.files[0];
-                    const fileData = await readFileAsBase64(file);
-                    data.fileName = file.name; data.mimeType = file.type; data.fileData = fileData;
-                } catch (e) {
-                    alert("ファイルの読み込みに失敗しました");
-                    submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return;
-                }
-            }
-
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => {
-                const msgBox = document.getElementById("toast"); msgBox.innerText = isEditing ? "修正しました！" : "送信完了しました！";
-                showToast(); resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信";
-            })
-            .catch(err => {
-                alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信";
-            });
+            const submitBtn = document.getElementById('submit-btn'); submitBtn.disabled = true; submitBtn.innerText = "送信中...";
+            let data = { targetDate: dateVal, name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
+            if (isEditing) { data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; } else { data.action = 'report'; }
+            if (fileInput.files.length > 0) { try { const file = fileInput.files[0]; const fileData = await readFileAsBase64(file); data.fileName = file.name; data.mimeType = file.type; data.fileData = fileData; } catch (e) { alert("ファイルの読み込みに失敗しました"); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return; } }
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = isEditing ? "修正しました！" : "送信完了しました！"; showToast(); resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信"; }).catch(err => { alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; });
         }
-
-        function readFileAsBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => { const result = reader.result; const base64 = result.split(',')[1]; resolve(base64); };
-                reader.onerror = error => reject(error); reader.readAsDataURL(file);
-            });
-        }
-
+        function readFileAsBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => { const result = reader.result; const base64 = result.split(',')[1]; resolve(base64); }; reader.onerror = error => reject(error); reader.readAsDataURL(file); }); }
         function fetchData() {
-            const reportContainer = document.getElementById('report-container');
-            reportContainer.innerHTML = "<p>データを取得中...</p>";
-            
-            fetch(GAS_URL)
-            .then(response => response.json())
-            .then(data => {
-                if (data.members) { 
-                    memberList = data.members; 
-                    renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections();
-                }
-                allData = (data.reports || []).reverse();
-                currentData = allData;
-                if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; }
-                applyFilter();
-            })
-            .catch(err => {
-                reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; console.error(err);
-            });
+            const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "<p>データを取得中...</p>";
+            fetch(GAS_URL).then(response => response.json()).then(data => {
+                if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections(); }
+                allData = (data.reports || []).reverse(); currentData = allData;
+                if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; } applyFilter();
+            }).catch(err => { reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; console.error(err); });
         }
-
         function deleteReport(rowIndex) {
             if (!confirm("本当に削除しますか？\n（この操作は取り消せません）")) return;
-            const data = { action: 'delete', rowIndex: rowIndex };
-            document.getElementById('report-container').style.opacity = "0.5";
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => {
-                const msgBox = document.getElementById("toast"); msgBox.innerText = "削除しました"; showToast();
-                document.getElementById('report-container').style.opacity = "1"; fetchData(); 
-            })
-            .catch(err => { alert("削除エラー: " + err); document.getElementById('report-container').style.opacity = "1"; });
+            const data = { action: 'delete', rowIndex: rowIndex }; document.getElementById('report-container').style.opacity = "0.5";
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "削除しました"; showToast(); document.getElementById('report-container').style.opacity = "1"; fetchData(); }).catch(err => { alert("削除エラー: " + err); document.getElementById('report-container').style.opacity = "1"; });
         }
-
         function editReport(rowIndex) {
-            switchTab('input');
-            const targetRow = allData.find(row => row[row.length - 1] == rowIndex);
-            if (!targetRow) { alert("データが見つかりません"); return; }
-            
-            // ★日付をセット（重要：フォーマット変換）
-            const d = new Date(targetRow[0]);
-            const yyyy = d.getFullYear();
-            const mm = ('0' + (d.getMonth() + 1)).slice(-2);
-            const dd = ('0' + d.getDate()).slice(-2);
-            document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
-
-            const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
-            nameRadios.forEach(r => r.checked = (r.value === targetRow[1]));
-            saveSelection('saved_name', targetRow[1]); 
-            lastSelection.name = targetRow[1];
-            const condRadios = document.querySelectorAll('input[name="condition"]');
-            condRadios.forEach(r => r.checked = (r.value === targetRow[2]));
-            saveSelection('saved_condition', targetRow[2]);
-            lastSelection.condition = targetRow[2];
-            document.getElementById('progress').value = targetRow[3];
-            document.getElementById('tomorrow').value = targetRow[4];
-            document.getElementById('comment').value = targetRow[5];
-            saveSelection('saved_progress', targetRow[3]);
-            saveSelection('saved_tomorrow', targetRow[4]);
-            saveSelection('saved_comment', targetRow[5]);
-            currentEditingFileUrl = targetRow[7];
-            if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) {
-                document.getElementById('current-file-msg').style.display = 'block';
-            } else {
-                document.getElementById('current-file-msg').style.display = 'none';
-            }
-            isEditing = true; editingRowIndex = rowIndex;
-            document.getElementById('page-title').innerText = "日報の修正・更新";
-            const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "更新"; submitBtn.classList.add('update-mode');
-            document.getElementById('cancel-edit-btn').style.display = 'block';
-            document.getElementById('form-container').classList.add('editing');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            switchTab('input'); const targetRow = allData.find(row => row[row.length - 1] == rowIndex); if (!targetRow) { alert("データが見つかりません"); return; }
+            const d = new Date(targetRow[0]); const yyyy = d.getFullYear(); const mm = ('0' + (d.getMonth() + 1)).slice(-2); const dd = ('0' + d.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
+            const nameRadios = document.querySelectorAll('#name-radios input[name="name"]'); nameRadios.forEach(r => r.checked = (r.value === targetRow[1])); saveSelection('saved_name', targetRow[1]); lastSelection.name = targetRow[1];
+            const condRadios = document.querySelectorAll('input[name="condition"]'); condRadios.forEach(r => r.checked = (r.value === targetRow[2])); saveSelection('saved_condition', targetRow[2]); lastSelection.condition = targetRow[2];
+            document.getElementById('progress').value = targetRow[3]; document.getElementById('tomorrow').value = targetRow[4]; document.getElementById('comment').value = targetRow[5];
+            saveSelection('saved_progress', targetRow[3]); saveSelection('saved_tomorrow', targetRow[4]); saveSelection('saved_comment', targetRow[5]);
+            currentEditingFileUrl = targetRow[7]; if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) { document.getElementById('current-file-msg').style.display = 'block'; } else { document.getElementById('current-file-msg').style.display = 'none'; }
+            isEditing = true; editingRowIndex = rowIndex; document.getElementById('page-title').innerText = "日報の修正・更新"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "更新"; submitBtn.classList.add('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'block'; document.getElementById('form-container').classList.add('editing'); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        function cancelEdit() {
-            isEditing = false; editingRowIndex = null; currentEditingFileUrl = "";
-            document.getElementById('page-title').innerText = "システム課日報";
-            const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "送信"; submitBtn.classList.remove('update-mode');
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-            document.getElementById('form-container').classList.remove('editing');
-            document.getElementById('current-file-msg').style.display = 'none';
-            setTodayDate(); // 日付も今日に戻す
-        }
-
-        function renderFilterOptions() {
-            const select = document.getElementById('filter-name');
-            select.innerHTML = '<option value="">全員</option>';
-            memberList.forEach(name => {
-                const option = document.createElement('option'); option.value = name; option.innerText = name; select.appendChild(option);
-            });
-        }
-
-        function applyFilter() {
-            const nameVal = document.getElementById('filter-name').value;
-            const textVal = document.getElementById('filter-text').value.toLowerCase();
-            currentData = allData.filter(row => {
-                const name = row[1];
-                const content = (row[3] + row[4] + row[5]).toLowerCase();
-                const nameMatch = (nameVal === "") || (name === nameVal);
-                const textMatch = (textVal === "") || (content.includes(textVal));
-                return nameMatch && textMatch;
-            });
-            renderPage(1);
-        }
-
+        function cancelEdit() { isEditing = false; editingRowIndex = null; currentEditingFileUrl = ""; document.getElementById('page-title').innerText = "システム課日報"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "送信"; submitBtn.classList.remove('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'none'; document.getElementById('form-container').classList.remove('editing'); document.getElementById('current-file-msg').style.display = 'none'; setTodayDate(); }
+        function renderFilterOptions() { const select = document.getElementById('filter-name'); select.innerHTML = '<option value="">全員</option>'; memberList.forEach(name => { const option = document.createElement('option'); option.value = name; option.innerText = name; select.appendChild(option); }); }
+        function applyFilter() { const nameVal = document.getElementById('filter-name').value; const textVal = document.getElementById('filter-text').value.toLowerCase(); currentData = allData.filter(row => { const name = row[1]; const content = (row[3] + row[4] + row[5]).toLowerCase(); const nameMatch = (nameVal === "") || (name === nameVal); const textMatch = (textVal === "") || (content.includes(textVal)); return nameMatch && textMatch; }); renderPage(1); }
         function renderMemberRadios() {
-            const inputContainer = document.getElementById('name-radios'); 
-            const manageContainer = document.getElementById('manage-member-radios'); 
-            const checkContainer = document.getElementById('check-member-radios'); 
-            inputContainer.innerHTML = ""; manageContainer.innerHTML = ""; checkContainer.innerHTML = "";
+            const inputContainer = document.getElementById('name-radios'); const manageContainer = document.getElementById('manage-member-radios'); const checkContainer = document.getElementById('check-member-radios'); inputContainer.innerHTML = ""; manageContainer.innerHTML = ""; checkContainer.innerHTML = "";
             memberList.forEach(name => {
-                const label1 = document.createElement('label'); label1.className = 'condition-label';
-                const input1 = document.createElement('input'); input1.type = 'radio'; input1.name = 'name'; input1.value = name;
-                input1.onclick = function() { toggleRadio(this, 'name'); };
-                label1.appendChild(input1); label1.appendChild(document.createTextNode(name));
-                inputContainer.appendChild(label1);
-                const label2 = document.createElement('label'); label2.className = 'condition-label';
-                const input2 = document.createElement('input'); input2.type = 'radio'; input2.name = 'manager-name'; input2.value = name;
-                input2.onchange = updateManagerButtonState;
-                label2.appendChild(input2); label2.appendChild(document.createTextNode(name));
-                manageContainer.appendChild(label2);
-                const label3 = document.createElement('label'); label3.className = 'condition-label';
-                const input3 = document.createElement('input'); input3.type = 'radio'; input3.name = 'check-target'; input3.value = name;
-                label3.appendChild(input3); label3.appendChild(document.createTextNode(name));
-                checkContainer.appendChild(label3);
+                const label1 = document.createElement('label'); label1.className = 'condition-label'; const input1 = document.createElement('input'); input1.type = 'radio'; input1.name = 'name'; input1.value = name; input1.onclick = function() { toggleRadio(this, 'name'); }; label1.appendChild(input1); label1.appendChild(document.createTextNode(name)); inputContainer.appendChild(label1);
+                const label2 = document.createElement('label'); label2.className = 'condition-label'; const input2 = document.createElement('input'); input2.type = 'radio'; input2.name = 'manager-name'; input2.value = name; input2.onchange = updateManagerButtonState; label2.appendChild(input2); label2.appendChild(document.createTextNode(name)); manageContainer.appendChild(label2);
+                const label3 = document.createElement('label'); label3.className = 'condition-label'; const input3 = document.createElement('input'); input3.type = 'radio'; input3.name = 'check-target'; input3.value = name; label3.appendChild(input3); label3.appendChild(document.createTextNode(name)); checkContainer.appendChild(label3);
             });
         }
-
-        function toggleAddMember() {
-            const area = document.getElementById('add-member-form');
-            if (area.style.display === 'flex') { area.style.display = 'none'; } 
-            else { area.style.display = 'flex'; document.getElementById('new-member-name').focus(); }
-        }
-
-        function addNewMember() {
-            const newNameInput = document.getElementById('new-member-name');
-            const newName = newNameInput.value;
-            if (!newName) { alert("名前を入力してください"); return; }
-            memberList.push(newName);
-            renderMemberRadios(); renderFilterOptions(); toggleAddMember(); newNameInput.value = ""; 
-            const data = { action: 'addMember', newName: newName };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-        }
-
-        function renderPage(pageNumber) {
-            currentPage = pageNumber;
-            const reportContainer = document.getElementById('report-container');
-            reportContainer.innerHTML = ""; 
-            if (currentData.length === 0) { reportContainer.innerHTML = "<p>該当する報告はありません。</p>"; return; }
-            const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const pageData = currentData.slice(startIndex, endIndex);
-            pageData.forEach(row => { createReportItem(row); });
-            renderPagination();
-        }
-
-        function renderPagination() {
-            const oldPagination = document.querySelector('.Pagination');
-            if (oldPagination) oldPagination.remove();
-            const reportContainer = document.getElementById('report-container');
-            const totalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE);
-            if (totalPages <= 1) return;
-            const paginationDiv = document.createElement('div'); paginationDiv.className = 'Pagination';
-            for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('a'); btn.className = 'Pagination-Item-Link'; btn.innerText = i;
-                if (i === currentPage) btn.classList.add('isActive');
-                btn.onclick = function() { renderPage(i); };
-                paginationDiv.appendChild(btn);
-            }
-            reportContainer.appendChild(paginationDiv);
-        }
-
+        function toggleAddMember() { const area = document.getElementById('add-member-form'); if (area.style.display === 'flex') { area.style.display = 'none'; } else { area.style.display = 'flex'; document.getElementById('new-member-name').focus(); } }
+        function addNewMember() { const newNameInput = document.getElementById('new-member-name'); const newName = newNameInput.value; if (!newName) { alert("名前を入力してください"); return; } memberList.push(newName); renderMemberRadios(); renderFilterOptions(); toggleAddMember(); newNameInput.value = ""; const data = { action: 'addMember', newName: newName }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); }
+        function renderPage(pageNumber) { currentPage = pageNumber; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = ""; if (currentData.length === 0) { reportContainer.innerHTML = "<p>該当する報告はありません。</p>"; return; } const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE; const endIndex = startIndex + ITEMS_PER_PAGE; const pageData = currentData.slice(startIndex, endIndex); pageData.forEach(row => { createReportItem(row); }); renderPagination(); }
+        function renderPagination() { const oldPagination = document.querySelector('.Pagination'); if (oldPagination) oldPagination.remove(); const reportContainer = document.getElementById('report-container'); const totalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE); if (totalPages <= 1) return; const paginationDiv = document.createElement('div'); paginationDiv.className = 'Pagination'; for (let i = 1; i <= totalPages; i++) { const btn = document.createElement('a'); btn.className = 'Pagination-Item-Link'; btn.innerText = i; if (i === currentPage) btn.classList.add('isActive'); btn.onclick = function() { renderPage(i); }; paginationDiv.appendChild(btn); } reportContainer.appendChild(paginationDiv); }
         function createReportItem(row) {
-            const reportContainer = document.getElementById('report-container');
-            const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
-            const name = row[1];
-            const condition = row[2];
-            const progress = row[3];
-            const tomorrow = row[4];
-            const comment = row[5];
-            const savedLikes = row[6] ? row[6] : ""; 
-            const fileUrl = row[7] ? row[7] : ""; 
-            const rowIndex = row[row.length - 1]; 
-            let buttonsHtml = '';
-            memberList.forEach(memberName => {
-                let btnText = memberName + "いいね👍"; 
-                if (savedLikes) {
-                    const parts = savedLikes.split(',');
-                    const found = parts.find(p => p.trim().startsWith(memberName));
-                    if (found) btnText = found.trim();
-                }
-                buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `;
-            });
-            let fileHtml = "";
-            if (fileUrl) {
-                if (fileUrl.indexOf("http") === 0) {
-                    fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`;
-                } else {
-                    fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`;
-                }
-            }
-            const div = document.createElement('div');
-            div.className = 'item';
-            div.innerHTML = `
-                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
-                <div class="like-buttons" data-row-index="${rowIndex}">
-                    ${buttonsHtml}
-                </div>
-                <div class="report-header-area">
-                    <span style="font-size: 1.3em; font-weight: bold;">${name}</span>
-                    <span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span>
-                    <div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div>
-                </div>
-                <div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div>
-                <div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div>
-                <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
-                ${fileHtml}
-                <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
-            `;
-            const btns = div.querySelectorAll('.like-btn');
-            btns.forEach(btn => updateButtonColor(btn));
-            reportContainer.appendChild(div);
+            const reportContainer = document.getElementById('report-container'); const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }); const name = row[1]; const condition = row[2]; const progress = row[3]; const tomorrow = row[4]; const comment = row[5]; const savedLikes = row[6] ? row[6] : ""; const fileUrl = row[7] ? row[7] : ""; const rowIndex = row[row.length - 1]; 
+            let buttonsHtml = ''; memberList.forEach(memberName => { let btnText = memberName + "いいね👍"; if (savedLikes) { const parts = savedLikes.split(','); const found = parts.find(p => p.trim().startsWith(memberName)); if (found) btnText = found.trim(); } buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `; });
+            let fileHtml = ""; if (fileUrl) { if (fileUrl.indexOf("http") === 0) { fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`; } else { fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; } }
+            const div = document.createElement('div'); div.className = 'item';
+            div.innerHTML = `<button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button><div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div><div class="report-header-area"><span style="font-size: 1.3em; font-weight: bold;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span><div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div></div><div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div><div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div><div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>${fileHtml}<button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>`;
+            const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); reportContainer.appendChild(div);
         }
-
-        function updateButtonColor(btn) {
-            const text = btn.innerText;
-            if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) {
-                if (text.indexOf('バッド') !== -1) {
-                    btn.style.backgroundColor = '#f0f0ff'; btn.style.borderColor = '#4b0082'; btn.style.color = '#4b0082';
-                } else {
-                    btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00';
-                }
-                btn.style.fontWeight = 'bold';
-            } else {
-                btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = '';
-            }
-        }
-
-        function addLike(btn) {
-            let text = btn.innerText;
-            let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart);
-            if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; }
-            updateButtonColor(btn); triggerDebounceSave(btn); 
-        }
-
-        function changeToBad(event, btn) {
-            event.preventDefault(); let textOnly = btn.innerText.split(' ')[0];
-            if (textOnly.indexOf('いいね👍') !== -1) { btn.innerText = textOnly.replace('いいね👍', 'バッド👎'); } 
-            else if (textOnly.indexOf('バッド👎') !== -1) { btn.innerText = textOnly.replace('バッド👎', 'いいね👍'); }
-            updateButtonColor(btn); triggerDebounceSave(btn); 
-        }
-
-        function triggerDebounceSave(btn) {
-            const parentDiv = btn.closest('.like-buttons'); const rowIndex = parentDiv.getAttribute('data-row-index');
-            if (saveTimers[rowIndex]) { clearTimeout(saveTimers[rowIndex]); }
-            saveTimers[rowIndex] = setTimeout(() => { sendLikeToSheet(rowIndex, parentDiv); }, 2000); 
-        }
-
-        function sendLikeToSheet(rowIndex, parentDiv) {
-            const btns = parentDiv.querySelectorAll('.like-btn');
-            const likeData = Array.from(btns).map(b => b.innerText).join(',');
-            const data = { action: 'like', rowIndex: rowIndex, likeData: likeData };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; })
-            .catch(err => console.error("エラー", err));
-        }
-
-        function showToast() {
-            var x = document.getElementById("toast"); x.className = "show"; 
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
-        }
-
+        function updateButtonColor(btn) { const text = btn.innerText; if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) { if (text.indexOf('バッド') !== -1) { btn.style.backgroundColor = '#f0f0ff'; btn.style.borderColor = '#4b0082'; btn.style.color = '#4b0082'; } else { btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00'; } btn.style.fontWeight = 'bold'; } else { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = ''; } }
+        function addLike(btn) { let text = btn.innerText; let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart); if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; } updateButtonColor(btn); triggerDebounceSave(btn); }
+        function changeToBad(event, btn) { event.preventDefault(); let textOnly = btn.innerText.split(' ')[0]; if (textOnly.indexOf('いいね👍') !== -1) { btn.innerText = textOnly.replace('いいね👍', 'バッド👎'); } else if (textOnly.indexOf('バッド👎') !== -1) { btn.innerText = textOnly.replace('バッド👎', 'いいね👍'); } updateButtonColor(btn); triggerDebounceSave(btn); }
+        function triggerDebounceSave(btn) { const parentDiv = btn.closest('.like-buttons'); const rowIndex = parentDiv.getAttribute('data-row-index'); if (saveTimers[rowIndex]) { clearTimeout(saveTimers[rowIndex]); } saveTimers[rowIndex] = setTimeout(() => { sendLikeToSheet(rowIndex, parentDiv); }, 2000); }
+        function sendLikeToSheet(rowIndex, parentDiv) { const btns = parentDiv.querySelectorAll('.like-btn'); const likeData = Array.from(btns).map(b => b.innerText).join(','); const data = { action: 'like', rowIndex: rowIndex, likeData: likeData }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; }).catch(err => console.error("エラー", err)); }
+        function showToast() { var x = document.getElementById("toast"); x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500); }
         function openCheckModal() { document.getElementById('check-modal').style.display = 'flex'; }
         function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
-
         function renderCalendar() {
-            const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
-            if (!targetName) { alert("チェックする人を選んでください"); return; }
-            const calendarArea = document.getElementById('calendar-area');
-            calendarArea.innerHTML = ""; 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth(); 
-            const today = now.getDate();
-            const lastDay = new Date(year, month + 1, 0).getDate();
-            const submittedDates = allData.filter(row => row[1] === targetName).map(row => {
-                const d = new Date(row[0]);
-                return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-            });
-            const headerHtml = `
-                <h3 style="text-align:center;">${year}年 ${month + 1}月 - ${targetName}さん</h3>
-                <div class="calendar-grid">
-                    <div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>
-            `;
-            let bodyHtml = "";
-            const firstDayOfWeek = new Date(year, month, 1).getDay();
+            const targetName = document.querySelector('input[name="check-target"]:checked')?.value; if (!targetName) { alert("チェックする人を選んでください"); return; }
+            const calendarArea = document.getElementById('calendar-area'); calendarArea.innerHTML = ""; const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); const today = now.getDate(); const lastDay = new Date(year, month + 1, 0).getDate();
+            const submittedDates = allData.filter(row => row[1] === targetName).map(row => { const d = new Date(row[0]); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; });
+            const headerHtml = `<h3 style="text-align:center;">${year}年 ${month + 1}月 - ${targetName}さん</h3><div class="calendar-grid"><div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>`;
+            let bodyHtml = ""; const firstDayOfWeek = new Date(year, month, 1).getDay();
             for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
             for (let d = 1; d <= lastDay; d++) {
-                const checkDateStr = `${year}-${month}-${d}`;
-                const currentObj = new Date(year, month, d);
-                const dayOfWeek = currentObj.getDay();
-                let className = "day-submitted"; 
-                let isClickable = true;
-                if (d > today) { className = "day-future"; isClickable = false; }
-                else if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; }
-                else if (dayOfWeek === 2 || dayOfWeek === 3) { className = "day-holiday"; }
-                else { className = "day-missing"; }
-                const clickEvent = isClickable ? `onclick="startReportForDate(${year}, ${month}, ${d})"` : "";
-                bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
-            }
-            calendarArea.innerHTML = headerHtml + bodyHtml + "</div>";
+                const checkDateStr = `${year}-${month}-${d}`; const currentObj = new Date(year, month, d); const dayOfWeek = currentObj.getDay(); let className = "day-submitted"; let isClickable = true;
+                if (d > today) { className = "day-future"; isClickable = false; } else if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; } else if (dayOfWeek === 2 || dayOfWeek === 3) { className = "day-holiday"; } else { className = "day-missing"; }
+                const clickEvent = isClickable ? `onclick="startReportForDate(${year}, ${month}, ${d})"` : ""; bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
+            } calendarArea.innerHTML = headerHtml + bodyHtml + "</div>";
         }
     </script>
 </body>
