@@ -33,6 +33,14 @@
             flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative;
         }
 
+        /* ★修正：タイトルの中央揃えを強化 */
+        .main-content h1 {
+            text-align: center !important; /* 強制的に中央にする */
+            width: 100%;
+            margin-bottom: 30px;
+            margin-top: 0;
+        }
+
         .content-section { display: none; }
         .content-section.active { display: block; }
 
@@ -85,14 +93,12 @@
         .btn-delete-member { display: none; background: #fff; color: #007bff; border: 1px solid #007bff; font-weight: bold; }
         .btn-delete-member:hover { background: #007bff; color: #fff; }
 
-        /* コピーボタンのデザイン（緑色） */
+        /* コピーボタン（緑色） */
         .btn-copy { 
             background: #fff; color: #28a745; border: 1px solid #28a745; 
             font-weight: bold; font-size: 13px; padding: 5px 12px; 
-            margin-bottom: 8px; /* 下に少し隙間を作る */
-            border-radius: 20px;
-            cursor: pointer;
-            transition: 0.2s;
+            margin-bottom: 8px; border-radius: 20px;
+            cursor: pointer; transition: 0.2s;
         }
         .btn-copy:hover { background: #28a745; color: #fff; }
 
@@ -170,7 +176,7 @@
         <div class="main-content">
             
             <div id="tab-member" class="content-section">
-                <h1 style="margin-top:0;">メンバー管理</h1>
+                <h1>メンバー管理</h1>
                 <div class="manager-container">
                     <div class="member-header">
                         <h3 style="margin:0;">現在のメンバー</h3>
@@ -338,23 +344,19 @@
             resetDate(); 
         }
 
-        // 前回の内容をコピーする機能
         function copyLastTomorrow() {
             const name = getSelectedName();
             if (!name) {
                 alert("まずは名前を選択してください");
                 return;
             }
-
             const lastReport = allData.find(row => row[1] === name);
-
             if (lastReport) {
                 const tomorrowTask = lastReport[4]; 
                 if (!tomorrowTask) {
                     alert("前回の報告に「明日の業務」が記入されていませんでした");
                     return;
                 }
-
                 if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) {
                     document.getElementById('progress').value = tomorrowTask;
                     const msgBox = document.getElementById("toast");
