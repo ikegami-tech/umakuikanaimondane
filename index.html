@@ -12,26 +12,25 @@
             background-color: #f0f8ff; height: 100vh; display: flex;
         }
 
-        /* --- オーバーレイ（ログイン・登録・リセット共通） --- */
-        .overlay {
+        /* --- ログイン画面 --- */
+        #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #333; z-index: 9999;
-            display: none; /* 初期は非表示（JSで制御） */
-            flex-direction: column; justify-content: center; align-items: center; color: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
         }
-        /* 初期表示用 */
-        #login-overlay { display: flex; } 
-
-        .auth-box {
+        .overlay { /* 登録・リセット画面用 */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #333; z-index: 9999;
+            display: none; flex-direction: column; justify-content: center; align-items: center; color: white;
+        }
+        .auth-box, .login-box {
             background: white; color: #333; padding: 30px; border-radius: 8px;
             text-align: center; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .auth-box h2 { margin-top: 0; margin-bottom: 15px; font-size: 20px; }
-        .auth-box p { margin-bottom: 15px; font-size: 14px; color: #666; }
-        .auth-box input {
+        .login-box input, .auth-box input {
             width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;
         }
-        .auth-box button {
+        .login-box button, .auth-box button {
             width: 100%; padding: 10px; margin-top: 15px; border: none;
             border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
         }
@@ -39,17 +38,15 @@
         .btn-primary:hover { background: #e07000; }
         .btn-secondary { background: #666; color: white; margin-top: 10px !important; }
         .btn-secondary:hover { background: #444; }
-
         .auth-link {
             display: block; margin-top: 15px; color: #007bff; text-decoration: underline; cursor: pointer; font-size: 14px;
         }
-        .auth-link:hover { color: #0056b3; }
-        
         .msg-area { color: red; margin-top: 10px; font-size: 14px; min-height: 20px; }
 
         /* --- アプリ本体 --- */
         .app-container { display: none; width: 100%; height: 100%; }
         
+        /* --- サイドバー --- */
         .sidebar {
             width: 200px; background-color: #333; color: white; padding: 20px;
             display: flex; flex-direction: column; gap: 20px; flex-shrink: 0;
@@ -62,6 +59,14 @@
         }
         .menu-btn:hover, .menu-btn.active { background: #ff7f00; }
 
+        /* ★ログアウトボタン用のスタイル（一番下に固定） */
+        .menu-btn.logout {
+            margin-top: auto; /* これで一番下に押しやられます */
+            background: #444; border: 1px solid #666;
+        }
+        .menu-btn.logout:hover { background: #ff4d4d; border-color: #ff4d4d; }
+
+        /* --- メインコンテンツ --- */
         .main-content {
             flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative;
         }
@@ -179,10 +184,10 @@
 <body>
 
     <div id="login-overlay" class="overlay">
-        <div class="auth-box">
+        <div class="login-box">
             <h2>🔑 ログイン</h2>
             <input type="text" id="login-id" placeholder="ログインID">
-            <input type="password" id="login-password" placeholder="パスワード">
+            <input type="password" id="login-password" placeholder="パスワード" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()" class="btn-primary" id="login-btn">ログイン</button>
             <div class="msg-area" id="login-msg"></div>
             
@@ -223,6 +228,8 @@
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
             <button class="menu-btn" onclick="openCheckModal()">📅 記入確認</button>
+            
+            <button class="menu-btn logout" onclick="logout()">🚪 ログアウト</button>
         </div>
 
         <div class="main-content">
@@ -333,7 +340,7 @@
 
     <script>
         // ★重要：ここにあなたのGASウェブアプリのURLを貼り付けてください！
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxTfKSY5N6IKvMUf7fk5nrlpKc0161B9d60HY3KE_YEbNQH4eqRBLIwaQQRnvUPuTnC2g/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbx0cpVWHFJ_Nc4shpwtG_XrP2IvLsHHL8MGZHBD_x1xrJ0hz2wZUVpw4iw_WvEtlo2RjA/exec"; 
 
         // --- 画面切り替え ---
         function showLogin() {
@@ -365,7 +372,7 @@
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
             .then(() => {
                 alert("登録しました！ログイン画面に戻ります。");
-                location.reload(); // リロードしてスッキリさせる
+                location.reload(); 
             })
             .catch(err => {
                 msg.innerText = "エラーが発生しました"; btn.disabled = false;
@@ -382,19 +389,11 @@
             if(!id || !email) { msg.innerText = "IDとメールアドレスを入力してください"; return; }
             msg.innerText = "送信中..."; btn.disabled = true;
 
-            // GASは値を返せないので、POSTで送って成功とみなす（エラーならGAS側でログが出るのみだが、今回は簡易実装）
-            // ※本格的にはdoPostで成功/失敗を判定したいがno-corsの壁があるため、
-            //  今回は「送信完了しました」と表示する仕様にします。
-            
-            // ★重要：今回はdoPostで処理します
             const data = { action: 'resetPassword', id: id, email: email };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
             .then(() => {
-                // GAS側でチェックNGでもここに来てしまうのがno-corsの弱点ですが、
-                // ユーザーには「合致していればメールが届きます」と伝えるのがセキュリティ的にも正解です。
                 alert("リセットリクエストを送信しました。\nIDとメールアドレスが一致していれば、仮パスワードがメールで届きます。");
                 showLogin();
-                // フォームクリア
                 document.getElementById('reset-id').value = "";
                 document.getElementById('reset-email').value = "";
                 msg.innerText = "";
@@ -403,6 +402,26 @@
             .catch(err => {
                 msg.innerText = "通信エラー"; btn.disabled = false;
             });
+        }
+
+        // --- ログアウト処理 ---
+        function logout() {
+            if(!confirm("ログアウトしますか？")) return;
+            localStorage.removeItem('login_user_id');
+            localStorage.removeItem('login_user_name');
+            localStorage.removeItem('login_time');
+            
+            loggedInUser = null;
+            lastSelection = { name: null, condition: null };
+            
+            document.getElementById('app-container').style.display = 'none';
+            showLogin();
+            
+            document.getElementById('login-id').value = "";
+            document.getElementById('login-password').value = "";
+            document.getElementById('login-msg').innerText = "";
+            
+            alert("ログアウトしました");
         }
 
         // --- 変数と基本ロジック ---
