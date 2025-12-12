@@ -440,7 +440,7 @@
         function deleteMember() {
             const name = getSelectedManagerName();
             if (!name) return;
-            if (!confirm(`「${name}」さんを名簿から削除しますか？\n（日報データは削除されません）`)) return;
+            if (!confirm(`「${name}」さんを名簿から削除しますか？\n（過去の日報もすべて消えてしまいます）`)) return;
             memberList = memberList.filter(m => m !== name);
             renderMemberRadios(); renderFilterOptions(); updateManagerButtonState();
             const data = { action: 'deleteMember', targetName: name };
