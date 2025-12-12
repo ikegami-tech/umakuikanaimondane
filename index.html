@@ -43,8 +43,6 @@
             max-width: 700px; margin: 0 auto; transition: border-color 0.3s;
         }
         .form-container.editing { border: 2px solid #007bff; background-color: #f8fbff !important; }
-        
-        /* ★新規：過去日報作成モードのデザイン */
         .form-container.past-mode { border: 2px solid #ff4d4d; background-color: #fff5f5 !important; }
 
         .manager-container {
@@ -127,7 +125,6 @@
         
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 20px; }
         .calendar-header { font-weight: bold; text-align: center; padding: 5px; background: #eee; }
-        /* ★修正：クリックできるようにカーソル変更 */
         .calendar-day { border: 1px solid #ddd; height: 60px; padding: 5px; font-size: 14px; cursor: pointer; }
         .calendar-day:hover { opacity: 0.8; border-color: #999; }
         
@@ -139,7 +136,6 @@
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
 
-        /* ★新規：日付表示アラートのデザイン */
         .date-alert-box {
             background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px;
             margin-bottom: 20px; display: none; align-items: center; justify-content: space-between;
@@ -187,7 +183,7 @@
                 <div class="form-container" id="form-container">
                     
                     <div id="date-alert" class="date-alert-box">
-                        <span id="date-alert-text">2025/12/10 の日報を作成中</span>
+                        <span id="date-alert-text"></span>
                         <button onclick="resetDate()" style="background:white; color:#ff4d4d; border:none; border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold;">今日に戻す</button>
                     </div>
 
@@ -270,7 +266,7 @@
             <div style="margin-top:10px; font-size:12px; text-align:right;">
                 <span style="display:inline-block; width:12px; height:12px; background:#fff; border:1px solid #ccc;"></span> 提出済
                 <span style="display:inline-block; width:12px; height:12px; background:#ffcccc; margin-left:10px;"></span> 未提出
-                <span style="display:inline-block; width:12px; height:12px; background:#cceeff; margin-left:10px;"></span> 休日(土日)
+                <span style="display:inline-block; width:12px; height:12px; background:#cceeff; margin-left:10px;"></span> 休日(火水)
             </div>
         </div>
     </div>
@@ -279,7 +275,7 @@
 
     <script>
         // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxgXtR1PjpS_VaQRR4jWFDCKwL_p30B3d2Sk02pd-BZrEXGuIIleqmtdqQK2we2S-PRcA/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzjKLYxO4N3hhCEtpjM_duXiNe4jSmQfIO807XQfNGq-xJfk-Xz1SLrTnvJHUrJqzuixA/exec"; 
 
         let allData = []; 
         let currentData = [];
@@ -290,8 +286,6 @@
         let isEditing = false;
         let editingRowIndex = null;
         let currentEditingFileUrl = "";
-
-        // ★新規：作成対象の日付（nullなら今日）
         let targetReportDate = null;
 
         function switchTab(tabName) {
@@ -325,30 +319,22 @@
             document.getElementById('comment').value = "";
             document.getElementById('file-attach').value = ""; 
             cancelEdit(); 
-            resetDate(); // ★日付も今日に戻す
+            resetDate(); 
         }
 
-        // ★新規：日付をリセットする関数
         function resetDate() {
             targetReportDate = null;
             document.getElementById('date-alert').style.display = 'none';
             document.getElementById('form-container').classList.remove('past-mode');
         }
 
-        // ★新規：特定の日付で日報作成を開始する関数
         function startReportForDate(year, month, day) {
             targetReportDate = `${year}/${month + 1}/${day}`;
-            
-            // UIの変更
             closeCheckModal();
             switchTab('input');
-            
-            // アラート表示
             document.getElementById('date-alert').style.display = 'flex';
             document.getElementById('date-alert-text').innerText = `${targetReportDate} の日報を作成中`;
             document.getElementById('form-container').classList.add('past-mode');
-            
-            // 名前も自動選択（カレンダーで選んでいた人）
             const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
             if (targetName) {
                 const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
@@ -388,10 +374,7 @@
 
             let data = { name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
 
-            // ★修正：日付指定がある場合はデータを追加
-            if (targetReportDate) {
-                data.targetDate = targetReportDate;
-            }
+            if (targetReportDate) { data.targetDate = targetReportDate; }
 
             if (isEditing) {
                 data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; 
@@ -435,7 +418,11 @@
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); }
+                if (data.members) { 
+                    memberList = data.members; 
+                    renderMemberRadios(); 
+                    renderFilterOptions(); 
+                }
                 allData = (data.reports || []).reverse();
                 currentData = allData;
                 if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; }
@@ -465,6 +452,7 @@
 
             const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
             nameRadios.forEach(r => r.checked = (r.value === targetRow[1]));
+
             const condRadios = document.querySelectorAll('input[name="condition"]');
             condRadios.forEach(r => r.checked = (r.value === targetRow[2]));
             document.getElementById('progress').value = targetRow[3];
@@ -689,6 +677,7 @@
             setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
         }
 
+        // --- カレンダー機能 ---
         function openCheckModal() { document.getElementById('check-modal').style.display = 'flex'; }
         function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
 
@@ -731,10 +720,10 @@
 
                 if (d > today) { className = "day-future"; isClickable = false; }
                 else if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; }
-                else if (dayOfWeek === 0 || dayOfWeek === 6) { className = "day-holiday"; }
+                /* ★修正：火(2)・水(3)を定休日(青色)に変更 */
+                else if (dayOfWeek === 2 || dayOfWeek === 3) { className = "day-holiday"; }
                 else { className = "day-missing"; }
 
-                // ★修正：クリックでその日付の日報作成へ
                 const clickEvent = isClickable ? `onclick="startReportForDate(${year}, ${month}, ${d})"` : "";
                 bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
             }
