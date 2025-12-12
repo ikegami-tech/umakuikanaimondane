@@ -762,3 +762,125 @@
                 }
                 buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `;
             });
+            let fileHtml = "";
+            if (fileUrl) {
+                if (fileUrl.indexOf("http") === 0) {
+                    fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`;
+                } else {
+                    fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`;
+                }
+            }
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.innerHTML = `
+                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
+                <div class="like-buttons" data-row-index="${rowIndex}">
+                    ${buttonsHtml}
+                </div>
+                <div class="report-header-area">
+                    <span style="font-size: 1.3em; font-weight: bold;">${name}</span>
+                    <span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span>
+                    <div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div>
+                </div>
+                <div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div>
+                <div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div>
+                <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
+                ${fileHtml}
+                <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
+            `;
+            const btns = div.querySelectorAll('.like-btn');
+            btns.forEach(btn => updateButtonColor(btn));
+            reportContainer.appendChild(div);
+        }
+
+        function updateButtonColor(btn) {
+            const text = btn.innerText;
+            if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) {
+                if (text.indexOf('バッド') !== -1) {
+                    btn.style.backgroundColor = '#f0f0ff'; btn.style.borderColor = '#4b0082'; btn.style.color = '#4b0082';
+                } else {
+                    btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00';
+                }
+                btn.style.fontWeight = 'bold';
+            } else {
+                btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = '';
+            }
+        }
+
+        function addLike(btn) {
+            let text = btn.innerText;
+            let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart);
+            if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; }
+            updateButtonColor(btn); triggerDebounceSave(btn); 
+        }
+
+        function changeToBad(event, btn) {
+            event.preventDefault(); let textOnly = btn.innerText.split(' ')[0];
+            if (textOnly.indexOf('いいね👍') !== -1) { btn.innerText = textOnly.replace('いいね👍', 'バッド👎'); } 
+            else if (textOnly.indexOf('バッド👎') !== -1) { btn.innerText = textOnly.replace('バッド👎', 'いいね👍'); }
+            updateButtonColor(btn); triggerDebounceSave(btn); 
+        }
+
+        function triggerDebounceSave(btn) {
+            const parentDiv = btn.closest('.like-buttons'); const rowIndex = parentDiv.getAttribute('data-row-index');
+            if (saveTimers[rowIndex]) { clearTimeout(saveTimers[rowIndex]); }
+            saveTimers[rowIndex] = setTimeout(() => { sendLikeToSheet(rowIndex, parentDiv); }, 2000); 
+        }
+
+        function sendLikeToSheet(rowIndex, parentDiv) {
+            const btns = parentDiv.querySelectorAll('.like-btn');
+            const likeData = Array.from(btns).map(b => b.innerText).join(',');
+            const data = { action: 'like', rowIndex: rowIndex, likeData: likeData };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; })
+            .catch(err => console.error("エラー", err));
+        }
+
+        function showToast() {
+            var x = document.getElementById("toast"); x.className = "show"; 
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
+        }
+
+        function openCheckModal() { document.getElementById('check-modal').style.display = 'flex'; }
+        function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
+
+        function renderCalendar() {
+            const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
+            if (!targetName) { alert("チェックする人を選んでください"); return; }
+            const calendarArea = document.getElementById('calendar-area');
+            calendarArea.innerHTML = ""; 
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth(); 
+            const today = now.getDate();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const submittedDates = allData.filter(row => row[1] === targetName).map(row => {
+                const d = new Date(row[0]);
+                return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            });
+            const headerHtml = `
+                <h3 style="text-align:center;">${year}年 ${month + 1}月 - ${targetName}さん</h3>
+                <div class="calendar-grid">
+                    <div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>
+            `;
+            let bodyHtml = "";
+            const firstDayOfWeek = new Date(year, month, 1).getDay();
+            for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
+            for (let d = 1; d <= lastDay; d++) {
+                const checkDateStr = `${year}-${month}-${d}`;
+                const currentObj = new Date(year, month, d);
+                const dayOfWeek = currentObj.getDay();
+                let className = "day-submitted"; 
+                let isClickable = true;
+                if (d > today) { className = "day-future"; isClickable = false; }
+                else if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; }
+                else if (dayOfWeek === 2 || dayOfWeek === 3) { className = "day-holiday"; }
+                else { className = "day-missing"; }
+                const clickEvent = isClickable ? `onclick="startReportForDate(${year}, ${month}, ${d})"` : "";
+                bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
+            }
+            calendarArea.innerHTML = headerHtml + bodyHtml + "</div>";
+        }
+    </script>
+</body>
+</html>
