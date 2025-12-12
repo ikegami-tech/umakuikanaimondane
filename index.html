@@ -33,17 +33,20 @@
             flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative;
         }
 
-        /* --- コンテンツエリア（タブ切り替え用） --- */
-        .content-section { display: none; } /* 基本は非表示 */
-        .content-section.active { display: block; } /* アクティブなやつだけ表示 */
+        .content-section { display: none; }
+        .content-section.active { display: block; }
 
         /* --- フォーム関連 --- */
         .form-container { 
             background-color: #fff; border: 1px solid #e0e0e0; 
             padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            max-width: 700px; margin: 0 auto;
+            max-width: 700px; margin: 0 auto; transition: border-color 0.3s;
         }
-        /* メンバー管理用のコンテナ（少し狭くてもOK） */
+        .form-container.editing { border: 2px solid #007bff; background-color: #f8fbff !important; }
+        
+        /* ★新規：過去日報作成モードのデザイン */
+        .form-container.past-mode { border: 2px solid #ff4d4d; background-color: #fff5f5 !important; }
+
         .manager-container {
             background-color: #fff; border: 1px solid #e0e0e0; 
             padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -56,6 +59,8 @@
             font-size: 16px; font-weight: bold; color: #333; 
             border-left: 4px solid #ff7f00; padding-left: 10px; 
         }
+        .label-flex { display: flex !important; justify-content: space-between; align-items: center; padding-right: 5px; }
+        .label-left-group { display: flex; align-items: center; gap: 10px; }
         .input-wrapper { flex-grow: 1; }
         input[type="text"], textarea { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
@@ -69,7 +74,7 @@
         .condition-group .condition-label { width: calc(25% - 6px); box-sizing: border-box; justify-content: flex-start; white-space: nowrap; padding: 5px 2px; }
         .condition-label:has(input[type="radio"]:checked) { border-color: #ff7f00; background-color: #fff8f0; font-weight: bold; }
 
-        /* --- メンバー管理画面用のデザイン --- */
+        /* --- メンバー管理 --- */
         .member-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .add-member-area { margin-top: 15px; display: none; align-items: center; gap: 10px; border-top: 1px dashed #ccc; padding-top: 15px; }
         .add-member-area input { width: 200px; padding: 5px; }
@@ -96,14 +101,12 @@
         .filter-area { display: flex; gap: 10px; }
         .filter-select, .filter-input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
 
-        /* ページネーション */
         .Pagination { display: flex; align-items: center; justify-content: center; margin-top: 40px; margin-bottom: 60px; }
         .Pagination > * + * { margin-left: 12px; }
         .Pagination-Item-Link { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; width: 35px; height: 35px; background: #fff; font-size: 16px; font-weight: bold; transition: all 0.15s linear; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; text-decoration: none; color: #333; }
         .Pagination-Item-Link.isActive { pointer-events: none; background: #111; color: #fff; border-color: #111; }
         .Pagination-Item-Link:not(.isActive):hover { background: #111; color: #fff; }
 
-        /* 日報カード */
         .item { position: relative; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); padding: 2rem 1.5rem; margin-bottom: 2rem; line-height: 1.6; }
         .like-buttons { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
         .like-btn { font-size: 11px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 15px; background-color: #fff; cursor: pointer; transition: 0.2s; }
@@ -111,7 +114,6 @@
         .delete-btn { position: absolute; top: -10px; left: -10px; width: 30px; height: 30px; background: #ff4d4d; color: white; border-radius: 50%; border: none; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; z-index: 10; }
         .edit-btn { position: absolute; bottom: 15px; right: 15px; padding: 5px 15px; background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
 
-        /* フォーム風レイアウト */
         .report-row { display: flex; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; }
         .report-row:last-child { border-bottom: none; margin-bottom: 0; }
         .report-label { display: block; width: 150px; min-width: 150px; margin-right: 20px; font-weight: bold; color: #333; border-left: 4px solid #ff7f00; padding-left: 10px; font-size: 16px; }
@@ -123,17 +125,25 @@
         .modal-content { background-color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
         .close-modal { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
         
-        /* カレンダー */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 20px; }
         .calendar-header { font-weight: bold; text-align: center; padding: 5px; background: #eee; }
-        .calendar-day { border: 1px solid #ddd; height: 60px; padding: 5px; font-size: 14px; }
+        /* ★修正：クリックできるようにカーソル変更 */
+        .calendar-day { border: 1px solid #ddd; height: 60px; padding: 5px; font-size: 14px; cursor: pointer; }
+        .calendar-day:hover { opacity: 0.8; border-color: #999; }
+        
         .day-missing { background-color: #ffcccc; } 
         .day-holiday { background-color: #cceeff; } 
         .day-submitted { background-color: #ffffff; } 
-        .day-future { background-color: #f9f9f9; color: #ccc; }
+        .day-future { background-color: #f9f9f9; color: #ccc; cursor: default; }
 
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+
+        /* ★新規：日付表示アラートのデザイン */
+        .date-alert-box {
+            background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px;
+            margin-bottom: 20px; display: none; align-items: center; justify-content: space-between;
+        }
     </style>
 </head>
 <body>
@@ -157,19 +167,13 @@
                         <h3 style="margin:0;">現在のメンバー</h3>
                         <button id="delete-member-btn" class="btn-sm btn-delete-member" onclick="deleteMember()">選択したメンバーを削除</button>
                     </div>
-                    
                     <p style="margin-bottom:15px; color:#666; font-size:14px;">
                         追加したい場合は「＋追加」ボタンを、削除したい場合はメンバーを選んで「削除」ボタンを押してください。
                     </p>
-
-                    <div id="manage-member-radios" class="condition-group">
-                        読み込み中...
-                    </div>
-
+                    <div id="manage-member-radios" class="condition-group">読み込み中...</div>
                     <div style="margin-top:20px;">
                         <button class="btn-sm btn-plus" onclick="toggleAddMember()">＋追加</button>
                     </div>
-
                     <div id="add-member-form" class="add-member-area">
                         <input type="text" id="new-member-name" placeholder="新しい名前を入力">
                         <button class="btn-sm" style="background:#333; color:#fff;" onclick="addNewMember()">追加</button>
@@ -181,6 +185,12 @@
             <div id="tab-input" class="content-section active">
                 <h1 id="page-title">システム課日報</h1>
                 <div class="form-container" id="form-container">
+                    
+                    <div id="date-alert" class="date-alert-box">
+                        <span id="date-alert-text">2025/12/10 の日報を作成中</span>
+                        <button onclick="resetDate()" style="background:white; color:#ff4d4d; border:none; border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold;">今日に戻す</button>
+                    </div>
+
                     <div class="form-group">
                         <label>名前</label>
                         <div class="input-wrapper">
@@ -269,7 +279,7 @@
 
     <script>
         // ★ここにGASのURLを貼り付けてください
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzxOEzOKd8JHOx9Yn__tiZYrirtsJKzNpfZrhRYv5a0Hs2qz0HgFiaZKO7WGwIP3hsdOQ/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzjKLYxO4N3hhCEtpjM_duXiNe4jSmQfIO807XQfNGq-xJfk-Xz1SLrTnvJHUrJqzuixA/exec"; 
 
         let allData = []; 
         let currentData = [];
@@ -281,24 +291,19 @@
         let editingRowIndex = null;
         let currentEditingFileUrl = "";
 
-        // ★新規：タブ切り替え機能
-        function switchTab(tabName) {
-            // すべてのコンテンツを非表示
-            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
-            // すべてのメニューボタンの選択状態を解除
-            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+        // ★新規：作成対象の日付（nullなら今日）
+        let targetReportDate = null;
 
-            // 選択されたものを表示
+        function switchTab(tabName) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
-            
-            // ボタンの色を変える（onclickの中身を見て判定する簡易実装）
             const buttons = document.querySelectorAll('.menu-btn');
             if(tabName === 'member') buttons[0].classList.add('active');
             if(tabName === 'input') buttons[1].classList.add('active');
             if(tabName === 'history') buttons[2].classList.add('active');
         }
 
-        // --- 基本機能 ---
         function getSelectedCondition() {
             const selected = document.querySelector('input[name="condition"]:checked');
             return selected ? selected.value : '';
@@ -307,7 +312,6 @@
             const selected = document.querySelector('#name-radios input[name="name"]:checked');
             return selected ? selected.value : '';
         }
-        // 管理画面で選択された名前を取得
         function getSelectedManagerName() {
             const selected = document.querySelector('#manage-member-radios input[name="manager-name"]:checked');
             return selected ? selected.value : '';
@@ -321,37 +325,52 @@
             document.getElementById('comment').value = "";
             document.getElementById('file-attach').value = ""; 
             cancelEdit(); 
+            resetDate(); // ★日付も今日に戻す
         }
 
-        // ★修正：管理画面用のボタン制御
-        function updateManagerButtonState() {
-            const name = getSelectedManagerName();
-            const deleteBtn = document.getElementById('delete-member-btn');
+        // ★新規：日付をリセットする関数
+        function resetDate() {
+            targetReportDate = null;
+            document.getElementById('date-alert').style.display = 'none';
+            document.getElementById('form-container').classList.remove('past-mode');
+        }
+
+        // ★新規：特定の日付で日報作成を開始する関数
+        function startReportForDate(year, month, day) {
+            targetReportDate = `${year}/${month + 1}/${day}`;
             
-            if (name) {
-                deleteBtn.style.display = 'block'; 
-            } else {
-                deleteBtn.style.display = 'none';
+            // UIの変更
+            closeCheckModal();
+            switchTab('input');
+            
+            // アラート表示
+            document.getElementById('date-alert').style.display = 'flex';
+            document.getElementById('date-alert-text').innerText = `${targetReportDate} の日報を作成中`;
+            document.getElementById('form-container').classList.add('past-mode');
+            
+            // 名前も自動選択（カレンダーで選んでいた人）
+            const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
+            if (targetName) {
+                const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
+                nameRadios.forEach(r => r.checked = (r.value === targetName));
             }
         }
 
-        // ★修正：メンバー削除機能（管理画面用）
+        function updateManagerButtonState() {
+            const name = getSelectedManagerName();
+            const deleteBtn = document.getElementById('delete-member-btn');
+            if (name) deleteBtn.style.display = 'block'; else deleteBtn.style.display = 'none';
+        }
+
         function deleteMember() {
-            const name = getSelectedManagerName(); // 管理画面の選択を取得
+            const name = getSelectedManagerName();
             if (!name) return;
-
             if (!confirm(`「${name}」さんを名簿から削除しますか？\n（日報データは削除されません）`)) return;
-
             memberList = memberList.filter(m => m !== name);
-            renderMemberRadios(); // 全箇所のラジオボタン更新
-            renderFilterOptions(); 
-            updateManagerButtonState();
-
+            renderMemberRadios(); renderFilterOptions(); updateManagerButtonState();
             const data = { action: 'deleteMember', targetName: name };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => {
-                const msgBox = document.getElementById("toast"); msgBox.innerText = "メンバーを削除しました"; showToast();
-            });
+            .then(() => { const msgBox = document.getElementById("toast"); msgBox.innerText = "メンバーを削除しました"; showToast(); });
         }
 
         async function sendData() {
@@ -368,6 +387,11 @@
             submitBtn.disabled = true; submitBtn.innerText = "送信中...";
 
             let data = { name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
+
+            // ★修正：日付指定がある場合はデータを追加
+            if (targetReportDate) {
+                data.targetDate = targetReportDate;
+            }
 
             if (isEditing) {
                 data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; 
@@ -411,11 +435,7 @@
             fetch(GAS_URL)
             .then(response => response.json())
             .then(data => {
-                if (data.members) { 
-                    memberList = data.members; 
-                    renderMemberRadios(); // 3箇所（入力、管理、確認）すべて更新
-                    renderFilterOptions(); 
-                }
+                if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); }
                 allData = (data.reports || []).reverse();
                 currentData = allData;
                 if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; }
@@ -439,15 +459,12 @@
         }
 
         function editReport(rowIndex) {
-            // 編集ボタンが押されたら強制的に日報入力タブへ移動
             switchTab('input');
-
             const targetRow = allData.find(row => row[row.length - 1] == rowIndex);
             if (!targetRow) { alert("データが見つかりません"); return; }
 
             const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
             nameRadios.forEach(r => r.checked = (r.value === targetRow[1]));
-
             const condRadios = document.querySelectorAll('input[name="condition"]');
             condRadios.forEach(r => r.checked = (r.value === targetRow[2]));
             document.getElementById('progress').value = targetRow[3];
@@ -499,29 +516,25 @@
             renderPage(1);
         }
 
-        // ★修正：3箇所のラジオボタンを一括生成
         function renderMemberRadios() {
-            const inputContainer = document.getElementById('name-radios'); // 入力フォーム用
-            const manageContainer = document.getElementById('manage-member-radios'); // 管理画面用
-            const checkContainer = document.getElementById('check-member-radios'); // 確認モーダル用
+            const inputContainer = document.getElementById('name-radios'); 
+            const manageContainer = document.getElementById('manage-member-radios'); 
+            const checkContainer = document.getElementById('check-member-radios'); 
             
             inputContainer.innerHTML = ""; manageContainer.innerHTML = ""; checkContainer.innerHTML = "";
 
             memberList.forEach(name => {
-                // 1. 入力フォーム用 (name="name")
                 const label1 = document.createElement('label'); label1.className = 'condition-label';
                 const input1 = document.createElement('input'); input1.type = 'radio'; input1.name = 'name'; input1.value = name;
                 label1.appendChild(input1); label1.appendChild(document.createTextNode(name));
                 inputContainer.appendChild(label1);
 
-                // 2. 管理画面用 (name="manager-name") ※選択すると削除ボタン表示
                 const label2 = document.createElement('label'); label2.className = 'condition-label';
                 const input2 = document.createElement('input'); input2.type = 'radio'; input2.name = 'manager-name'; input2.value = name;
                 input2.onchange = updateManagerButtonState;
                 label2.appendChild(input2); label2.appendChild(document.createTextNode(name));
                 manageContainer.appendChild(label2);
 
-                // 3. 確認モーダル用 (name="check-target")
                 const label3 = document.createElement('label'); label3.className = 'condition-label';
                 const input3 = document.createElement('input'); input3.type = 'radio'; input3.name = 'check-target'; input3.value = name;
                 label3.appendChild(input3); label3.appendChild(document.createTextNode(name));
@@ -676,7 +689,6 @@
             setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
         }
 
-        // --- カレンダー機能 ---
         function openCheckModal() { document.getElementById('check-modal').style.display = 'flex'; }
         function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
 
@@ -708,20 +720,23 @@
             let bodyHtml = "";
 
             const firstDayOfWeek = new Date(year, month, 1).getDay();
-            for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9;"></div>`; }
+            for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
 
             for (let d = 1; d <= lastDay; d++) {
                 const checkDateStr = `${year}-${month}-${d}`;
                 const currentObj = new Date(year, month, d);
                 const dayOfWeek = currentObj.getDay();
                 let className = "day-submitted"; 
+                let isClickable = true;
 
-                if (d > today) { className = "day-future"; }
+                if (d > today) { className = "day-future"; isClickable = false; }
                 else if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; }
                 else if (dayOfWeek === 0 || dayOfWeek === 6) { className = "day-holiday"; }
                 else { className = "day-missing"; }
 
-                bodyHtml += `<div class="calendar-day ${className}">${d}</div>`;
+                // ★修正：クリックでその日付の日報作成へ
+                const clickEvent = isClickable ? `onclick="startReportForDate(${year}, ${month}, ${d})"` : "";
+                bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
             }
             calendarArea.innerHTML = headerHtml + bodyHtml + "</div>";
         }
