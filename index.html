@@ -33,6 +33,14 @@
             flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative;
         }
 
+        /* タイトル中央揃え */
+        .main-content h1 {
+            text-align: center !important;
+            width: 100%;
+            margin-bottom: 30px;
+            margin-top: 0;
+        }
+
         .content-section { display: none; }
         .content-section.active { display: block; }
 
@@ -85,6 +93,7 @@
         .btn-delete-member { display: none; background: #fff; color: #007bff; border: 1px solid #007bff; font-weight: bold; }
         .btn-delete-member:hover { background: #007bff; color: #fff; }
 
+        /* コピーボタン（緑色） */
         .btn-copy { 
             background: #fff; color: #28a745; border: 1px solid #28a745; 
             font-weight: bold; font-size: 13px; padding: 5px 12px; 
@@ -149,14 +158,6 @@
         .date-alert-box {
             background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px;
             margin-bottom: 20px; display: none; align-items: center; justify-content: space-between;
-        }
-        
-        /* タイトル中央揃え */
-        .main-content h1 {
-            text-align: center !important;
-            width: 100%;
-            margin-bottom: 30px;
-            margin-top: 0;
         }
     </style>
 </head>
@@ -319,29 +320,52 @@
             if(tabName === 'history') buttons[2].classList.add('active');
         }
 
-        // --- ローカルストレージ保存機能（★新規追加） ---
+        // --- ★新規：自動保存設定 ---
         function saveSelection(key, value) {
             localStorage.setItem(key, value);
         }
 
+        // ラジオボタンとテキスト入力を監視して自動保存
+        function setupAutoSave() {
+            // 体調
+            const condRadios = document.querySelectorAll('input[name="condition"]');
+            condRadios.forEach(radio => {
+                radio.addEventListener('change', function() { saveSelection('saved_condition', this.value); });
+            });
+
+            // テキストエリア（inputイベントで文字を打つたびに保存）
+            const textFields = ['progress', 'tomorrow', 'comment'];
+            textFields.forEach(id => {
+                const element = document.getElementById(id);
+                element.addEventListener('input', function() { saveSelection('saved_' + id, this.value); });
+            });
+        }
+
+        // 保存されたデータを復元
         function restoreSelections() {
-            // 名前の復元
+            // 名前
             const savedName = localStorage.getItem('saved_name');
             if (savedName) {
-                // 入力画面のラジオボタン
                 const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`);
-                if (nameRadio) {
-                    nameRadio.checked = true;
-                    updateNameButtonState(); // ボタン状態更新
-                }
+                if (nameRadio) nameRadio.checked = true;
             }
 
-            // 体調の復元
+            // 体調
             const savedCondition = localStorage.getItem('saved_condition');
             if (savedCondition) {
                 const condRadio = document.querySelector(`input[name="condition"][value="${savedCondition}"]`);
                 if (condRadio) condRadio.checked = true;
             }
+
+            // テキストエリア
+            const savedProgress = localStorage.getItem('saved_progress');
+            if (savedProgress) document.getElementById('progress').value = savedProgress;
+
+            const savedTomorrow = localStorage.getItem('saved_tomorrow');
+            if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
+
+            const savedComment = localStorage.getItem('saved_comment');
+            if (savedComment) document.getElementById('comment').value = savedComment;
         }
 
         function getSelectedCondition() {
@@ -367,20 +391,12 @@
             cancelEdit(); 
             resetDate();
             
-            // ★リセット時にローカルストレージも消す
+            // ★リセット時にローカルストレージも全消去
             localStorage.removeItem('saved_name');
             localStorage.removeItem('saved_condition');
-            updateNameButtonState();
-        }
-
-        // 体調ラジオボタンにイベントリスナー追加（初期化時）
-        function setupConditionListeners() {
-            const radios = document.querySelectorAll('input[name="condition"]');
-            radios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    saveSelection('saved_condition', this.value);
-                });
-            });
+            localStorage.removeItem('saved_progress');
+            localStorage.removeItem('saved_tomorrow');
+            localStorage.removeItem('saved_comment');
         }
 
         function copyLastTomorrow() {
@@ -392,6 +408,8 @@
                 if (!tomorrowTask) { alert("前回の報告に「明日の業務」が記入されていませんでした"); return; }
                 if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) {
                     document.getElementById('progress').value = tomorrowTask;
+                    // コピーした内容も保存
+                    saveSelection('saved_progress', tomorrowTask);
                     const msgBox = document.getElementById("toast"); msgBox.innerText = "コピーしました！"; showToast();
                 }
             } else { alert("前回の報告データが見つかりませんでした"); }
@@ -414,18 +432,9 @@
             if (targetName) {
                 const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
                 nameRadios.forEach(r => r.checked = (r.value === targetName));
-                // 名前が自動選択されたら保存もしておく
+                // 自動選択されたら名前も保存
                 saveSelection('saved_name', targetName);
-                updateNameButtonState();
             }
-        }
-
-        function updateNameButtonState() {
-            const name = getSelectedName();
-            const btn = document.getElementById('name-action-btn');
-            const deleteBtn = document.getElementById('delete-member-btn');
-            // 入力画面には追加/削除ボタンがないので、ここは空処理にしておくか、必要なら実装
-            // 今回の要望では入力画面にはボタン不要なので何もしない
         }
 
         function updateManagerButtonState() {
@@ -508,8 +517,9 @@
                     memberList = data.members; 
                     renderMemberRadios(); 
                     renderFilterOptions(); 
-                    setupConditionListeners(); // ★体調ラジオボタンにイベント設定
-                    restoreSelections();       // ★保存データの復元実行
+                    // ★新規：自動保存＆復元機能の初期化
+                    setupAutoSave();
+                    restoreSelections();
                 }
                 allData = (data.reports || []).reverse();
                 currentData = allData;
@@ -540,15 +550,20 @@
 
             const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
             nameRadios.forEach(r => r.checked = (r.value === targetRow[1]));
-            saveSelection('saved_name', targetRow[1]); // 編集時も名前を保存しておく
+            saveSelection('saved_name', targetRow[1]); 
 
             const condRadios = document.querySelectorAll('input[name="condition"]');
             condRadios.forEach(r => r.checked = (r.value === targetRow[2]));
-            saveSelection('saved_condition', targetRow[2]); // 編集時も体調を保存しておく
+            saveSelection('saved_condition', targetRow[2]);
 
             document.getElementById('progress').value = targetRow[3];
             document.getElementById('tomorrow').value = targetRow[4];
             document.getElementById('comment').value = targetRow[5];
+            
+            // 編集中の内容も保存しておく（リロード対策）
+            saveSelection('saved_progress', targetRow[3]);
+            saveSelection('saved_tomorrow', targetRow[4]);
+            saveSelection('saved_comment', targetRow[5]);
             
             currentEditingFileUrl = targetRow[7];
             if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) {
@@ -605,8 +620,8 @@
             memberList.forEach(name => {
                 const label1 = document.createElement('label'); label1.className = 'condition-label';
                 const input1 = document.createElement('input'); input1.type = 'radio'; input1.name = 'name'; input1.value = name;
-                // ★修正：入力フォームの名前が選ばれたら保存
-                input1.onchange = function() { saveSelection('saved_name', this.value); updateNameButtonState(); };
+                // 名前変更時も保存
+                input1.onchange = function() { saveSelection('saved_name', this.value); };
                 label1.appendChild(input1); label1.appendChild(document.createTextNode(name));
                 inputContainer.appendChild(label1);
 
