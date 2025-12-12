@@ -34,7 +34,6 @@
         /* --- アプリ本体 --- */
         .app-container { display: none; width: 100%; height: 100%; }
         
-        /* --- サイドバー --- */
         .sidebar {
             width: 200px; background-color: #333; color: white; padding: 20px;
             display: flex; flex-direction: column; gap: 20px; flex-shrink: 0;
@@ -47,7 +46,6 @@
         }
         .menu-btn:hover, .menu-btn.active { background: #ff7f00; }
 
-        /* --- メインコンテンツ --- */
         .main-content {
             flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative;
         }
@@ -57,13 +55,14 @@
         .content-section { display: none; }
         .content-section.active { display: block; }
 
-        /* --- フォーム --- */
         .form-container { 
             background-color: #fff; border: 1px solid #e0e0e0; 
             padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             max-width: 700px; margin: 0 auto; transition: border-color 0.3s;
         }
         .form-container.editing { border: 2px solid #007bff; background-color: #f8fbff !important; }
+        
+        /* 以前の past-mode は不要になりましたが、互換性のため残しておきます */
         .form-container.past-mode { border: 2px solid #ff4d4d; background-color: #fff5f5 !important; }
 
         .manager-container {
@@ -79,7 +78,7 @@
             border-left: 4px solid #ff7f00; padding-left: 10px; 
         }
         .input-wrapper { flex-grow: 1; }
-        input[type="text"], textarea { 
+        input[type="text"], input[type="date"], textarea { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
         }
         textarea { height: 100px; resize: vertical; }
@@ -90,7 +89,6 @@
         .condition-group .condition-label { width: calc(25% - 6px); box-sizing: border-box; justify-content: flex-start; white-space: nowrap; padding: 5px 2px; }
         .condition-label:has(input[type="radio"]:checked) { border-color: #ff7f00; background-color: #fff8f0; font-weight: bold; }
 
-        /* --- その他パーツ --- */
         .member-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .add-member-area { margin-top: 15px; display: none; align-items: center; gap: 10px; border-top: 1px dashed #ccc; padding-top: 15px; }
         .add-member-area input { width: 200px; padding: 5px; }
@@ -212,6 +210,14 @@
                         <span id="date-alert-text"></span>
                         <button onclick="resetDate()" style="background:white; color:#ff4d4d; border:none; border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold;">今日に戻す</button>
                     </div>
+
+                    <div class="form-group">
+                        <label>日付</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="report-date">
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>名前</label>
                         <div class="input-wrapper"><div id="name-radios" class="condition-group">読み込み中...</div></div>
@@ -296,7 +302,7 @@
 
     <script>
         // ★重要：ここにあなたのGASウェブアプリのURLを貼り付けてください！
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyICbPgHzzsDexJu0cu2HBAOtBAIQmgiKR4ReMXhr__x4068sQWdsyO2C3mX7n9ewkDhQ/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbytwDZFxqmKNQYeOM_OjTTpuNY2CwidyPnUE84diMx117om_skoZXESW_qUCr7GcgT1Tw/exec"; 
 
         let allData = []; 
         let currentData = [];
@@ -311,7 +317,7 @@
         let lastSelection = { name: null, condition: null };
         let loggedInUser = null; 
 
-        // ★新機能：セッションチェック（10分保持機能）
+        // --- ログインセッション管理 ---
         function checkLoginSession() {
             const savedId = localStorage.getItem('login_user_id');
             const savedTime = localStorage.getItem('login_time');
@@ -320,24 +326,21 @@
             if (savedId && savedTime && savedName) {
                 const now = new Date().getTime();
                 const diff = now - parseInt(savedTime);
-                const tenMinutes = 10 * 60 * 1000; // 10分 (ミリ秒)
+                const tenMinutes = 10 * 60 * 1000; 
 
-                // 10分以内ならログイン済みとする
                 if (diff < tenMinutes) {
                     loggedInUser = savedName;
                     document.getElementById('login-overlay').style.display = 'none';
                     document.getElementById('app-container').style.display = 'flex';
-                    fetchData(); // データを読み込む
-                    return; // ログイン画面での待機を終了
+                    fetchData(); 
+                    return; 
                 }
             }
-            // 期限切れ、または保存データがない場合は何もしない（ログイン画面のまま）
             localStorage.removeItem('login_user_id');
             localStorage.removeItem('login_user_name');
             localStorage.removeItem('login_time');
         }
 
-        // --- ログイン処理 ---
         function tryLogin() {
             const id = document.getElementById('login-id').value;
             const pass = document.getElementById('login-password').value;
@@ -354,11 +357,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.auth === true) {
-                    // ★ログイン成功：時間を記録して画面を開く
                     const now = new Date().getTime();
                     localStorage.setItem('login_user_id', id);
                     localStorage.setItem('login_user_name', data.name);
-                    localStorage.setItem('login_time', now); // 時間を保存
+                    localStorage.setItem('login_time', now);
 
                     document.getElementById('login-overlay').style.display = 'none';
                     document.getElementById('app-container').style.display = 'flex';
@@ -377,14 +379,22 @@
             });
         }
 
-        // --- 起動時にセッションチェックを実行 ---
+        // --- 起動時処理 ---
         window.onload = function() {
             checkLoginSession(); 
-            // もしログイン済みなら自動で fetchData が呼ばれる
-            // 未ログインならログイン画面のまま待機
+            setTodayDate(); // ★起動時に今日の日付をセット
         };
 
-        // --- 以下、既存の関数群 ---
+        // ★新機能：今日の日付をセットする関数
+        function setTodayDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = ('0' + (today.getMonth() + 1)).slice(-2);
+            const dd = ('0' + today.getDate()).slice(-2);
+            document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // --- 以下、基本機能 ---
         function switchTab(tabName) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
@@ -465,6 +475,10 @@
             document.getElementById('tomorrow').value = "";
             document.getElementById('comment').value = "";
             document.getElementById('file-attach').value = ""; 
+            
+            // 日付もリセット
+            setTodayDate();
+
             cancelEdit(); resetDate();
             if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } 
             else { lastSelection = { name: null, condition: null }; }
@@ -493,15 +507,26 @@
             targetReportDate = null;
             document.getElementById('date-alert').style.display = 'none';
             document.getElementById('form-container').classList.remove('past-mode');
+            setTodayDate(); // 今日へ戻す
         }
 
         function startReportForDate(year, month, day) {
-            targetReportDate = `${year}/${month + 1}/${day}`;
+            // カレンダーからクリックされた場合、日付欄を更新する
+            const mm = ('0' + (month + 1)).slice(-2);
+            const dd = ('0' + day).slice(-2);
+            const dateStr = `${year}-${mm}-${dd}`;
+            
+            document.getElementById('report-date').value = dateStr;
+            
+            targetReportDate = `${year}/${month + 1}/${day}`; // 互換性のため維持
             closeCheckModal();
             switchTab('input');
+            
+            // アラート表示
             document.getElementById('date-alert').style.display = 'flex';
             document.getElementById('date-alert-text').innerText = `${targetReportDate} の日報を作成中`;
             document.getElementById('form-container').classList.add('past-mode');
+            
             const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
             if (targetName) {
                 const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
@@ -530,6 +555,7 @@
         }
 
         async function sendData() {
+            const dateVal = document.getElementById('report-date').value; // ★日付取得
             const name = getSelectedName();
             const condition = getSelectedCondition(); 
             const progress = document.getElementById('progress').value;
@@ -537,12 +563,14 @@
             const comment = document.getElementById('comment').value;
             const fileInput = document.getElementById('file-attach');
 
-            if(!name || !condition || !progress || !tomorrow || !comment) { alert("全ての項目を入力・選択してください"); return; }
+            if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { alert("全ての項目を入力・選択してください"); return; }
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true; submitBtn.innerText = "送信中...";
 
-            let data = { name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
-            if (targetReportDate) { data.targetDate = targetReportDate; }
+            let data = { 
+                targetDate: dateVal, // ★日付を送信データに追加
+                name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment 
+            };
 
             if (isEditing) {
                 data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; 
@@ -616,6 +644,14 @@
             switchTab('input');
             const targetRow = allData.find(row => row[row.length - 1] == rowIndex);
             if (!targetRow) { alert("データが見つかりません"); return; }
+            
+            // ★日付をセット（重要：フォーマット変換）
+            const d = new Date(targetRow[0]);
+            const yyyy = d.getFullYear();
+            const mm = ('0' + (d.getMonth() + 1)).slice(-2);
+            const dd = ('0' + d.getDate()).slice(-2);
+            document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
+
             const nameRadios = document.querySelectorAll('#name-radios input[name="name"]');
             nameRadios.forEach(r => r.checked = (r.value === targetRow[1]));
             saveSelection('saved_name', targetRow[1]); 
@@ -651,6 +687,7 @@
             document.getElementById('cancel-edit-btn').style.display = 'none';
             document.getElementById('form-container').classList.remove('editing');
             document.getElementById('current-file-msg').style.display = 'none';
+            setTodayDate(); // 日付も今日に戻す
         }
 
         function renderFilterOptions() {
