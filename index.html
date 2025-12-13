@@ -280,7 +280,7 @@
     <div id="login-overlay" class="overlay">
         <div class="auth-box">
             <h2>🔑 ログイン</h2>
-            <input type="text" id="login-id" placeholder="ログインID">
+            <input type="text" id="login-id" placeholder="ログインID" oninput="value = value.replace(/[^a-zA-Z0-9]/g, '');">
             <input type="password" id="login-password" placeholder="パスワード" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()" class="btn-primary" id="login-btn">ログイン</button>
             <div class="msg-area" id="login-msg"></div>
@@ -292,7 +292,7 @@
     <div id="register-overlay" class="overlay">
         <div class="auth-box">
             <h2>📝 新規ユーザー登録</h2>
-            <input type="text" id="reg-id" placeholder="ログインID（半角英数）">
+            <input type="text" id="reg-id" placeholder="ログインID（半角英数）" oninput="value = value.replace(/[^a-zA-Z0-9]/g, '');">
             <input type="text" id="reg-name" placeholder="お名前">
             <input type="email" id="reg-email" placeholder="メールアドレス">
             <input type="password" id="reg-pass" placeholder="パスワード">
