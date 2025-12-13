@@ -63,12 +63,28 @@
         .menu-btn.logout { margin-top: auto; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); }
 
         .main-content {
-            flex-grow: 1; padding: 20px 40px; overflow-y: auto; position: relative;
+            width: 100%;
+            /* ★修正: 上部に80pxの余白を入れ、ハンバーガーボタンと被らないようにする */
+            padding-top: 80px; 
+            padding-bottom: 30px;
+            padding-left: 15px;
+            padding-right: 15px;
+            
+            /* ★修正: コンテンツを中央寄せにする設定 */
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            overflow-y: auto; position: relative;
         }
         .main-content h1 {
             text-align: center !important; width: 100%; margin-bottom: 30px; margin-top: 0; color: #01579b;
         }
-        .content-section { display: none; }
+        /* ★修正: 中身の各セクションの幅を制限して中央に寄せる */
+        .content-section { 
+            display: none; 
+            width: 100%;
+            max-width: 800px; /* PCで見ても広がりすぎないように */
+        }
         .content-section.active { display: block; }
 
         /* --- フォーム --- */
@@ -116,124 +132,86 @@
         /* --- ハンバーガーメニューボタン（PCでは非表示） --- */
         .hamburger { display: none; }
 
-        /* --- 検索・フィルターエリアのデザイン修正 --- */
+        /* --- 検索・フィルターエリアのデザイン --- */
         .list-header {
             background-color: #f8fbff; /* ほんのり薄い青色でエリアを区別 */
             padding: 20px;             /* 内側に余白をとる */
             border-radius: 8px;        /* 角を丸く */
             border: 1px solid #b3e5fc; /* 薄い枠線で囲む */
-            margin-bottom: 30px;       /* ★重要：下の日報リストとの距離を大きく離す */
+            margin-bottom: 30px;       /* 下の日報リストとの距離を大きく離す */
             box-shadow: 0 2px 5px rgba(0,0,0,0.03); /* わずかに影をつけて浮き上がらせる */
         }
-
         .list-header h2 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            color: #0277bd;
-            border-bottom: 1px dashed #b3e5fc; /* タイトルの下に点線を入れる */
-            padding-bottom: 10px;
+            margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; color: #0277bd;
+            border-bottom: 1px dashed #b3e5fc; padding-bottom: 10px;
         }
-
-        .filter-area {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* 検索ボックスとセレクトボックスのデザイン */
+        .filter-area { display: flex; gap: 10px; }
         .filter-select, .filter-input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px; /* スマホでズームしない適切なサイズ */
+            padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;
         }
-        .filter-select { width: 30%; } /* 名前選択は少し狭く */
-        .filter-input { width: 70%; }  /* 文字検索は広く */
+        .filter-select { width: 30%; } 
+        .filter-input { width: 70%; } 
 
-        /* --- スマホ表示時の微調整 --- */
-        @media (max-width: 768px) {
-            .filter-area {
-                flex-direction: column; /* スマホでは縦並びにする */
-            }
-            .filter-select, .filter-input {
-                width: 100%; /* 横幅いっぱいに */
-            }
-        }
         /* --- 過去レポート（カードデザイン） --- */
-        /* --- 過去レポート（カードデザイン：見やすく修正版） --- */
         .item { 
             position: relative; 
             background-color: #fff; 
-            border: 1px solid #ccc; /* 枠線を少しはっきりさせる */
+            border: 1px solid #ccc; 
             border-radius: 8px; 
             padding: 20px; 
             margin-bottom: 20px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* 軽く影をつけてカード感を出す */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
         }
-
-        /* 横並び(flex)をやめて縦積みにし、文章のスペースを確保 */
         .report-row { 
             display: block; 
             margin-bottom: 20px; 
             border-bottom: none; 
             padding-bottom: 0; 
         }
-
-        /* 項目名（ラベル）のデザイン */
         .report-label { 
-            font-weight: bold;
-            font-size: 0.95rem;
-            color: #333;
-            background-color: #f0f0f0; /* 薄いグレー背景で「見出し」らしく */
-            padding: 4px 10px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 8px; /* 本文との間に隙間を作る */
-            border-left: none; /* 左の青線は削除 */
+            font-weight: bold; font-size: 0.95rem; color: #333;
+            background-color: #f0f0f0; padding: 4px 10px;
+            border-radius: 4px; display: inline-block;
+            margin-bottom: 8px; border-left: none; 
         }
-
-        /* 本文のデザイン */
         .report-content {
-            font-size: 1rem;
-            line-height: 1.6; /* 行間を広げて読みやすく */
-            color: #222;
-            padding-left: 5px;
-            white-space: pre-wrap; /* 改行をそのまま表示 */
+            font-size: 1rem; line-height: 1.6; color: #222;
+            padding-left: 5px; white-space: pre-wrap; 
         }
-
-        /* 日付と名前のヘッダーエリア */
         .report-header-area {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee; /* ここに区切り線を入れる */
+            margin-bottom: 15px; padding-bottom: 10px;
+            border-bottom: 2px solid #eee; 
         }
         
-        /* ★修正：カード下部のフッターエリア（いいね＆編集ボタン） */
+        /* カード下部のフッターエリア（いいね＆編集ボタン） */
         .card-footer {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 20px; padding-top: 15px;
             border-top: 1px dashed #e0e0e0;
-            display: flex;
-            justify-content: flex-end; /* 右寄せ */
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: flex; justify-content: flex-end; align-items: center;
+            flex-wrap: wrap; gap: 10px;
         }
 
         /* いいねボタンエリア */
         .like-buttons { 
-            display: flex; 
-            gap: 5px; 
-            flex-wrap: wrap; 
-            justify-content: flex-end;
+            display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end;
         }
         .like-btn { font-size: 11px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 15px; background-color: #fff; cursor: pointer; transition: 0.2s; }
         .like-btn:hover { background-color: #e1f5fe; border-color: #0288d1; }
         
-        /* 削除ボタン（これは左上に残す） */
+        /* ★追加：自分のボタン以外（disabled状態）のスタイル */
+        .like-btn:disabled {
+            background-color: #f5f5f5; /* 背景をグレーに */
+            color: #aaa;               /* 文字色を薄く */
+            border-color: #ddd;        /* 枠線も薄く */
+            cursor: not-allowed;       /* カーソルを禁止マークに */
+            opacity: 0.7;
+        }
+        .like-btn:disabled:hover { background-color: #f5f5f5; border-color: #ddd; }
+        
+        /* 削除ボタン */
         .delete-btn { position: absolute; top: -10px; left: -10px; width: 30px; height: 30px; background: #ff4d4d; color: white; border-radius: 50%; border: none; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; z-index: 10; }
         
-        /* 編集ボタン（フッター内に移動） */
+        /* 編集ボタン */
         .edit-btn { padding: 6px 15px; background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
 
         /* その他ユーティリティ */
@@ -260,25 +238,6 @@
                 height: auto;
                 min-height: 100vh;
             }
-            .main-content {
-                width: 100%;
-                /* 上部に80pxの余白を入れ、ハンバーガーボタンと被らないようにする */
-                padding-top: 80px; 
-                padding-bottom: 30px;
-                padding-left: 15px;
-                padding-right: 15px;
-                
-                /* コンテンツを中央寄せにする設定 */
-                display: flex;
-                flex-direction: column;
-                align-items: center; 
-            }
-
-            /* 中身の各セクション（入力画面や履歴一覧）の幅を調整 */
-            .content-section {
-                width: 100%;
-                max-width: 600px; /* スマホでも横幅が広がりすぎないように制限 */
-            }
             .sidebar {
                 position: fixed;
                 top: 0; left: -250px; 
@@ -301,16 +260,18 @@
             }
 
             .form-group { flex-direction: column; }
-            /* .report-row は上で block にしたのでここでは削除でOK */
             
             label {
                 width: 100%; border-bottom: 2px solid #81d4fa;
                 border-left: none; margin-bottom: 5px; padding-left: 0;
             }
-            /* report-labelの設定も上で共通化したので、スマホ専用設定は削除してOK */
             .button-group { flex-direction: column-reverse; gap: 10px; }
             button { width: 100%; padding: 12px; }
             .condition-group .condition-label { width: calc(50% - 6px); }
+            
+            /* フィルターエリアも縦並び */
+            .filter-area { flex-direction: column; }
+            .filter-select, .filter-input { width: 100%; }
         }
     </style>
 </head>
@@ -785,13 +746,28 @@
         function renderPage(pageNumber) { currentPage = pageNumber; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = ""; if (currentData.length === 0) { reportContainer.innerHTML = "<p>該当する報告はありません。</p>"; return; } const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE; const endIndex = startIndex + ITEMS_PER_PAGE; const pageData = currentData.slice(startIndex, endIndex); pageData.forEach(row => { createReportItem(row); }); renderPagination(); }
         function renderPagination() { const oldPagination = document.querySelector('.Pagination'); if (oldPagination) oldPagination.remove(); const reportContainer = document.getElementById('report-container'); const totalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE); if (totalPages <= 1) return; const paginationDiv = document.createElement('div'); paginationDiv.className = 'Pagination'; for (let i = 1; i <= totalPages; i++) { const btn = document.createElement('a'); btn.className = 'Pagination-Item-Link'; btn.innerText = i; if (i === currentPage) btn.classList.add('isActive'); btn.onclick = function() { renderPage(i); }; paginationDiv.appendChild(btn); } reportContainer.appendChild(paginationDiv); }
         
-        // ★修正：レポート作成関数（ボタンを右下フッターに配置）
+        // ★修正：いいねボタンのロジック変更
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container'); const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }); const name = row[1]; const condition = row[2]; const progress = row[3]; const tomorrow = row[4]; const comment = row[5]; const savedLikes = row[6] ? row[6] : ""; const fileUrl = row[7] ? row[7] : ""; const rowIndex = row[row.length - 1]; 
-            let buttonsHtml = ''; memberList.forEach(memberName => { let btnText = memberName + "いいね👍"; if (savedLikes) { const parts = savedLikes.split(','); const found = parts.find(p => p.trim().startsWith(memberName)); if (found) btnText = found.trim(); } buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `; });
+            
+            let buttonsHtml = ''; 
+            memberList.forEach(memberName => { 
+                let btnText = memberName + "いいね👍"; 
+                if (savedLikes) { 
+                    const parts = savedLikes.split(','); 
+                    const found = parts.find(p => p.trim().startsWith(memberName)); 
+                    if (found) btnText = found.trim(); 
+                } 
+                // ★追加：ログインユーザーとボタンの名前が一致するか確認
+                const isMyButton = (memberName === loggedInUser);
+                const disabledAttr = isMyButton ? "" : "disabled"; // 一致しないなら無効化
+
+                // ★修正：oncontextmenu（右クリック）を削除
+                buttonsHtml += `<button class="like-btn" onclick="addLike(this)" ${disabledAttr}>${btnText}</button> `; 
+            });
+
             let fileHtml = ""; if (fileUrl) { if (fileUrl.indexOf("http") === 0) { fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`; } else { fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; } }
             const div = document.createElement('div'); div.className = 'item';
-            // 構造変更：下部に「card-footer」を追加し、そこに編集ボタンといいねボタンを入れる
             div.innerHTML = `
                 <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
                 <div class="report-header-area"><span style="font-size: 1.3em; font-weight: bold;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span><div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div></div>
@@ -807,9 +783,25 @@
             const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); reportContainer.appendChild(div);
         }
 
-        function updateButtonColor(btn) { const text = btn.innerText; if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) { if (text.indexOf('バッド') !== -1) { btn.style.backgroundColor = '#f0f0ff'; btn.style.borderColor = '#4b0082'; btn.style.color = '#4b0082'; } else { btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00'; } btn.style.fontWeight = 'bold'; } else { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = ''; } }
+        // ★修正：バッド判定を削除してシンプルに
+        function updateButtonColor(btn) { 
+            const text = btn.innerText; 
+            // 数字が含まれている（＝いいね済み）かどうかだけをチェック
+            if (text.match(/\d+$/)) { 
+                btn.style.backgroundColor = '#fff8f0'; 
+                btn.style.borderColor = '#ff7f00'; 
+                btn.style.color = '#ff7f00'; 
+                btn.style.fontWeight = 'bold'; 
+            } else { 
+                btn.style.backgroundColor = ''; 
+                btn.style.borderColor = ''; 
+                btn.style.color = ''; 
+                btn.style.fontWeight = ''; 
+            } 
+        }
+
         function addLike(btn) { let text = btn.innerText; let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart); if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; } updateButtonColor(btn); triggerDebounceSave(btn); }
-        function changeToBad(event, btn) { event.preventDefault(); let textOnly = btn.innerText.split(' ')[0]; if (textOnly.indexOf('いいね👍') !== -1) { btn.innerText = textOnly.replace('いいね👍', 'バッド👎'); } else if (textOnly.indexOf('バッド👎') !== -1) { btn.innerText = textOnly.replace('バッド👎', 'いいね👍'); } updateButtonColor(btn); triggerDebounceSave(btn); }
+        // ★修正：changeToBad関数は削除しました
         function triggerDebounceSave(btn) { const parentDiv = btn.closest('.like-buttons'); const rowIndex = parentDiv.getAttribute('data-row-index'); if (saveTimers[rowIndex]) { clearTimeout(saveTimers[rowIndex]); } saveTimers[rowIndex] = setTimeout(() => { sendLikeToSheet(rowIndex, parentDiv); }, 2000); }
         function sendLikeToSheet(rowIndex, parentDiv) { const btns = parentDiv.querySelectorAll('.like-btn'); const likeData = Array.from(btns).map(b => b.innerText).join(','); const data = { action: 'like', rowIndex: rowIndex, likeData: likeData }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; }).catch(err => console.error("エラー", err)); }
         function showToast() { var x = document.getElementById("toast"); x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500); }
