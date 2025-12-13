@@ -195,149 +195,105 @@
         }
 
         /* ▼ ここからスマホ専用（カードデザイン） ▼ */
+        /* =========================================
+           ▼ スマホ対応＆水色テーマ＆ハンバーガーメニュー ▼
+           ========================================= */
+        
+        /* 全体のテーマカラー（PC・スマホ共通）を水色系に */
+        body {
+            background-color: #e3f2fd; /* 薄い水色の背景 */
+            color: #333;
+        }
+        .sidebar {
+            background-color: #0277bd; /* 濃い水色のメニュー */
+        }
+        .menu-btn {
+            color: white;
+        }
+        .menu-btn:hover, .menu-btn.active {
+            background-color: #4fc3f7; /* 明るい水色 */
+            color: #fff;
+        }
+        .button-group button, .send-btn {
+            background-color: #0288d1; /* ボタンも水色系 */
+        }
+        .button-group button:hover, .send-btn:hover {
+            background-color: #01579b;
+        }
+
+        /* ハンバーガーボタン（普段は隠しておく） */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 2000; /* 最前面に */
+            background-color: #0277bd;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* ▼ スマホ用レイアウト（幅768px以下） ▼ */
         @media (max-width: 768px) {
-            /* 全体レイアウト */
-            body { 
-                flex-direction: column; 
-                height: auto; 
+            /* レイアウト調整 */
+            body, .app-container {
+                flex-direction: column;
+                height: auto;
                 min-height: 100vh;
             }
-            .app-container { 
-                flex-direction: column; 
-                height: auto; 
-                overflow: visible; 
-            }
-
-            /* メニューバーを「アプリのヘッダー」風に */
-            .sidebar {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                overflow-x: auto;
-                padding: 10px 15px;
-                gap: 10px;
-                background-color: #ffffff; /* 白背景 */
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 影で浮かせる */
-                position: sticky;
-                top: 0;
-                z-index: 1000;
-                border-right: none;
-            }
-            .menu-btn {
-                background-color: #f0f0f0;
-                color: #333;
-                border: none;
-                margin: 0;
-                font-size: 13px;
-                padding: 8px 16px;
-                border-radius: 20px; /* 楕円形のボタン */
-            }
-            .menu-btn.active {
-                background-color: #ff7f00; /* 選択中はオレンジ */
-                color: white;
-            }
-
-            /* コンテンツエリア */
             .main-content {
-                padding: 20px 15px;
                 width: 100%;
-                background-color: #f4f7f6;
+                padding: 60px 15px 15px 15px; /* 上にボタン分の余白を空ける */
             }
 
-            /* ▼▼ ここがポイント：日報リストを「カード」にする ▼▼ */
-            /* まず表の「見出し行」を消す */
-            .report-table thead { display: none; }
-            
-            .report-table, .report-table tbody, .report-table tr, .report-table td {
+            /* --- サイドバー（メニュー）の設定 --- */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px; /* 最初は画面の左外に隠す */
+                width: 250px;
+                height: 100%; /* 全画面の高さ */
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 60px; /* 上部に余白 */
+                transition: left 0.3s ease; /* スルッと出すアニメーション */
+                z-index: 1000;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            }
+            /* クラスがついたら表示する */
+            .sidebar.active {
+                left: 0;
+            }
+
+            /* ハンバーガーボタンを表示 */
+            .hamburger {
                 display: block;
+            }
+
+            /* フォームやリストを見やすく */
+            .form-group, .report-row {
+                flex-direction: column;
+            }
+            label, .report-label {
                 width: 100%;
-            }
-
-            /* 1件分の日報（カード） */
-            .report-row {
-                background: #fff;
-                margin-bottom: 20px;
-                padding: 20px;
-                border-radius: 12px; /* 角を丸く */
-                box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* ふんわりした影 */
-                border: 1px solid #eee;
-                position: relative;
-            }
-
-            /* 各項目のデザイン */
-            .report-table td {
-                padding: 5px 0;
-                border: none;
-                text-align: left;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+                border-bottom: 2px solid #81d4fa; /* 水色の下線 */
+                border-left: none;
+                margin-bottom: 5px;
             }
             
-            /* 項目の前にラベルをつける（疑似要素） */
-            .report-table td::before {
-                content: attr(data-label); /* JSでラベル付与が必要 */
-                font-weight: bold;
-                color: #888;
-                font-size: 12px;
-                margin-right: 10px;
-            }
-
-            /* 日付を目立たせる */
-            .report-table td:nth-child(1) { 
-                font-weight: bold; 
-                font-size: 1.1em; 
-                color: #ff7f00; 
-                border-bottom: 1px solid #eee;
-                padding-bottom: 10px;
-                margin-bottom: 10px;
-                display: block; /* 1行独占 */
-            }
-            .report-table td:nth-child(1)::before { display: none; } /* 日付のラベルは消す */
-
-            /* 名前 */
-            .report-table td:nth-child(2) { font-weight: bold; }
-
-            /* 画像（サムネイル）を大きく */
-            .file-link img {
-                width: 100%;
-                max-width: 100%;
-                height: 150px;
-                object-fit: cover;
-                border-radius: 8px;
-                margin-top: 10px;
-            }
-            
-            /* ボタン類を下にまとめる */
-            .report-table td:last-child {
-                margin-top: 15px;
-                padding-top: 15px;
-                border-top: 1px dashed #eee;
-                justify-content: flex-end;
+            /* ボタン類 */
+            .button-group {
+                flex-direction: column-reverse;
                 gap: 10px;
             }
-            .action-btn {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-
-            /* --- 入力フォームもおしゃれに --- */
-            .form-container {
-                background: #fff;
-                border-radius: 12px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-                border: none;
-            }
-            input[type="text"], input[type="date"], textarea, select {
-                border: 1px solid #ddd;
-                border-radius: 8px;
+            button {
+                width: 100%;
                 padding: 12px;
-                background: #fafafa;
-            }
-            input:focus, textarea:focus {
-                background: #fff;
-                border-color: #ff7f00;
-                outline: none;
             }
         }
     </style>
