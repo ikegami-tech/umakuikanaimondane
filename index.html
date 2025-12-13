@@ -116,6 +116,49 @@
         /* --- ハンバーガーメニューボタン（PCでは非表示） --- */
         .hamburger { display: none; }
 
+        /* --- 検索・フィルターエリアのデザイン修正 --- */
+        .list-header {
+            background-color: #f8fbff; /* ほんのり薄い青色でエリアを区別 */
+            padding: 20px;             /* 内側に余白をとる */
+            border-radius: 8px;        /* 角を丸く */
+            border: 1px solid #b3e5fc; /* 薄い枠線で囲む */
+            margin-bottom: 30px;       /* ★重要：下の日報リストとの距離を大きく離す */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03); /* わずかに影をつけて浮き上がらせる */
+        }
+
+        .list-header h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #0277bd;
+            border-bottom: 1px dashed #b3e5fc; /* タイトルの下に点線を入れる */
+            padding-bottom: 10px;
+        }
+
+        .filter-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 検索ボックスとセレクトボックスのデザイン */
+        .filter-select, .filter-input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px; /* スマホでズームしない適切なサイズ */
+        }
+        .filter-select { width: 30%; } /* 名前選択は少し狭く */
+        .filter-input { width: 70%; }  /* 文字検索は広く */
+
+        /* --- スマホ表示時の微調整 --- */
+        @media (max-width: 768px) {
+            .filter-area {
+                flex-direction: column; /* スマホでは縦並びにする */
+            }
+            .filter-select, .filter-input {
+                width: 100%; /* 横幅いっぱいに */
+            }
+        }
         /* --- 過去レポート（カードデザイン） --- */
         /* --- 過去レポート（カードデザイン：見やすく修正版） --- */
         .item { 
