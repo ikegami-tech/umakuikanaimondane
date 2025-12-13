@@ -117,16 +117,53 @@
         .hamburger { display: none; }
 
         /* --- 過去レポート（カードデザイン） --- */
+        /* --- 過去レポート（カードデザイン：見やすく修正版） --- */
         .item { 
             position: relative; 
             background-color: #fff; 
-            border: 1px solid #b3e5fc; 
+            border: 1px solid #ccc; /* 枠線を少しはっきりさせる */
             border-radius: 8px; 
-            padding: 2rem 1.5rem; 
-            margin-bottom: 2rem; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* 軽く影をつけてカード感を出す */
         }
-        .report-row { display: flex; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; }
-        .report-label { border-left: 4px solid #0288d1; }
+
+        /* 横並び(flex)をやめて縦積みにし、文章のスペースを確保 */
+        .report-row { 
+            display: block; 
+            margin-bottom: 20px; 
+            border-bottom: none; 
+            padding-bottom: 0; 
+        }
+
+        /* 項目名（ラベル）のデザイン */
+        .report-label { 
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #333;
+            background-color: #f0f0f0; /* 薄いグレー背景で「見出し」らしく */
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px; /* 本文との間に隙間を作る */
+            border-left: none; /* 左の青線は削除 */
+        }
+
+        /* 本文のデザイン */
+        .report-content {
+            font-size: 1rem;
+            line-height: 1.6; /* 行間を広げて読みやすく */
+            color: #222;
+            padding-left: 5px;
+            white-space: pre-wrap; /* 改行をそのまま表示 */
+        }
+
+        /* 日付と名前のヘッダーエリア */
+        .report-header-area {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee; /* ここに区切り線を入れる */
+        }
         
         /* ★修正：カード下部のフッターエリア（いいね＆編集ボタン） */
         .card-footer {
@@ -205,11 +242,14 @@
                 box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             }
 
-            .form-group, .report-row { flex-direction: column; }
-            label, .report-label {
+            .form-group { flex-direction: column; }
+            /* .report-row は上で block にしたのでここでは削除でOK */
+            
+            label {
                 width: 100%; border-bottom: 2px solid #81d4fa;
                 border-left: none; margin-bottom: 5px; padding-left: 0;
             }
+            /* report-labelの設定も上で共通化したので、スマホ専用設定は削除してOK */
             .button-group { flex-direction: column-reverse; gap: 10px; }
             button { width: 100%; padding: 12px; }
             .condition-group .condition-label { width: calc(50% - 6px); }
