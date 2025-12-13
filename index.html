@@ -262,7 +262,22 @@
             }
             .main-content {
                 width: 100%;
-                padding: 15px; 
+                /* 上部に80pxの余白を入れ、ハンバーガーボタンと被らないようにする */
+                padding-top: 80px; 
+                padding-bottom: 30px;
+                padding-left: 15px;
+                padding-right: 15px;
+                
+                /* コンテンツを中央寄せにする設定 */
+                display: flex;
+                flex-direction: column;
+                align-items: center; 
+            }
+
+            /* 中身の各セクション（入力画面や履歴一覧）の幅を調整 */
+            .content-section {
+                width: 100%;
+                max-width: 600px; /* スマホでも横幅が広がりすぎないように制限 */
             }
             .sidebar {
                 position: fixed;
