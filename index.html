@@ -14,7 +14,7 @@
             color: #333;
         }
 
-        /* --- オーバーレイ（ログイン画面など） --- */
+        /* --- オーバーレイ --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(51, 51, 51, 0.9); z-index: 9999;
@@ -45,7 +45,7 @@
         /* --- アプリ本体 --- */
         .app-container { display: none; width: 100%; height: 100%; }
         
-        /* --- サイドバー（PC版） --- */
+        /* --- サイドバー --- */
         .sidebar {
             width: 200px; 
             background-color: #0277bd; 
@@ -71,7 +71,7 @@
         .content-section { display: none; }
         .content-section.active { display: block; }
 
-        /* --- フォーム・コンテナ --- */
+        /* --- フォーム --- */
         .form-container, .manager-container { 
             background-color: #fff; border: 1px solid #b3e5fc; 
             padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -114,19 +114,52 @@
         .btn-copy { background: #fff; color: #28a745; border: 1px solid #28a745; font-weight: bold; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
 
         /* --- ハンバーガーメニューボタン（PCでは非表示） --- */
-        .hamburger {
-            display: none; /* PCでは消す */
-        }
+        .hamburger { display: none; }
 
-        /* --- 過去レポート --- */
-        .item { position: relative; background-color: #fff; border: 1px solid #b3e5fc; border-radius: 8px; padding: 2rem 1.5rem; margin-bottom: 2rem; }
+        /* --- 過去レポート（カードデザイン） --- */
+        .item { 
+            position: relative; 
+            background-color: #fff; 
+            border: 1px solid #b3e5fc; 
+            border-radius: 8px; 
+            padding: 2rem 1.5rem; 
+            margin-bottom: 2rem; 
+        }
         .report-row { display: flex; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; }
         .report-label { border-left: 4px solid #0288d1; }
+        
+        /* ★修正：カード下部のフッターエリア（いいね＆編集ボタン） */
+        .card-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #e0e0e0;
+            display: flex;
+            justify-content: flex-end; /* 右寄せ */
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* いいねボタンエリア */
+        .like-buttons { 
+            display: flex; 
+            gap: 5px; 
+            flex-wrap: wrap; 
+            justify-content: flex-end;
+        }
+        .like-btn { font-size: 11px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 15px; background-color: #fff; cursor: pointer; transition: 0.2s; }
+        .like-btn:hover { background-color: #e1f5fe; border-color: #0288d1; }
+        
+        /* 削除ボタン（これは左上に残す） */
+        .delete-btn { position: absolute; top: -10px; left: -10px; width: 30px; height: 30px; background: #ff4d4d; color: white; border-radius: 50%; border: none; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; z-index: 10; }
+        
+        /* 編集ボタン（フッター内に移動） */
+        .edit-btn { padding: 6px 15px; background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+
+        /* その他ユーティリティ */
         .Pagination { display: flex; justify-content: center; margin: 40px 0; gap: 10px; }
         .Pagination-Item-Link { width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; border: 1px solid #ccc; cursor: pointer; text-decoration: none; color: #333; background: #fff; }
         .Pagination-Item-Link.isActive { background: #0288d1; color: white; border-color: #0288d1; pointer-events: none; }
-
-        /* その他ユーティリティ */
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
@@ -142,7 +175,6 @@
            ▼ スマホ対応（水色テーマ＆ハンバーガーメニュー） ▼
            ========================================= */
         @media (max-width: 768px) {
-            /* レイアウト縦並び */
             body, .app-container {
                 flex-direction: column;
                 height: auto;
@@ -150,73 +182,37 @@
             }
             .main-content {
                 width: 100%;
-                /* 上の余白を少し減らす */
-                padding: 15px 15px 15px 15px; 
+                padding: 15px; 
             }
-
-            /* --- サイドバー（メニュー）を隠す設定 --- */
             .sidebar {
                 position: fixed;
-                top: 0;
-                left: -250px; /* 最初は画面の左外に隠す */
-                width: 250px;
-                height: 100%; /* 全画面の高さ */
-                flex-direction: column;
-                justify-content: flex-start;
-                padding-top: 60px; /* ボタンと被らないよう余白 */
-                z-index: 1000;
+                top: 0; left: -250px; 
+                width: 250px; height: 100%; 
+                flex-direction: column; justify-content: flex-start;
+                padding-top: 60px; z-index: 1000;
                 box-shadow: 2px 0 10px rgba(0,0,0,0.2);
             }
-            /* activeクラスがついたら出てくる */
-            .sidebar.active {
-                left: 0;
-            }
-
-            /* ★ハンバーガーボタンの設定（左上に小さく表示） */
-            .hamburger {
-                display: flex; /* スマホのみ表示 */
-                justify-content: center;
-                align-items: center;
-                position: fixed;
-                top: 15px;    /* 上からの位置 */
-                left: 15px;   /* 左からの位置 */
-                width: 50px;  /* 幅 */
-                height: 50px; /* 高さ */
-                border-radius: 50%; /* 丸くする */
-                z-index: 2000; /* 最前面に */
-                background-color: #0277bd;
-                color: white;
-                border: none;
-                font-size: 24px;
-                cursor: pointer;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* 影をつけて浮いているように見せる */
-            }
-
-            /* フォームやリストをスマホ用に縦積みに */
-            .form-group, .report-row {
-                flex-direction: column;
-            }
-            label, .report-label {
-                width: 100%;
-                border-bottom: 2px solid #81d4fa;
-                border-left: none;
-                margin-bottom: 5px;
-                padding-left: 0;
-            }
+            .sidebar.active { left: 0; }
             
-            /* ボタン類 */
-            .button-group {
-                flex-direction: column-reverse;
-                gap: 10px;
+            /* ハンバーガーボタン（左上固定） */
+            .hamburger {
+                display: flex; justify-content: center; align-items: center;
+                position: fixed; top: 15px; left: 15px;
+                width: 50px; height: 50px; border-radius: 50%;
+                z-index: 2000;
+                background-color: #0277bd; color: white; border: none;
+                font-size: 24px; cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             }
-            button {
-                width: 100%;
-                padding: 12px;
+
+            .form-group, .report-row { flex-direction: column; }
+            label, .report-label {
+                width: 100%; border-bottom: 2px solid #81d4fa;
+                border-left: none; margin-bottom: 5px; padding-left: 0;
             }
-            /* ラジオボタンを2列に */
-            .condition-group .condition-label {
-                width: calc(50% - 6px);
-            }
+            .button-group { flex-direction: column-reverse; gap: 10px; }
+            button { width: 100%; padding: 12px; }
+            .condition-group .condition-label { width: calc(50% - 6px); }
         }
     </style>
 </head>
@@ -268,9 +264,7 @@
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
             <button class="menu-btn" onclick="openCheckModal()">📅 記入確認</button>
-            
             <button class="menu-btn" onclick="switchTab('password')">🔑 パスワード変更</button>
-            
             <button class="menu-btn logout" onclick="logout()">🚪 ログアウト</button>
         </div>
 
@@ -692,14 +686,29 @@
         function addNewMember() { const newNameInput = document.getElementById('new-member-name'); const newName = newNameInput.value; if (!newName) { alert("名前を入力してください"); return; } memberList.push(newName); renderMemberRadios(); renderFilterOptions(); toggleAddMember(); newNameInput.value = ""; const data = { action: 'addMember', newName: newName }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); }
         function renderPage(pageNumber) { currentPage = pageNumber; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = ""; if (currentData.length === 0) { reportContainer.innerHTML = "<p>該当する報告はありません。</p>"; return; } const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE; const endIndex = startIndex + ITEMS_PER_PAGE; const pageData = currentData.slice(startIndex, endIndex); pageData.forEach(row => { createReportItem(row); }); renderPagination(); }
         function renderPagination() { const oldPagination = document.querySelector('.Pagination'); if (oldPagination) oldPagination.remove(); const reportContainer = document.getElementById('report-container'); const totalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE); if (totalPages <= 1) return; const paginationDiv = document.createElement('div'); paginationDiv.className = 'Pagination'; for (let i = 1; i <= totalPages; i++) { const btn = document.createElement('a'); btn.className = 'Pagination-Item-Link'; btn.innerText = i; if (i === currentPage) btn.classList.add('isActive'); btn.onclick = function() { renderPage(i); }; paginationDiv.appendChild(btn); } reportContainer.appendChild(paginationDiv); }
+        
+        // ★修正：レポート作成関数（ボタンを右下フッターに配置）
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container'); const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }); const name = row[1]; const condition = row[2]; const progress = row[3]; const tomorrow = row[4]; const comment = row[5]; const savedLikes = row[6] ? row[6] : ""; const fileUrl = row[7] ? row[7] : ""; const rowIndex = row[row.length - 1]; 
             let buttonsHtml = ''; memberList.forEach(memberName => { let btnText = memberName + "いいね👍"; if (savedLikes) { const parts = savedLikes.split(','); const found = parts.find(p => p.trim().startsWith(memberName)); if (found) btnText = found.trim(); } buttonsHtml += `<button class="like-btn" onclick="addLike(this)" oncontextmenu="changeToBad(event, this)">${btnText}</button> `; });
             let fileHtml = ""; if (fileUrl) { if (fileUrl.indexOf("http") === 0) { fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`; } else { fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; } }
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `<button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button><div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div><div class="report-header-area"><span style="font-size: 1.3em; font-weight: bold;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span><div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div></div><div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div><div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div><div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>${fileHtml}<button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>`;
+            // 構造変更：下部に「card-footer」を追加し、そこに編集ボタンといいねボタンを入れる
+            div.innerHTML = `
+                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
+                <div class="report-header-area"><span style="font-size: 1.3em; font-weight: bold;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span><div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div></div>
+                <div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div>
+                <div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div>
+                <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
+                ${fileHtml}
+                <div class="card-footer">
+                    <div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div>
+                    <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
+                </div>
+            `;
             const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); reportContainer.appendChild(div);
         }
+
         function updateButtonColor(btn) { const text = btn.innerText; if (text.indexOf(' 1') !== -1 || text.match(/\d+$/) || text.indexOf('バッド') !== -1) { if (text.indexOf('バッド') !== -1) { btn.style.backgroundColor = '#f0f0ff'; btn.style.borderColor = '#4b0082'; btn.style.color = '#4b0082'; } else { btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00'; } btn.style.fontWeight = 'bold'; } else { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = ''; } }
         function addLike(btn) { let text = btn.innerText; let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart); if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; } updateButtonColor(btn); triggerDebounceSave(btn); }
         function changeToBad(event, btn) { event.preventDefault(); let textOnly = btn.innerText.split(' ')[0]; if (textOnly.indexOf('いいね👍') !== -1) { btn.innerText = textOnly.replace('いいね👍', 'バッド👎'); } else if (textOnly.indexOf('バッド👎') !== -1) { btn.innerText = textOnly.replace('バッド👎', 'いいね👍'); } updateButtonColor(btn); triggerDebounceSave(btn); }
