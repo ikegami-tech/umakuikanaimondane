@@ -173,6 +173,120 @@
             background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px;
             margin-bottom: 20px; display: none; align-items: center; justify-content: space-between;
         }
+        /* =========================================
+           ▼ ここからスマホ用デザイン（レスポンシブ） ▼
+           ========================================= */
+        @media (max-width: 768px) {
+            /* --- 全体のレイアウト --- */
+            body { 
+                flex-direction: column; /* 全体を縦並びにする */
+                height: auto; 
+                min-height: 100vh;
+            }
+            .app-container { 
+                flex-direction: column; /* サイドバーとメインを縦並びに */
+                height: auto;
+                overflow: visible; /* スクロール制限を解除 */
+            }
+
+            /* --- サイドバー（メニュー）を上に配置 --- */
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row; /* ボタンを横並びに */
+                overflow-x: auto; /* ボタンが多いのではみ出たらスクロール */
+                padding: 10px;
+                gap: 10px;
+                background-color: #222;
+                position: sticky; /* 上に固定 */
+                top: 0;
+                z-index: 1000;
+                white-space: nowrap; /* ボタンの折り返し防止 */
+            }
+            .sidebar h2 { display: none; } /* 「メニュー」という文字は消す */
+            
+            .menu-btn {
+                width: auto;
+                flex-shrink: 0; /* 縮まないようにする */
+                font-size: 12px;
+                padding: 8px 12px;
+                margin-top: 0 !important; /* ログアウトボタンの位置調整リセット */
+            }
+            /* ログアウト等のボタンも他と同じ並びに */
+            .menu-btn.logout { margin-top: 0; background: #555; border: none; }
+
+            /* --- メインコンテンツ --- */
+            .main-content {
+                padding: 15px; /* 余白を少し狭く */
+                width: 100%;
+            }
+            .main-content h1 { font-size: 20px; margin-bottom: 20px; }
+
+            /* --- フォーム周り --- */
+            .form-container, .manager-container {
+                padding: 1.5rem 1rem; /* 内側の余白を調整 */
+            }
+            .form-group {
+                flex-direction: column; /* ラベルと入力欄を縦積みに */
+            }
+            label {
+                width: 100%;
+                border-left: none;
+                border-bottom: 2px solid #ff7f00; /* 下線スタイルに変更 */
+                margin-bottom: 8px;
+                padding-left: 0;
+            }
+            
+            /* --- ボタンや入力欄 --- */
+            input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea, select {
+                font-size: 16px; /* スマホで文字が小さくなりすぎないように */
+            }
+            .button-group {
+                flex-direction: column-reverse; /* 送信ボタンを上に、キャンセルを下に */
+                gap: 15px;
+            }
+            button.send-btn, #cancel-edit-btn {
+                width: 100%; /* ボタンを横幅いっぱいに */
+                padding: 12px;
+            }
+
+            /* --- 体調などのラジオボタン --- */
+            .condition-group .condition-label {
+                width: calc(50% - 6px); /* 2列表示にする */
+                font-size: 13px;
+                padding: 8px;
+                justify-content: center;
+            }
+
+            /* --- ログイン画面 --- */
+            .auth-box, .login-box {
+                width: 90%; /* 画面幅いっぱいになりすぎないように */
+                padding: 20px;
+            }
+
+            /* --- リスト表示 --- */
+            .item {
+                padding: 1.5rem 1rem;
+            }
+            .report-row {
+                flex-direction: column;
+            }
+            .report-label {
+                width: 100%;
+                border-left: none;
+                border-bottom: 2px solid #ddd;
+                margin-bottom: 5px;
+                color: #555;
+                font-size: 14px;
+            }
+            
+            /* --- カレンダー --- */
+            .calendar-day {
+                height: 40px; /* 少し高さを縮める */
+                font-size: 12px;
+                padding: 2px;
+            }
+        }
     </style>
 </head>
 <body>
