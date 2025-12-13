@@ -64,13 +64,10 @@
 
         .main-content {
             width: 100%;
-            /* ★修正: 上部に80pxの余白を入れ、ハンバーガーボタンと被らないようにする */
             padding-top: 80px; 
             padding-bottom: 30px;
             padding-left: 15px;
             padding-right: 15px;
-            
-            /* ★修正: コンテンツを中央寄せにする設定 */
             display: flex;
             flex-direction: column;
             align-items: center; 
@@ -79,11 +76,10 @@
         .main-content h1 {
             text-align: center !important; width: 100%; margin-bottom: 30px; margin-top: 0; color: #01579b;
         }
-        /* ★修正: 中身の各セクションの幅を制限して中央に寄せる */
         .content-section { 
             display: none; 
             width: 100%;
-            max-width: 800px; /* PCで見ても広がりすぎないように */
+            max-width: 800px;
         }
         .content-section.active { display: block; }
 
@@ -134,12 +130,12 @@
 
         /* --- 検索・フィルターエリアのデザイン --- */
         .list-header {
-            background-color: #f8fbff; /* ほんのり薄い青色でエリアを区別 */
-            padding: 20px;             /* 内側に余白をとる */
-            border-radius: 8px;        /* 角を丸く */
-            border: 1px solid #b3e5fc; /* 薄い枠線で囲む */
-            margin-bottom: 30px;       /* 下の日報リストとの距離を大きく離す */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03); /* わずかに影をつけて浮き上がらせる */
+            background-color: #f8fbff; 
+            padding: 20px;             
+            border-radius: 8px;        
+            border: 1px solid #b3e5fc; 
+            margin-bottom: 30px;       
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03); 
         }
         .list-header h2 {
             margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; color: #0277bd;
@@ -198,12 +194,11 @@
         .like-btn { font-size: 11px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 15px; background-color: #fff; cursor: pointer; transition: 0.2s; }
         .like-btn:hover { background-color: #e1f5fe; border-color: #0288d1; }
         
-        /* ★追加：自分のボタン以外（disabled状態）のスタイル */
         .like-btn:disabled {
-            background-color: #f5f5f5; /* 背景をグレーに */
-            color: #aaa;               /* 文字色を薄く */
-            border-color: #ddd;        /* 枠線も薄く */
-            cursor: not-allowed;       /* カーソルを禁止マークに */
+            background-color: #f5f5f5; 
+            color: #aaa;               
+            border-color: #ddd;        
+            cursor: not-allowed;       
             opacity: 0.7;
         }
         .like-btn:disabled:hover { background-color: #f5f5f5; border-color: #ddd; }
@@ -221,13 +216,22 @@
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        
+        /* カレンダーモーダル */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
         .modal-content { background-color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
         .close-modal { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 20px; }
         .calendar-header { font-weight: bold; text-align: center; padding: 5px; background: #eee; }
-        .calendar-day { border: 1px solid #ddd; height: 60px; padding: 5px; font-size: 14px; cursor: pointer; }
-        .day-missing { background-color: #ffcccc; } .day-holiday { background-color: #cceeff; } .day-submitted { background-color: #ffffff; } .day-future { background-color: #f9f9f9; color: #ccc; cursor: default; }
+        .calendar-day { border: 1px solid #ddd; height: 60px; padding: 5px; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .day-missing { background-color: #ffcccc; } 
+        .day-holiday { background-color: #cceeff; } 
+        .day-submitted { background-color: #ffffff; } 
+        .day-future { background-color: #f9f9f9; color: #ccc; cursor: default; }
+
+        /* 休日設定モードのスイッチ用 */
+        .mode-switch-area { margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 6px; text-align: center; }
+        .switch-label { font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
 
         /* =========================================
            ▼ スマホ対応（水色テーマ＆ハンバーガーメニュー） ▼
@@ -445,12 +449,23 @@
                 <p>チェックしたい人を選んでください：</p>
                 <div id="check-member-radios" class="condition-group"></div>
             </div>
-            <button class="send-btn" onclick="renderCalendar()">確認する</button>
+            
+            <div class="mode-switch-area">
+                <label class="switch-label">
+                    <input type="checkbox" id="holiday-mode-check">
+                    <span>✏️ 休日設定モード</span>
+                </label>
+                <div style="font-size:12px; color:#666; margin-top:5px;">
+                    ※チェックを入れると、日付タップで「休み」を変更できます
+                </div>
+            </div>
+
+            <button class="send-btn" onclick="renderCalendar()" style="margin-top:15px;">更新する</button>
             <div id="calendar-area"></div>
             <div style="margin-top:10px; font-size:12px; text-align:right;">
                 <span style="display:inline-block; width:12px; height:12px; background:#fff; border:1px solid #ccc;"></span> 提出済
                 <span style="display:inline-block; width:12px; height:12px; background:#ffcccc; margin-left:10px;"></span> 未提出
-                <span style="display:inline-block; width:12px; height:12px; background:#cceeff; margin-left:10px;"></span> 休日(火水)
+                <span style="display:inline-block; width:12px; height:12px; background:#cceeff; margin-left:10px;"></span> 休み
             </div>
         </div>
     </div>
@@ -458,183 +473,81 @@
     <div id="toast">送信完了しました！</div>
 
     <script>
-        // ★重要：あなたのGAS URL (そのまま残してあります)
+        // ★重要：あなたのGAS URL
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxdHqdqmuc5CZHXwFSgqsBrrUEUkLoKI2XICSIVFXh2TlMUX1jvuYq61ptmQqEsaEHXvg/exec"; 
 
         // --- 画面切り替え ---
-        function showLogin() {
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-            document.getElementById('login-overlay').style.display = 'flex';
-        }
-        function showRegister() {
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-            document.getElementById('register-overlay').style.display = 'flex';
-        }
-        function showReset() {
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-            document.getElementById('reset-overlay').style.display = 'flex';
-        }
+        function showLogin() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('login-overlay').style.display = 'flex'; }
+        function showRegister() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('register-overlay').style.display = 'flex'; }
+        function showReset() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('reset-overlay').style.display = 'flex'; }
 
-        // --- 新規登録処理 ---
         function tryRegister() {
-            const id = document.getElementById('reg-id').value;
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const msg = document.getElementById('reg-msg');
-            const btn = document.getElementById('reg-btn');
-
+            const id = document.getElementById('reg-id').value; const name = document.getElementById('reg-name').value; const email = document.getElementById('reg-email').value; const pass = document.getElementById('reg-pass').value; const msg = document.getElementById('reg-msg'); const btn = document.getElementById('reg-btn');
             if(!id || !name || !email || !pass) { msg.innerText = "すべての項目を入力してください"; return; }
             msg.innerText = "登録中..."; btn.disabled = true;
-
             const data = { action: 'register', id: id, name: name, email: email, password: pass };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => {
-                alert("登録しました！ログイン画面に戻ります。");
-                location.reload(); 
-            })
-            .catch(err => {
-                msg.innerText = "エラーが発生しました"; btn.disabled = false;
-            });
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("登録しました！ログイン画面に戻ります。"); location.reload(); }).catch(err => { msg.innerText = "エラーが発生しました"; btn.disabled = false; });
         }
 
-        // --- パスワードリセット処理 ---
         function tryReset() {
-            const id = document.getElementById('reset-id').value;
-            const email = document.getElementById('reset-email').value;
-            const msg = document.getElementById('reset-msg');
-            const btn = document.getElementById('reset-btn');
-
+            const id = document.getElementById('reset-id').value; const email = document.getElementById('reset-email').value; const msg = document.getElementById('reset-msg'); const btn = document.getElementById('reset-btn');
             if(!id || !email) { msg.innerText = "IDとメールアドレスを入力してください"; return; }
             msg.innerText = "送信中..."; btn.disabled = true;
-
             const data = { action: 'resetPassword', id: id, email: email };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => {
-                alert("リセットリクエストを送信しました。\nIDとメールアドレスが一致していれば、仮パスワードがメールで届きます。");
-                showLogin();
-                document.getElementById('reset-id').value = "";
-                document.getElementById('reset-email').value = "";
-                msg.innerText = "";
-                btn.disabled = false;
-            })
-            .catch(err => {
-                msg.innerText = "通信エラー"; btn.disabled = false;
-            });
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("リセットリクエストを送信しました。"); showLogin(); document.getElementById('reset-id').value = ""; document.getElementById('reset-email').value = ""; msg.innerText = ""; btn.disabled = false; }).catch(err => { msg.innerText = "通信エラー"; btn.disabled = false; });
         }
 
-        // --- パスワード変更処理 ---
         function changePassword() {
-            const currentPass = document.getElementById('cp-current').value;
-            const newPass = document.getElementById('cp-new').value;
-            const confirmPass = document.getElementById('cp-confirm').value;
-            const msg = document.getElementById('cp-msg');
-            const myId = localStorage.getItem('login_user_id'); 
-
-            if (!currentPass || !newPass || !confirmPass) {
-                msg.innerText = "すべての項目を入力してください"; return;
-            }
-            if (newPass !== confirmPass) {
-                msg.innerText = "新しいパスワードが一致しません"; return;
-            }
-            
+            const currentPass = document.getElementById('cp-current').value; const newPass = document.getElementById('cp-new').value; const confirmPass = document.getElementById('cp-confirm').value; const msg = document.getElementById('cp-msg'); const myId = localStorage.getItem('login_user_id'); 
+            if (!currentPass || !newPass || !confirmPass) { msg.innerText = "すべての項目を入力してください"; return; }
+            if (newPass !== confirmPass) { msg.innerText = "新しいパスワードが一致しません"; return; }
             msg.innerText = "変更中...";
-            
-            const data = { 
-                action: 'changePassword', 
-                id: myId, 
-                currentPass: currentPass, 
-                newPass: newPass 
-            };
-
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(() => {
-                alert("パスワード変更リクエストを送信しました。\n(現在のパスワードが正しい場合のみ変更されます)");
-                document.getElementById('cp-current').value = "";
-                document.getElementById('cp-new').value = "";
-                document.getElementById('cp-confirm').value = "";
-                msg.innerText = "";
-            })
-            .catch(err => {
-                msg.innerText = "エラーが発生しました";
-            });
+            const data = { action: 'changePassword', id: myId, currentPass: currentPass, newPass: newPass };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("パスワード変更リクエストを送信しました。"); document.getElementById('cp-current').value = ""; document.getElementById('cp-new').value = ""; document.getElementById('cp-confirm').value = ""; msg.innerText = ""; }).catch(err => { msg.innerText = "エラーが発生しました"; });
         }
 
-        // --- ログアウト処理 ---
         function logout() {
             if(!confirm("ログアウトしますか？")) return;
-            localStorage.removeItem('login_user_id');
-            localStorage.removeItem('login_user_name');
-            localStorage.removeItem('login_time');
-            loggedInUser = null;
-            lastSelection = { name: null, condition: null };
-            document.getElementById('app-container').style.display = 'none';
-            showLogin();
-            document.getElementById('login-id').value = "";
-            document.getElementById('login-password').value = "";
-            document.getElementById('login-msg').innerText = "";
-            alert("ログアウトしました");
+            localStorage.removeItem('login_user_id'); localStorage.removeItem('login_user_name'); localStorage.removeItem('login_time');
+            loggedInUser = null; lastSelection = { name: null, condition: null };
+            document.getElementById('app-container').style.display = 'none'; showLogin();
+            document.getElementById('login-id').value = ""; document.getElementById('login-password').value = ""; document.getElementById('login-msg').innerText = ""; alert("ログアウトしました");
         }
 
-        let allData = [], currentData = [], memberList = [];
+        let allData = [], currentData = [], memberList = [], holidayList = []; // ★追加：holidayList
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1, saveTimers = {}, isEditing = false, editingRowIndex = null, currentEditingFileUrl = "", targetReportDate = null, lastSelection = { name: null, condition: null }, loggedInUser = null; 
 
         function checkLoginSession() {
-            const savedId = localStorage.getItem('login_user_id');
-            const savedTime = localStorage.getItem('login_time');
-            const savedName = localStorage.getItem('login_user_name');
+            const savedId = localStorage.getItem('login_user_id'); const savedTime = localStorage.getItem('login_time'); const savedName = localStorage.getItem('login_user_name');
             if (savedId && savedTime && savedName) {
                 const now = new Date().getTime();
-                if ((now - parseInt(savedTime)) < 10 * 60 * 1000) {
-                    loggedInUser = savedName;
-                    document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-                    document.getElementById('app-container').style.display = 'flex';
-                    fetchData(); return; 
-                }
+                if ((now - parseInt(savedTime)) < 10 * 60 * 1000) { loggedInUser = savedName; document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('app-container').style.display = 'flex'; fetchData(); return; }
             }
             localStorage.removeItem('login_user_id'); localStorage.removeItem('login_user_name'); localStorage.removeItem('login_time');
         }
 
         function tryLogin() {
-            const id = document.getElementById('login-id').value;
-            const pass = document.getElementById('login-password').value;
-            const msg = document.getElementById('login-msg');
-            const btn = document.getElementById('login-btn');
+            const id = document.getElementById('login-id').value; const pass = document.getElementById('login-password').value; const msg = document.getElementById('login-msg'); const btn = document.getElementById('login-btn');
             if(!id || !pass) { msg.innerText = "IDとパスワードを入力してください"; return; }
             msg.innerText = "確認中..."; btn.disabled = true;
             const loginUrl = GAS_URL + '?action=login&id=' + encodeURIComponent(id) + '&password=' + encodeURIComponent(pass) + '&t=' + new Date().getTime();
             fetch(loginUrl).then(response => response.json()).then(data => {
                 if (data.auth === true) {
-                    const now = new Date().getTime();
-                    localStorage.setItem('login_user_id', id); localStorage.setItem('login_user_name', data.name); localStorage.setItem('login_time', now);
-                    document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-                    document.getElementById('app-container').style.display = 'flex';
-                    loggedInUser = data.name; fetchData(); 
-                } else {
-                    msg.innerText = data.message; btn.disabled = false; document.getElementById('login-password').value = "";
-                }
+                    const now = new Date().getTime(); localStorage.setItem('login_user_id', id); localStorage.setItem('login_user_name', data.name); localStorage.setItem('login_time', now);
+                    document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('app-container').style.display = 'flex'; loggedInUser = data.name; fetchData(); 
+                } else { msg.innerText = data.message; btn.disabled = false; document.getElementById('login-password').value = ""; }
             }).catch(err => { msg.innerText = "通信エラー"; console.error(err); btn.disabled = false; });
         }
 
         window.onload = function() { checkLoginSession(); setTodayDate(); };
-        function setTodayDate() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = ('0' + (today.getMonth() + 1)).slice(-2);
-            const dd = ('0' + today.getDate()).slice(-2);
-            document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
-        }
+        function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
 
         function switchTab(tabName) {
-            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active')); document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             const buttons = document.querySelectorAll('.menu-btn');
-            if(tabName === 'member') buttons[0].classList.add('active');
-            if(tabName === 'input') buttons[1].classList.add('active');
-            if(tabName === 'history') buttons[2].classList.add('active');
-            if(tabName === 'password') buttons[4].classList.add('active');
+            if(tabName === 'member') buttons[0].classList.add('active'); if(tabName === 'input') buttons[1].classList.add('active'); if(tabName === 'history') buttons[2].classList.add('active'); if(tabName === 'password') buttons[4].classList.add('active');
         }
         function saveSelection(key, value) { localStorage.setItem(key, value); }
         function setupAutoSave() {
@@ -642,31 +555,20 @@
             textFields.forEach(id => { document.getElementById(id).addEventListener('input', function() { saveSelection('saved_' + id, this.value); }); });
         }
         function restoreSelections() {
-            if (loggedInUser) {
-                 const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`);
-                 if (nameRadio) { nameRadio.checked = true; lastSelection.name = loggedInUser; saveSelection('saved_name', loggedInUser); }
-            } else {
-                const savedName = localStorage.getItem('saved_name');
-                if (savedName) { const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; } }
-            }
-            const savedCondition = localStorage.getItem('saved_condition');
-            if (savedCondition) { const condRadio = document.querySelector(`input[name="condition"][value="${savedCondition}"]`); if (condRadio) { condRadio.checked = true; lastSelection.condition = savedCondition; } }
+            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = loggedInUser; saveSelection('saved_name', loggedInUser); } } 
+            else { const savedName = localStorage.getItem('saved_name'); if (savedName) { const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; } } }
+            const savedCondition = localStorage.getItem('saved_condition'); if (savedCondition) { const condRadio = document.querySelector(`input[name="condition"][value="${savedCondition}"]`); if (condRadio) { condRadio.checked = true; lastSelection.condition = savedCondition; } }
             const savedProgress = localStorage.getItem('saved_progress'); if (savedProgress) document.getElementById('progress').value = savedProgress;
             const savedTomorrow = localStorage.getItem('saved_tomorrow'); if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
             const savedComment = localStorage.getItem('saved_comment'); if (savedComment) document.getElementById('comment').value = savedComment;
         }
-        function toggleRadio(radio, type) {
-            if (lastSelection[type] === radio.value) { radio.checked = false; lastSelection[type] = null; saveSelection('saved_' + type, ''); } 
-            else { lastSelection[type] = radio.value; saveSelection('saved_' + type, radio.value); }
-        }
+        function toggleRadio(radio, type) { if (lastSelection[type] === radio.value) { radio.checked = false; lastSelection[type] = null; saveSelection('saved_' + type, ''); } else { lastSelection[type] = radio.value; saveSelection('saved_' + type, radio.value); } }
         function getSelectedCondition() { const selected = document.querySelector('input[name="condition"]:checked'); return selected ? selected.value : ''; }
         function getSelectedName() { const selected = document.querySelector('#name-radios input[name="name"]:checked'); return selected ? selected.value : ''; }
         function getSelectedManagerName() { const selected = document.querySelector('#manage-member-radios input[name="manager-name"]:checked'); return selected ? selected.value : ''; }
         function resetForm() {
-            document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false);
-            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) nameRadio.checked = true; }
-            document.querySelectorAll('input[name="condition"]').forEach(radio => radio.checked = false);
-            document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
+            document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false); if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) nameRadio.checked = true; }
+            document.querySelectorAll('input[name="condition"]').forEach(radio => radio.checked = false); document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
             setTodayDate(); cancelEdit(); resetDate();
             if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } else { lastSelection = { name: null, condition: null }; }
             localStorage.removeItem('saved_condition'); localStorage.removeItem('saved_progress'); localStorage.removeItem('saved_tomorrow'); localStorage.removeItem('saved_comment');
@@ -674,12 +576,10 @@
         function copyLastTomorrow() {
             const name = getSelectedName(); if (!name) { alert("まずは名前を選択してください"); return; }
             const lastReport = allData.find(row => row[1] === name);
-            if (lastReport) {
-                const tomorrowTask = lastReport[4]; if (!tomorrowTask) { alert("前回の報告に「明日の業務」が記入されていませんでした"); return; }
-                if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) { document.getElementById('progress').value = tomorrowTask; saveSelection('saved_progress', tomorrowTask); document.getElementById("toast").innerText = "コピーしました！"; showToast(); }
-            } else { alert("前回の報告データが見つかりませんでした"); }
+            if (lastReport) { const tomorrowTask = lastReport[4]; if (!tomorrowTask) { alert("前回の報告に「明日の業務」が記入されていませんでした"); return; } if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) { document.getElementById('progress').value = tomorrowTask; saveSelection('saved_progress', tomorrowTask); document.getElementById("toast").innerText = "コピーしました！"; showToast(); } } else { alert("前回の報告データが見つかりませんでした"); }
         }
         function resetDate() { targetReportDate = null; document.getElementById('date-alert').style.display = 'none'; document.getElementById('form-container').classList.remove('past-mode'); setTodayDate(); }
+        
         function startReportForDate(year, month, day) {
             const mm = ('0' + (month + 1)).slice(-2); const dd = ('0' + day).slice(-2);
             document.getElementById('report-date').value = `${year}-${mm}-${dd}`;
@@ -689,6 +589,7 @@
             const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
             if (targetName) { const nameRadios = document.querySelectorAll('#name-radios input[name="name"]'); nameRadios.forEach(r => { if (r.value === targetName) { r.checked = true; lastSelection.name = targetName; } else { r.checked = false; } }); saveSelection('saved_name', targetName); }
         }
+
         function updateManagerButtonState() { const name = getSelectedManagerName(); const deleteBtn = document.getElementById('delete-member-btn'); if (name) deleteBtn.style.display = 'block'; else deleteBtn.style.display = 'none'; }
         function deleteMember() {
             const name = getSelectedManagerName(); if (!name) return;
@@ -697,6 +598,7 @@
             const data = { action: 'deleteMember', targetName: name };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
+
         async function sendData() {
             const dateVal = document.getElementById('report-date').value; const name = getSelectedName(); const condition = getSelectedCondition(); const progress = document.getElementById('progress').value; const tomorrow = document.getElementById('tomorrow').value; const comment = document.getElementById('comment').value; const fileInput = document.getElementById('file-attach');
             if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { alert("全ての項目を入力・選択してください"); return; }
@@ -707,14 +609,17 @@
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = isEditing ? "修正しました！" : "送信完了しました！"; showToast(); resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信"; }).catch(err => { alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; });
         }
         function readFileAsBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => { const result = reader.result; const base64 = result.split(',')[1]; resolve(base64); }; reader.onerror = error => reject(error); reader.readAsDataURL(file); }); }
+        
         function fetchData() {
             const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "<p>データを取得中...</p>";
             fetch(GAS_URL + '?t=' + new Date().getTime()).then(response => response.json()).then(data => {
                 if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections(); }
+                if (data.holidays) { holidayList = data.holidays; } // ★追加
                 allData = (data.reports || []).reverse(); currentData = allData;
                 if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; } applyFilter();
             }).catch(err => { reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; console.error(err); });
         }
+
         function deleteReport(rowIndex) {
             if (!confirm("本当に削除しますか？\n（この操作は取り消せません）")) return;
             const data = { action: 'delete', rowIndex: rowIndex }; document.getElementById('report-container').style.opacity = "0.5";
@@ -746,96 +651,111 @@
         function renderPage(pageNumber) { currentPage = pageNumber; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = ""; if (currentData.length === 0) { reportContainer.innerHTML = "<p>該当する報告はありません。</p>"; return; } const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE; const endIndex = startIndex + ITEMS_PER_PAGE; const pageData = currentData.slice(startIndex, endIndex); pageData.forEach(row => { createReportItem(row); }); renderPagination(); }
         function renderPagination() { const oldPagination = document.querySelector('.Pagination'); if (oldPagination) oldPagination.remove(); const reportContainer = document.getElementById('report-container'); const totalPages = Math.ceil(currentData.length / ITEMS_PER_PAGE); if (totalPages <= 1) return; const paginationDiv = document.createElement('div'); paginationDiv.className = 'Pagination'; for (let i = 1; i <= totalPages; i++) { const btn = document.createElement('a'); btn.className = 'Pagination-Item-Link'; btn.innerText = i; if (i === currentPage) btn.classList.add('isActive'); btn.onclick = function() { renderPage(i); }; paginationDiv.appendChild(btn); } reportContainer.appendChild(paginationDiv); }
         
-        // ★修正：いいねボタンのロジック変更
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container'); const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }); const name = row[1]; const condition = row[2]; const progress = row[3]; const tomorrow = row[4]; const comment = row[5]; const savedLikes = row[6] ? row[6] : ""; const fileUrl = row[7] ? row[7] : ""; const rowIndex = row[row.length - 1]; 
-            
             let buttonsHtml = ''; 
             memberList.forEach(memberName => { 
                 let btnText = memberName + "いいね👍"; 
-                if (savedLikes) { 
-                    const parts = savedLikes.split(','); 
-                    const found = parts.find(p => p.trim().startsWith(memberName)); 
-                    if (found) btnText = found.trim(); 
-                } 
-                // ★追加：ログインユーザーとボタンの名前が一致するか確認
-                const isMyButton = (memberName === loggedInUser);
-                const disabledAttr = isMyButton ? "" : "disabled"; // 一致しないなら無効化
-
-                // ★修正：oncontextmenu（右クリック）を削除
+                if (savedLikes) { const parts = savedLikes.split(','); const found = parts.find(p => p.trim().startsWith(memberName)); if (found) btnText = found.trim(); } 
+                const isMyButton = (memberName === loggedInUser); const disabledAttr = isMyButton ? "" : "disabled"; 
                 buttonsHtml += `<button class="like-btn" onclick="addLike(this)" ${disabledAttr}>${btnText}</button> `; 
             });
-
             let fileHtml = ""; if (fileUrl) { if (fileUrl.indexOf("http") === 0) { fileHtml = `<div class="report-row"><div class="report-label">添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く 📎</a></div></div>`; } else { fileHtml = `<div class="report-row"><div class="report-label">添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; } }
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `
-                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
-                <div class="report-header-area"><span style="font-size: 1.3em; font-weight: bold;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span><div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div></div>
-                <div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div>
-                <div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div>
-                <div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>
-                ${fileHtml}
-                <div class="card-footer">
-                    <div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div>
-                    <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
-                </div>
-            `;
+            div.innerHTML = `<button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button><div class="report-header-area"><span style="font-size: 1.3em; font-weight: bold;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; padding: 2px 8px; border-radius: 10px; margin-left: 10px; font-weight: bold;">${condition}</span><div style="color: #666; font-size: 0.9em; margin-top: 5px;">報告日時: ${date}</div></div><div class="report-row"><div class="report-label">今日の進捗</div><div class="report-content">${progress}</div></div><div class="report-row"><div class="report-label">明日の業務</div><div class="report-content">${tomorrow}</div></div><div class="report-row"><div class="report-label">所見</div><div class="report-content">${comment}</div></div>${fileHtml}<div class="card-footer"><div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div><button class="edit-btn" onclick="editReport(${rowIndex})">編集</button></div>`;
             const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); reportContainer.appendChild(div);
         }
-
-        // ★修正：バッド判定を削除してシンプルに
-        function updateButtonColor(btn) { 
-            const text = btn.innerText; 
-            // 数字が含まれている（＝いいね済み）かどうかだけをチェック
-            if (text.match(/\d+$/)) { 
-                btn.style.backgroundColor = '#fff8f0'; 
-                btn.style.borderColor = '#ff7f00'; 
-                btn.style.color = '#ff7f00'; 
-                btn.style.fontWeight = 'bold'; 
-            } else { 
-                btn.style.backgroundColor = ''; 
-                btn.style.borderColor = ''; 
-                btn.style.color = ''; 
-                btn.style.fontWeight = ''; 
-            } 
-        }
-
+        function updateButtonColor(btn) { const text = btn.innerText; if (text.match(/\d+$/)) { btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00'; btn.style.fontWeight = 'bold'; } else { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = ''; } }
         function addLike(btn) { let text = btn.innerText; let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart); if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; } updateButtonColor(btn); triggerDebounceSave(btn); }
-        // ★修正：changeToBad関数は削除しました
         function triggerDebounceSave(btn) { const parentDiv = btn.closest('.like-buttons'); const rowIndex = parentDiv.getAttribute('data-row-index'); if (saveTimers[rowIndex]) { clearTimeout(saveTimers[rowIndex]); } saveTimers[rowIndex] = setTimeout(() => { sendLikeToSheet(rowIndex, parentDiv); }, 2000); }
         function sendLikeToSheet(rowIndex, parentDiv) { const btns = parentDiv.querySelectorAll('.like-btn'); const likeData = Array.from(btns).map(b => b.innerText).join(','); const data = { action: 'like', rowIndex: rowIndex, likeData: likeData }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; }).catch(err => console.error("エラー", err)); }
         function showToast() { var x = document.getElementById("toast"); x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500); }
-        function openCheckModal() { document.getElementById('check-modal').style.display = 'flex'; }
+        
+        function openCheckModal() { 
+            // 毎回最新のデータを取ってくるためにfetchDataを呼んでもいいが、重くなるので既存データで描画
+            document.getElementById('check-modal').style.display = 'flex'; 
+        }
         function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
+        
+        // ★修正：カレンダー描画
         function renderCalendar() {
-            const targetName = document.querySelector('input[name="check-target"]:checked')?.value; if (!targetName) { alert("チェックする人を選んでください"); return; }
-            const calendarArea = document.getElementById('calendar-area'); calendarArea.innerHTML = ""; const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); const today = now.getDate(); const lastDay = new Date(year, month + 1, 0).getDate();
+            const targetName = document.querySelector('input[name="check-target"]:checked')?.value; 
+            if (!targetName) { alert("チェックする人を選んでください"); return; }
+            
+            const calendarArea = document.getElementById('calendar-area'); calendarArea.innerHTML = ""; 
+            const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); const today = now.getDate(); const lastDay = new Date(year, month + 1, 0).getDate();
             const submittedDates = allData.filter(row => row[1] === targetName).map(row => { const d = new Date(row[0]); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; });
+            
             const headerHtml = `<h3 style="text-align:center;">${year}年 ${month + 1}月 - ${targetName}さん</h3><div class="calendar-grid"><div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>`;
             let bodyHtml = ""; const firstDayOfWeek = new Date(year, month, 1).getDay();
             for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
+            
             for (let d = 1; d <= lastDay; d++) {
-                const checkDateStr = `${year}-${month}-${d}`; const currentObj = new Date(year, month, d); const dayOfWeek = currentObj.getDay(); let className = "day-submitted"; let isClickable = true;
-                if (d > today) { className = "day-future"; isClickable = false; } else if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; } else if (dayOfWeek === 2 || dayOfWeek === 3) { className = "day-holiday"; } else { className = "day-missing"; }
-                const clickEvent = isClickable ? `onclick="startReportForDate(${year}, ${month}, ${d})"` : ""; bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
-            } calendarArea.innerHTML = headerHtml + bodyHtml + "</div>";
+                const checkDateStr = `${year}-${month}-${d}`; 
+                
+                let className = "day-missing"; 
+                
+                // ★休日判定ロジック変更：スプレッドシートのリストを見る
+                // holidayList = [[日付文字列(ISO), 名前], ...]
+                const isHoliday = holidayList.some(h => {
+                    const hDate = new Date(h[0]);
+                    // 年月日が一致し、かつ 名前が一致（または全員対象）の場合
+                    return hDate.getFullYear() === year && hDate.getMonth() === month && hDate.getDate() === d && h[1] === targetName;
+                });
+
+                if (d > today) { className = "day-future"; }
+                else if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; } 
+                else if (isHoliday) { className = "day-holiday"; } // 青色にする
+                
+                // クリック時の挙動を関数でラップ
+                const clickEvent = (d > today) ? "" : `onclick="handleDateClick(${year}, ${month}, ${d}, '${targetName}')"`;
+                
+                bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
+            } 
+            calendarArea.innerHTML = headerHtml + bodyHtml + "</div>";
         }
 
-        // ■ ハンバーガーメニューの開閉機能
-        function toggleMenu() {
-            var sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
+        // ★追加：日付クリック時の処理分岐
+        function handleDateClick(year, month, day, targetName) {
+            const isEditMode = document.getElementById('holiday-mode-check').checked;
+            
+            if (isEditMode) {
+                // 休日設定モードなら、休日登録/解除を行う
+                toggleHoliday(year, month, day, targetName);
+            } else {
+                // 通常モードなら、日報入力へ進む
+                startReportForDate(year, month, day);
+            }
         }
 
-        // メニューのボタン（日報入力など）を押したら、メニューを自動で閉じる
-        document.querySelectorAll('.menu-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                var sidebar = document.querySelector('.sidebar');
-                if (window.innerWidth <= 768) { // スマホ幅のときだけ
-                    sidebar.classList.remove('active');
-                }
+        // ★追加：休日トグル処理
+        function toggleHoliday(year, month, day, targetName) {
+            const dateStr = `${year}-${('0'+(month+1)).slice(-2)}-${('0'+day).slice(-2)}`;
+            const btn = document.querySelector('.send-btn'); 
+            const originalText = btn.innerText;
+            btn.innerText = "通信中..."; btn.disabled = true;
+
+            const data = { action: 'manageHoliday', date: dateStr, name: targetName };
+            
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(() => { 
+                // ローカルのデータも仮更新して再描画（サーバーからのフェッチを待たずに反映させるため）
+                // 簡易的にリロードをかけるのが確実
+                fetchData(); // データを再取得
+                setTimeout(() => {
+                    renderCalendar(); // 少し待ってから再描画（fetchDataが完了してないかもだが、UX的には少し待つ演出）
+                    btn.innerText = originalText; btn.disabled = false;
+                    document.getElementById("toast").innerText = "休日設定を更新しました"; showToast();
+                }, 1000);
+            })
+            .catch(err => {
+                alert("エラーが発生しました");
+                btn.innerText = originalText; btn.disabled = false;
             });
-        });
+        }
+
+        function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
+        document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
     </script>
 </body>
 </html>
