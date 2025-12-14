@@ -97,20 +97,21 @@
             border-left: 4px solid #0288d1; padding-left: 10px; 
         }
         .input-wrapper { flex-grow: 1; }
-        /* ↓↓↓ ここを修正しました（ラジオボタンを除外する設定に変更） ↓↓↓ */
+        
+        /* ラジオボタン以外を幅100%に */
         input:not([type="radio"]), textarea, select { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
         }
 
-        /* ラジオボタン専用の調整（文字との間に隙間を作る） */
+        /* ラジオボタン専用の調整 */
         input[type="radio"] {
-            transform: scale(1.2); /* 少しだけ大きくして押しやすく */
+            transform: scale(1.2); 
             margin-right: 6px; 
             cursor: pointer;
         }
         textarea { height: 100px; resize: vertical; }
 
-        /* --- コンディションボタン（名前・体調など）の修正版 --- */
+        /* --- コンディションボタン（名前・体調など） --- */
         .condition-group { 
             display: flex; 
             flex-wrap: wrap; 
@@ -128,7 +129,6 @@
             align-items: center; 
             justify-content: flex-start; /* 左揃えで見やすく */
             
-            /* ★ここが修正ポイント★ */
             width: calc(25% - 8px); /* 1列に4つ均等に並べる計算式 */
             white-space: nowrap;    /* 文字を絶対に改行させない（横書き維持） */
             overflow: hidden;       /* 枠からはみ出ても形を崩さない */
@@ -147,10 +147,7 @@
                 width: calc(50% - 6px); /* スマホなら2列 */
             }
         }
-        
-        /* ★ここに余計なコードがないことを確認してください★ */
 
-        /* --- 以下、ボタンやハンバーガーメニューなど（変更なし） --- */
         .button-group { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
         button.send-btn { 
             padding: 10px 30px; background: #0288d1; color: white; border: none; 
@@ -193,9 +190,7 @@
         .filter-area { display: flex; gap: 10px; }
         .filter-select { width: 30%; } .filter-input { width: 70%; } 
 
-        /* =========================================
-           ▼ 新規追加: 休日設定用カレンダー（インライン表示） ▼
-           ========================================= */
+        /* 休日設定用カレンダー */
         .calendar-container {
             background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ccc; max-width: 600px; margin: 0 auto;
         }
@@ -222,9 +217,7 @@
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
 
-        /* =========================================
-           ▼ スマホ対応（水色テーマ＆ハンバーガーメニュー） ▼
-           ========================================= */
+        /* スマホ対応 */
         @media (max-width: 768px) {
             body, .app-container { flex-direction: column; height: auto; min-height: 100vh; }
             .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; padding-top: 60px; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
@@ -241,14 +234,14 @@
             
             .filter-area { flex-direction: column; } .filter-select, .filter-input { width: 100%; }
 
-            /* ▼ カレンダータイトル修正（今回追加した部分） ▼ */
+            /* カレンダータイトル修正 */
             .calendar-title-area {
-                flex-wrap: wrap; /* 折り返しを許可 */
+                flex-wrap: wrap; 
             }
             .calendar-title-area h3 {
-                width: 100%;       /* 年月を横幅いっぱいに */
-                order: -1;         /* 無理やり一番上に移動させる魔法 */
-                margin-bottom: 10px !important; /* 下に隙間をあける */
+                width: 100%;       
+                order: -1;         
+                margin-bottom: 10px !important; 
                 text-align: center;
             }
         }
@@ -299,7 +292,6 @@
         <div class="sidebar">
             <h2>メニュー</h2>
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
-            <button class="menu-btn" onclick="switchTab('correction')">✏️ 日報確認</button>
             <button class="menu-btn" onclick="switchTab('holiday')">🏖️ 休日設定</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
             <button class="menu-btn" onclick="switchTab('member')">👥 メンバー管理</button>
@@ -377,30 +369,6 @@
                 </div>      
             </div>
 
-            <div id="tab-correction" class="content-section">
-                <h1>日報確認</h1>
-                <div class="manager-container">
-                    <p style="text-align:center; margin-bottom:20px;">
-                        日付をタップすると、その日の日報を作成・修正できます。<br>
-                    </p>
-                    
-                    <div class="calendar-container">
-                        <div class="calendar-title-area">
-                            <button class="calendar-btn" onclick="changeReportCheckMonth(-1)">◀ 前月</button>
-                            <h3 id="report-check-title" style="margin:0;">----年 --月</h3>
-                            <button class="calendar-btn" onclick="changeReportCheckMonth(1)">翌月 ▶</button>
-                        </div>
-                        <div class="calendar-grid" id="report-check-grid">
-                            </div>
-                    </div>
-
-                    <div style="margin-top:15px; font-size:12px; text-align:center;">
-                        <span style="display:inline-block; width:12px; height:12px; background:#fff; border:1px solid #ccc;"></span> 未提出
-                        <span style="display:inline-block; width:12px; height:12px; background:#cceeff; border:1px solid #0288d1; margin-left:10px;"></span> 提出済
-                    </div>
-                </div>
-            </div>
-
             <div id="tab-holiday" class="content-section">
                 <h1>休日設定</h1>
                 <div class="manager-container">
@@ -472,7 +440,7 @@
     <div id="toast">送信完了しました！</div>
 
     <script>
-        // ★重要：GAS URL（あなたのURLのままです）
+        // ★重要：GAS URL（変更なし）
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyDvA1WA7D_EQRmD_nYrtD-3RWWm2sT3hASH9luQGxJ_OXm4zhOwqPe1OU0oows0W0lPQ/exec"; 
 
         // --- 共通変数 ---
@@ -494,7 +462,7 @@
             const savedId = localStorage.getItem('login_user_id'); const savedTime = localStorage.getItem('login_time'); const savedName = localStorage.getItem('login_user_name');
             if (savedId && savedTime && savedName) {
                 const now = new Date().getTime();
-                if ((now - parseInt(savedTime)) < 60 * 60 * 1000) { // 60分有効
+                if ((now - parseInt(savedTime)) < 60 * 60 * 1000) { 
                     loggedInUser = savedName; 
                     document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); 
                     document.getElementById('app-container').style.display = 'flex'; 
@@ -542,114 +510,13 @@
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            // ボタンのActive表示切り替え
             const btns = document.querySelectorAll('.menu-btn');
             if(tabName==='input') btns[0].classList.add('active');
-            if(tabName==='correction') { btns[1].classList.add('active'); renderReportCheckCalendar(); }
-            if(tabName==='holiday') { btns[2].classList.add('active'); renderHolidayCalendar(); }
-            if(tabName==='history') btns[3].classList.add('active');
-            if(tabName==='member') btns[4].classList.add('active');
-            if(tabName==='password') btns[5].classList.add('active');
+            if(tabName==='holiday') { btns[1].classList.add('active'); renderHolidayCalendar(); }
+            if(tabName==='history') btns[2].classList.add('active');
+            if(tabName==='member') btns[3].classList.add('active');
+            if(tabName==='password') btns[4].classList.add('active');
         }
-        // --- ▼ 日報確認カレンダー用ロジック（ここから追加） ▼ ---
-        
-        let checkDisplayYear = new Date().getFullYear();
-        let checkDisplayMonth = new Date().getMonth();
-
-        // 月を切り替えるボタン
-        function changeReportCheckMonth(diff) {
-            checkDisplayMonth += diff;
-            if (checkDisplayMonth > 11) { checkDisplayMonth = 0; checkDisplayYear++; }
-            else if (checkDisplayMonth < 0) { checkDisplayMonth = 11; checkDisplayYear--; }
-            renderReportCheckCalendar();
-        }
-
-        // カレンダーを描画する関数
-        // ▼ 修正版: カレンダーを描画する関数（日付判定を強化）
-        // ▼ 修正版: カレンダーを描画する関数（年月日だけで判定するように強化）
-        function renderReportCheckCalendar() {
-            if (!loggedInUser) return;
-            const year = checkDisplayYear;
-            const month = checkDisplayMonth;
-            document.getElementById('report-check-title').innerText = `${year}年 ${month + 1}月`;
-            
-            const grid = document.getElementById('report-check-grid');
-            grid.innerHTML = '<div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>';
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const lastDay = new Date(year, month + 1, 0).getDate();
-
-            // 提出済みの日付を「YYYY-MM-DD」という文字のリストにする（これで時間のズレを無視できます）
-            const submittedDateStrings = [];
-            allData.forEach(row => {
-                if (row[1] === loggedInUser && row[0]) {
-                    const rDate = new Date(row[0]);
-                    // 年と月が一致するかチェック
-                    if (rDate.getFullYear() === year && rDate.getMonth() === month) {
-                        // "2025-1-22" のような文字を作ってリストに入れる
-                        submittedDateStrings.push(rDate.getDate()); 
-                    }
-                }
-            });
-
-            // 空白セル
-            for (let i = 0; i < firstDay; i++) { grid.innerHTML += '<div class="calendar-day day-other-month"></div>'; }
-
-            // 日付セル
-            for (let d = 1; d <= lastDay; d++) {
-                const el = document.createElement('div');
-                el.className = 'calendar-day';
-                el.innerText = d;
-
-                // 今日(d)がリストに含まれているかチェック
-                const isSubmitted = submittedDateStrings.includes(d);
-
-                if (isSubmitted) {
-                    // ★ここで青色クラスを追加
-                    el.classList.add('day-submitted-check'); 
-                    el.innerText += " ✔";
-                }
-
-                // クリック時の動作
-                el.onclick = () => {
-                    if (isSubmitted) {
-                        // 提出済みならそのデータを探して編集モードへ
-                        const targetRow = allData.find(row => {
-                            const rDate = new Date(row[0]);
-                            return row[1] === loggedInUser && 
-                                   rDate.getFullYear() === year && 
-                                   rDate.getMonth() === month && 
-                                   rDate.getDate() === d;
-                        });
-                        if (targetRow) editReport(targetRow[targetRow.length - 1]);
-                    } else {
-                        // 未提出なら新規作成
-                        startNewReportAt(year, month, d);
-                    }
-                };
-                grid.appendChild(el);
-            }
-        }
-        // 未提出の日をクリックしたときの処理
-        function startNewReportAt(year, month, day) {
-            switchTab('input'); // 入力タブへ移動
-            const mm = ('0' + (month + 1)).slice(-2);
-            const dd = ('0' + day).slice(-2);
-            document.getElementById('report-date').value = `${year}-${mm}-${dd}`;
-            
-            // フォームをリセットしつつ日付アラートを出す
-            document.getElementById('date-alert').style.display = 'flex';
-            document.getElementById('date-alert-text').innerText = `${year}/${month+1}/${day} の日報を作成します`;
-            document.getElementById('form-container').classList.add('past-mode');
-            
-            // 編集モードなどは解除
-            isEditing = false;
-            editingRowIndex = null;
-            document.getElementById('submit-btn').innerText = "送信";
-            document.getElementById('submit-btn').classList.remove('update-mode');
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-        }
-        // --- ▲ 日報確認カレンダー用ロジック（ここまで） ▲ ---
 
         // --- 休日一括設定ロジック ---
         function changeHolidayMonth(diff) {
@@ -679,13 +546,11 @@
                 el.className = 'calendar-day';
                 el.innerText = d;
 
-                // 既にDBにある休日か？
                 const isSavedHoliday = holidayList.some(h => {
                    const hD = new Date(h[0]);
                    return hD.getFullYear()===year && hD.getMonth()===month && hD.getDate()===d && h[1]===loggedInUser;
                 });
 
-                // 今タップして選択中か？
                 if (pendingHolidayChanges.has(dateStr)) {
                     el.classList.add('day-selected');
                 } else if (isSavedHoliday) {
@@ -695,11 +560,11 @@
 
                 el.onclick = () => {
                     if (pendingHolidayChanges.has(dateStr)) {
-                        pendingHolidayChanges.delete(dateStr); // 選択解除
+                        pendingHolidayChanges.delete(dateStr); 
                     } else {
-                        pendingHolidayChanges.add(dateStr); // 選択
+                        pendingHolidayChanges.add(dateStr); 
                     }
-                    renderHolidayCalendar(); // 再描画
+                    renderHolidayCalendar(); 
                 };
                 grid.appendChild(el);
             }
@@ -712,47 +577,24 @@
             const btn = document.getElementById('save-holiday-btn');
             btn.disabled = true; btn.innerText = "保存中...";
 
-            // GASが1件ずつしか対応していないため、JSで並列処理して一括保存に見せる
             const promises = Array.from(pendingHolidayChanges).map(dateStr => {
                 const data = { action: 'manageHoliday', date: dateStr, name: loggedInUser };
                 return fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             });
 
             try {
-                await Promise.all(promises); // 全部のリクエストが終わるのを待つ
-                pendingHolidayChanges.clear(); // 選択解除
+                await Promise.all(promises); 
+                pendingHolidayChanges.clear(); 
                 document.getElementById("toast").innerText = "休日設定を保存しました！"; showToast();
                 btn.disabled = false; btn.innerText = "変更を保存する";
-                fetchData(); // データを再取得してカレンダー更新
+                fetchData(); 
             } catch (e) {
                 alert("保存中にエラーが発生しました");
                 btn.disabled = false; btn.innerText = "変更を保存する";
             }
         }
 
-        // --- 日報修正検索ロジック ---
-        function findAndEditReport() {
-            const dateVal = document.getElementById('correction-date-input').value;
-            if (!dateVal) { alert("日付を選択してください"); return; }
-            if (!loggedInUser) { alert("ログインしてください"); return; }
-
-            // データから検索
-            const targetRow = allData.find(row => {
-                const rowDate = new Date(row[0]);
-                const rowDateStr = `${rowDate.getFullYear()}-${('0'+(rowDate.getMonth()+1)).slice(-2)}-${('0'+rowDate.getDate()).slice(-2)}`;
-                return rowDateStr === dateVal && row[1] === loggedInUser;
-            });
-
-            if (targetRow) {
-                // 見つかったら修正モードへ
-                const rowIndex = targetRow[targetRow.length - 1];
-                editReport(rowIndex);
-            } else {
-                alert("その日の日報データは見つかりませんでした。\n「日報入力」タブから新規作成してください。");
-            }
-        }
-
-        // ▼ 修正版: データの読み込み関数（順番を修正）
+        // --- 通常のデータ処理 ---
         function fetchData() {
             const reportContainer = document.getElementById('report-container'); 
             reportContainer.innerHTML = "<p>データを取得中...</p>";
@@ -760,7 +602,6 @@
             fetch(GAS_URL + '?t=' + new Date().getTime())
             .then(response => response.json())
             .then(data => {
-                // 1. メンバーと休日の読み込み
                 if (data.members) { 
                     memberList = data.members; 
                     renderMemberRadios(); 
@@ -773,13 +614,7 @@
                     renderHolidayCalendar(); 
                 } 
                 
-                // 2. ★重要★ 先に日報データを allData に入れる
                 allData = (data.reports || []).reverse(); 
-                
-                // 3. ★重要★ データが入った後にカレンダーを描画する（これで色が付きます）
-                renderReportCheckCalendar(); 
-
-                // 4. 過去の報告リストを表示
                 currentData = allData;
                 if (currentData.length === 0) { 
                     reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; 
