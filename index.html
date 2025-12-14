@@ -102,17 +102,43 @@
         }
         textarea { height: 100px; resize: vertical; }
 
-        /* コンディションボタン */
-        .condition-group { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 5px; }
-        .condition-label { 
-            border: 1px solid transparent; border-radius: 6px; padding: 5px 8px; 
-            font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; 
+        /* --- コンディションボタン（名前・体調など）の修正版 --- */
+        .condition-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; /* ボタン同士の間隔を均等に */
+            padding-top: 5px; 
         }
-        .condition-group .condition-label { width: calc(25% - 6px); justify-content: flex-start; }
-        .condition-label:has(input[type="radio"]:checked) { 
-            border-color: #0288d1; background-color: #e1f5fe; font-weight: bold; 
+        
+        .condition-label { 
+            border: 1px solid transparent; 
+            border-radius: 6px; 
+            padding: 8px 2px; /* 上下の余白と、左右の余白 */
+            font-size: 13px;  /* 文字が入りきるように少し調整 */
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; /* 左揃えで見やすく */
+            
+            /* ★ここが修正ポイント★ */
+            width: calc(25% - 8px); /* 1列に4つ均等に並べる計算式 */
+            white-space: nowrap;    /* 文字を絶対に改行させない（横書き維持） */
+            overflow: hidden;       /* 万からはみ出ても形を崩さない */
         }
 
+        /* 選択された時のデザイン */
+        .condition-label:has(input[type="radio"]:checked) { 
+            border-color: #0288d1; 
+            background-color: #e1f5fe; 
+            font-weight: bold; 
+        }
+
+        /* スマホの時は2列にする（文字が小さくなりすぎないように） */
+        @media (max-width: 768px) {
+            .condition-group .condition-label { 
+                width: calc(50% - 6px); /* スマホなら2列 */
+            }
+        }
         .button-group { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
         button.send-btn { 
             padding: 10px 30px; background: #0288d1; color: white; border: none; 
