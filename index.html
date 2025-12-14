@@ -550,7 +550,12 @@
             document.getElementById('login-id').value = ""; document.getElementById('login-password').value = ""; document.getElementById('login-msg').innerText = ""; alert("ログアウトしました");
         }
 
-        window.onload = function() { checkLoginSession(); setTodayDate(); };
+        window.onload = function() { 
+            checkLoginSession(); 
+            setTodayDate(); 
+            updateBackgroundByTime(); // ▼ 背景色セットを実行
+            setInterval(updateBackgroundByTime, 60000); // ▼ 1分ごとに背景色をチェック
+        };
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
 
         // --- タブ切り替え（修正版） ---
@@ -887,6 +892,32 @@
         
         function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
         document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
+    // ==========================================
+        // ■ 新機能：時間帯による背景色の変更
+        // ==========================================
+        function updateBackgroundByTime() {
+            const hour = new Date().getHours(); // 現在の「時」(0〜23)を取得
+            const body = document.body;
+            let color = "#e3f2fd"; // 基本の色（いつもの水色）
+
+            if (hour >= 5 && hour < 11) {
+                // 朝 (5:00 〜 10:59) : 爽やかなミントグリーン
+                color = "#e8f5e9"; 
+            } else if (hour >= 11 && hour < 16) {
+                // 昼 (11:00 〜 15:59) : いつものライトブルー
+                color = "#e3f2fd"; 
+            } else if (hour >= 16 && hour < 19) {
+                // 夕方 (16:00 〜 18:59) : 夕焼けのオレンジ
+                color = "#fff3e0"; 
+            } else {
+                // 夜 (19:00 〜 4:59) : 落ち着いたクールグレー
+                // ※文字が読みやすいよう、暗すぎない色にしています
+                color = "#eceff1"; 
+            }
+
+            // 背景色を適用
+            body.style.backgroundColor = color;
+        }
     </script>
 </body>
 </html>
