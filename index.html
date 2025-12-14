@@ -207,7 +207,28 @@
         .day-selected { background-color: #ffcdd2 !important; border-color: #e57373 !important; color: #c62828; font-weight: bold; } /* 選択中（赤） */
         .day-saved-holiday { background-color: #cceeff; color: #007bff; } /* 既に登録済みの休み（青） */
         .day-other-month { background-color: #fafafa; color: #ccc; pointer-events: none; }
-
+        /* --- 日報確認カレンダー用の色設定 --- */
+        .day-missing { 
+            background-color: #ffebee; /* 薄い赤 */
+            color: #c62828; 
+            border: 1px solid #ef9a9a !important;
+            font-weight: bold;
+        }
+        .day-holiday-confirmed { 
+            background-color: #e1f5fe; /* 薄い青 */
+            color: #0277bd; 
+            border: 1px solid #81d4fa !important;
+        }
+        .day-submitted { 
+            background-color: #ffffff; 
+            border: 2px solid #66bb6a !important; /* 提出済みは緑の枠線 */
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .day-future {
+            background-color: #fafafa;
+            color: #ccc;
+        }
         /* ページネーション */
         .Pagination { display: flex; justify-content: center; margin: 40px 0; gap: 10px; }
         .Pagination-Item-Link { width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; border: 1px solid #ccc; cursor: pointer; text-decoration: none; color: #333; background: #fff; }
@@ -245,6 +266,26 @@
                 text-align: center;
             }
         }
+        /* ▼▼▼ 追加：カレンダーの色設定 ▼▼▼ */
+        .day-missing { 
+            background-color: #ffebee; /* 未提出：薄い赤 */
+            color: #c62828; 
+            border: 1px solid #ef9a9a !important;
+            font-weight: bold;
+        }
+        .day-holiday-confirmed { 
+            background-color: #e1f5fe; /* 休み：薄い青 */
+            color: #0277bd; 
+            border: 1px solid #81d4fa !important;
+        }
+        .day-submitted { 
+            background-color: #ffffff; 
+            border: 2px solid #66bb6a !important; /* 提出済：緑の枠 */
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .day-future { background-color: #fafafa; color: #ccc; }
+        /* ▲▲▲ 追加終わり ▲▲▲ */
     </style>
 </head>
 <body>
@@ -292,6 +333,7 @@
         <div class="sidebar">
             <h2>メニュー</h2>
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
+            <button class="menu-btn" onclick="switchTab('check')">📅 日報確認</button>
             <button class="menu-btn" onclick="switchTab('holiday')">🏖️ 休日設定</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
             <button class="menu-btn" onclick="switchTab('member')">👥 メンバー管理</button>
@@ -368,6 +410,43 @@
                     </div>
                 </div>      
             </div>
+
+            <div id="tab-check" class="content-section">
+                <h1>日報提出チェック</h1>
+                <div class="manager-container">
+                    <p style="text-align:center; margin-bottom:20px;">
+                        日付をタップすると、その日の日報を作成・修正できます。<br>
+                        <span style="color:#c62828; font-weight:bold;">赤：未提出</span> / 
+                        <span style="color:#0277bd;">青：休日</span> / 
+                        <span style="color:#2e7d32; font-weight:bold;">緑枠：提出済</span>
+                    </p>
+                    
+                    <div class="calendar-container">
+                        <div class="calendar-title-area">
+                            <button class="calendar-btn" onclick="changeCheckMonth(-1)">◀ 前月</button>
+                            <h3 id="check-calendar-title" style="margin:0;">2024年 1月</h3>
+                            <button class="calendar-btn" onclick="changeCheckMonth(1)">翌月 ▶</button>
+                        </div>
+                        <div class="calendar-grid" id="check-calendar-grid">
+                            </div>
+                    </div>
+                </div>
+            </div>
+            ```
+
+---
+
+### 手順③：JavaScript（ロジック）の追加
+
+HTMLファイルの下の方にある `<script>` タグの中に、以下のコードを追記・修正します。
+
+#### 1. 変数の追加
+冒頭の `// --- 共通変数 ---` のあたりに、確認カレンダー用の変数を追加します。
+
+```javascript
+        // 既存の変数の下に追加してください
+        let checkDisplayYear = new Date().getFullYear();
+        let checkDisplayMonth = new Date().getMonth();
 
             <div id="tab-holiday" class="content-section">
                 <h1>休日設定</h1>
@@ -752,6 +831,104 @@
         
         function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
         document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
+        // ▼▼▼ ここから下を全部コピーして貼り付けてください ▼▼▼
+
+        // ■ メニュー切り替え機能の修正版
+        const originalSwitchTab = switchTab;
+        switchTab = function(tabName) {
+            // 元のswitchTabの動きを呼び出す
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            // ボタンの色付け
+            const btns = document.querySelectorAll('.menu-btn');
+            // ボタンの順番に合わせて番号を指定（入力=0, 休日=1, 確認=2...）
+            if(tabName==='input') btns[0].classList.add('active');
+            if(tabName==='holiday') { btns[1].classList.add('active'); renderHolidayCalendar(); }
+            if(tabName==='check') { 
+                // 今回追加したボタンを光らせる
+                Array.from(btns).find(b => b.innerText.includes('日報確認')).classList.add('active');
+                renderCheckCalendar(); 
+            }
+            if(tabName==='history') Array.from(btns).find(b => b.innerText.includes('過去')).classList.add('active');
+            if(tabName==='member') Array.from(btns).find(b => b.innerText.includes('メンバー')).classList.add('active');
+            if(tabName==='password') Array.from(btns).find(b => b.innerText.includes('PW')).classList.add('active');
+        };
+
+        // ■ 日報確認カレンダーの機能
+        function changeCheckMonth(diff) {
+            checkDisplayMonth += diff;
+            if (checkDisplayMonth > 11) { checkDisplayMonth = 0; checkDisplayYear++; }
+            else if (checkDisplayMonth < 0) { checkDisplayMonth = 11; checkDisplayYear--; }
+            renderCheckCalendar();
+        }
+
+        function renderCheckCalendar() {
+            if (!loggedInUser) return;
+            const year = checkDisplayYear;
+            const month = checkDisplayMonth;
+            document.getElementById('check-calendar-title').innerText = `${year}年 ${month + 1}月`;
+            
+            const grid = document.getElementById('check-calendar-grid');
+            grid.innerHTML = '<div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const today = new Date(); today.setHours(0,0,0,0);
+
+            // 自分の休日と提出状況を取得
+            const myHolidays = holidayList.filter(h => h[1] === loggedInUser).map(h => {
+                const d = new Date(h[0]); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            });
+            const myReports = allData.filter(row => row[1] === loggedInUser).map(row => {
+                const d = new Date(row[0]); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            });
+
+            for (let i = 0; i < firstDay; i++) { grid.innerHTML += '<div class="calendar-day day-other-month"></div>'; }
+
+            for (let d = 1; d <= lastDay; d++) {
+                const dateKey = `${year}-${month}-${d}`;
+                const dateStrForInput = `${year}-${('0'+(month+1)).slice(-2)}-${('0'+d).slice(-2)}`;
+                const currentDate = new Date(year, month, d);
+
+                const el = document.createElement('div');
+                el.className = 'calendar-day'; el.innerText = d;
+
+                const isHoliday = myHolidays.includes(dateKey);
+                const isSubmitted = myReports.includes(dateKey);
+                const isPastOrToday = currentDate <= today;
+
+                // 色塗りロジック
+                if (isSubmitted) { el.classList.add('day-submitted'); }
+                else if (isHoliday) { el.classList.add('day-holiday-confirmed'); el.innerText += " 休"; }
+                else if (isPastOrToday) { el.classList.add('day-missing'); el.innerText += " 未"; }
+                else { el.classList.add('day-future'); }
+
+                // クリックで入力画面へ
+                el.onclick = () => {
+                    switchTab('input');
+                    document.getElementById('report-date').value = dateStrForInput;
+                    const targetRow = allData.find(row => {
+                        const rD = new Date(row[0]);
+                        return `${rD.getFullYear()}-${('0'+(rD.getMonth()+1)).slice(-2)}-${('0'+rD.getDate()).slice(-2)}` === dateStrForInput && row[1] === loggedInUser;
+                    });
+                    if (targetRow) {
+                        editReport(targetRow[targetRow.length - 1]);
+                        document.getElementById("toast").innerText = "修正モードで開きました"; showToast();
+                    } else {
+                        resetForm();
+                        document.getElementById('report-date').value = dateStrForInput; // リセット後に日付再設定
+                        if(currentDate < today) {
+                            document.getElementById('date-alert').style.display = 'flex';
+                            document.getElementById('date-alert-text').innerText = "過去の日報を作成中";
+                            document.getElementById('form-container').classList.add('past-mode');
+                        }
+                    }
+                };
+                grid.appendChild(el);
+            }
+        }
     </script>
 </body>
 </html>
