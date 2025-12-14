@@ -741,18 +741,27 @@
                 return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; 
             });
             
-            const headerHtml = `
+            // ★修正：HTML構造を正しく組み立てる（以前のコードでのバグ修正）
+            const titleHtml = `
                 <div class="calendar-title-area">
                     <button class="calendar-btn" onclick="changeMonth(-1)">◀ 前月</button>
                     <h3 style="margin:0;">${year}年 ${month + 1}月 - ${targetName}さん</h3>
                     <button class="calendar-btn" onclick="changeMonth(1)">翌月 ▶</button>
                 </div>
-                <div class="calendar-grid">
-                    <div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>
+            `;
+
+            const gridHeaderHtml = `
+                <div class="calendar-header">日</div>
+                <div class="calendar-header">月</div>
+                <div class="calendar-header">火</div>
+                <div class="calendar-header">水</div>
+                <div class="calendar-header">木</div>
+                <div class="calendar-header">金</div>
+                <div class="calendar-header">土</div>
             `;
             
-            let bodyHtml = ""; 
-            for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
+            let gridBodyHtml = ""; 
+            for (let i = 0; i < firstDayOfWeek; i++) { gridBodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
             
             for (let d = 1; d <= lastDay; d++) {
                 const checkDateStr = `${year}-${month}-${d}`; 
@@ -763,6 +772,7 @@
                     return hDate.getFullYear() === year && hDate.getMonth() === month && hDate.getDate() === d && h[1] === targetName;
                 });
 
+                // 未来判定ロジック
                 let isFuture = false;
                 if (year > todayYear) isFuture = true;
                 else if (year === todayYear && month > todayMonth) isFuture = true;
@@ -774,9 +784,11 @@
                 
                 const clickEvent = `onclick="handleDateClick(${year}, ${month}, ${d}, '${targetName}')"`;
                 
-                bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
+                gridBodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
             } 
-            calendarArea.innerHTML = headerHtml + "</div>" + bodyHtml + "</div>";
+            
+            // ★グリッドコンテナの中に、ヘッダーとボディを正しく入れる
+            calendarArea.innerHTML = titleHtml + '<div class="calendar-grid">' + gridHeaderHtml + gridBodyHtml + '</div>';
         }
 
         function handleDateClick(year, month, day, targetName) {
