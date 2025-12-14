@@ -10,12 +10,12 @@
         body { 
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             margin: 0; padding: 0; 
-            background-color: #e3f2fd; /* 全体を水色に */
+            background-color: #e3f2fd; 
             height: 100vh; display: flex;
             color: #333;
         }
 
-        /* --- オーバーレイ（ログイン画面など） --- */
+        /* --- オーバーレイ --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(51, 51, 51, 0.9); z-index: 9999;
@@ -48,27 +48,24 @@
         
         /* --- サイドバー --- */
         .sidebar {
-            width: 200px; 
+            width: 220px; 
             background-color: #0277bd; 
             color: white; padding: 20px;
-            display: flex; flex-direction: column; gap: 20px; flex-shrink: 0;
+            display: flex; flex-direction: column; gap: 15px; flex-shrink: 0;
             transition: left 0.3s ease;
         }
         .sidebar h2 { font-size: 18px; text-align: center; margin-bottom: 10px; border-bottom: 1px solid #4fc3f7; padding-bottom: 10px; }
         .menu-btn {
             background: transparent; color: white; border: none; padding: 12px;
             text-align: left; cursor: pointer; border-radius: 4px; font-size: 14px;
-            transition: 0.2s; width: 100%;
+            transition: 0.2s; width: 100%; display: flex; align-items: center; gap: 10px;
         }
         .menu-btn:hover, .menu-btn.active { background: #4fc3f7; color: #fff; }
         .menu-btn.logout { margin-top: auto; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); }
 
         .main-content {
             width: 100%;
-            padding-top: 80px; 
-            padding-bottom: 30px;
-            padding-left: 15px;
-            padding-right: 15px;
+            padding: 80px 20px 30px 20px;
             display: flex;
             flex-direction: column;
             align-items: center; 
@@ -84,7 +81,7 @@
         }
         .content-section.active { display: block; }
 
-        /* --- フォーム --- */
+        /* --- フォーム・コンテナ --- */
         .form-container, .manager-container { 
             background-color: #fff; border: 1px solid #b3e5fc; 
             padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -100,11 +97,12 @@
             border-left: 4px solid #0288d1; padding-left: 10px; 
         }
         .input-wrapper { flex-grow: 1; }
-        input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea { 
+        input, textarea, select { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
         }
         textarea { height: 100px; resize: vertical; }
 
+        /* コンディションボタン */
         .condition-group { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 5px; }
         .condition-label { 
             border: 1px solid transparent; border-radius: 6px; padding: 5px 8px; 
@@ -123,176 +121,80 @@
         button.send-btn:hover { background: #01579b; }
         button.send-btn:disabled { background: #ccc; cursor: not-allowed; }
         button.send-btn.update-mode { background: #007bff; }
-        #cancel-edit-btn { display: none; padding: 10px 30px; background: #999; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
+        
         .btn-copy { background: #fff; color: #28a745; border: 1px solid #28a745; font-weight: bold; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
+        #cancel-edit-btn { display: none; padding: 10px 30px; background: #999; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
 
-        /* --- ハンバーガーメニューボタン（PCでは非表示） --- */
+        /* ハンバーガーメニュー */
         .hamburger { display: none; }
 
-        /* --- 検索・フィルターエリアのデザイン --- */
-        .list-header {
-            background-color: #f8fbff; 
-            padding: 20px;              
-            border-radius: 8px;        
-            border: 1px solid #b3e5fc; 
-            margin-bottom: 30px;        
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03); 
-        }
-        .list-header h2 {
-            margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; color: #0277bd;
-            border-bottom: 1px dashed #b3e5fc; padding-bottom: 10px;
-        }
-        .filter-area { display: flex; gap: 10px; }
-        .filter-select, .filter-input {
-            padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;
-        }
-        .filter-select { width: 30%; } 
-        .filter-input { width: 70%; } 
-
-        /* =========================================
-           ▼ 修正箇所: 過去レポート（カードデザイン） ▼
-           ========================================= */
+        /* 過去レポートカード */
         .item { 
-            position: relative; 
-            background-color: #fff; 
-            border: 1px solid #e0e0e0; 
-            border-radius: 8px; 
-            padding: 25px; 
-            margin-bottom: 25px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            position: relative; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
         }
-        .report-row { 
-            display: block; 
-            margin-bottom: 25px; 
-            border-bottom: none; 
-            padding-bottom: 0; 
-        }
+        .report-row { display: block; margin-bottom: 25px; border-bottom: none; padding-bottom: 0; }
         .report-label { 
-            display: block; 
-            width: 100%;
-            font-weight: bold; 
-            font-size: 1rem; 
-            color: #01579b; 
-            background-color: #e1f5fe; 
-            padding: 8px 15px; 
-            border-radius: 6px; 
-            margin-bottom: 12px; 
-            border-left: 5px solid #0288d1; 
+            display: block; width: 100%; font-weight: bold; font-size: 1rem; color: #01579b; 
+            background-color: #e1f5fe; padding: 8px 15px; border-radius: 6px; margin-bottom: 12px; border-left: 5px solid #0288d1; 
         }
         .report-content {
-            font-size: 1.05rem; 
-            line-height: 1.8; 
-            color: #333;
-            padding: 10px 15px;
-            background-color: #fafafa; 
-            border-radius: 4px;
-            white-space: pre-wrap; 
+            font-size: 1.05rem; line-height: 1.8; color: #333; padding: 10px 15px; background-color: #fafafa; border-radius: 4px; white-space: pre-wrap; 
         }
-        .report-header-area {
-            margin-bottom: 20px; 
-            padding-bottom: 15px;
-            border-bottom: 2px solid #eee; 
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            gap: 15px;
-        }
-        
-        /* カード下部のフッターエリア */
-        .card-footer {
-            margin-top: 20px; padding-top: 15px;
-            border-top: 1px dashed #e0e0e0;
-            display: flex; justify-content: flex-end; align-items: center;
-            flex-wrap: wrap; gap: 10px;
-        }
-
-        /* いいねボタンエリア */
-        .like-buttons { 
-            display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end;
-        }
+        .report-header-area { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #eee; display: flex; flex-wrap: wrap; align-items: baseline; gap: 15px; }
+        .card-footer { margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e0e0e0; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .like-buttons { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
         .like-btn { font-size: 11px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 15px; background-color: #fff; cursor: pointer; transition: 0.2s; }
         .like-btn:hover { background-color: #e1f5fe; border-color: #0288d1; }
-        
-        .like-btn:disabled {
-            background-color: #f5f5f5; color: #aaa; border-color: #ddd; cursor: not-allowed; opacity: 0.7;
-        }
-        .like-btn:disabled:hover { background-color: #f5f5f5; border-color: #ddd; }
-        
-        /* 削除ボタン */
+        .like-btn:disabled { background-color: #f5f5f5; color: #aaa; border-color: #ddd; cursor: not-allowed; opacity: 0.7; }
         .delete-btn { position: absolute; top: -10px; left: -10px; width: 30px; height: 30px; background: #ff4d4d; color: white; border-radius: 50%; border: none; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; z-index: 10; }
-        
-        /* 編集ボタン */
         .edit-btn { padding: 6px 15px; background: #fff; color: #007bff; border: 1px solid #007bff; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
 
-        /* その他ユーティリティ */
+        /* リストヘッダー */
+        .list-header { background-color: #f8fbff; padding: 20px; border-radius: 8px; border: 1px solid #b3e5fc; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .list-header h2 { margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; color: #0277bd; border-bottom: 1px dashed #b3e5fc; padding-bottom: 10px; }
+        .filter-area { display: flex; gap: 10px; }
+        .filter-select { width: 30%; } .filter-input { width: 70%; } 
+
+        /* =========================================
+           ▼ 新規追加: 休日設定用カレンダー（インライン表示） ▼
+           ========================================= */
+        .calendar-container {
+            background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ccc; max-width: 600px; margin: 0 auto;
+        }
+        .calendar-title-area { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+        .calendar-btn { padding:5px 15px; cursor:pointer; background:#eee; border:1px solid #ccc; border-radius:4px; font-weight:bold; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .calendar-header { font-weight: bold; text-align: center; padding: 8px; background: #eee; border-radius:4px; }
+        .calendar-day { 
+            border: 1px solid #eee; height: 60px; padding: 5px; font-size: 16px; 
+            cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 4px;
+            transition: 0.2s;
+        }
+        .calendar-day:hover { background-color: #f0f0f0; }
+        .day-selected { background-color: #ffcdd2 !important; border-color: #e57373 !important; color: #c62828; font-weight: bold; } /* 選択中（赤） */
+        .day-saved-holiday { background-color: #cceeff; color: #007bff; } /* 既に登録済みの休み（青） */
+        .day-other-month { background-color: #fafafa; color: #ccc; pointer-events: none; }
+
+        /* ページネーション */
         .Pagination { display: flex; justify-content: center; margin: 40px 0; gap: 10px; }
         .Pagination-Item-Link { width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; border: 1px solid #ccc; cursor: pointer; text-decoration: none; color: #333; background: #fff; }
         .Pagination-Item-Link.isActive { background: #0288d1; color: white; border-color: #0288d1; pointer-events: none; }
+        
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
-        
-        /* カレンダーモーダル */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background-color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
-        .close-modal { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 20px; }
-        .calendar-header { font-weight: bold; text-align: center; padding: 5px; background: #eee; }
-        .calendar-day { border: 1px solid #ddd; height: 60px; padding: 5px; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-        .day-missing { background-color: #ffcccc; } 
-        .day-holiday { background-color: #cceeff; } 
-        .day-submitted { background-color: #ffffff; } 
-        .day-future { background-color: #f9f9f9; color: #ccc; cursor: default; }
 
-        /* 休日設定モードのスイッチ用 */
-        .mode-switch-area { margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 6px; text-align: center; }
-        .switch-label { font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-        .calendar-title-area { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-        .calendar-btn { padding:5px 15px; cursor:pointer; background:#eee; border:1px solid #ccc; border-radius:4px; font-weight:bold; }
-
-        /* =========================================
-           ▼ スマホ対応（水色テーマ＆ハンバーガーメニュー） ▼
-           ========================================= */
         @media (max-width: 768px) {
-            body, .app-container {
-                flex-direction: column;
-                height: auto;
-                min-height: 100vh;
-            }
-            .sidebar {
-                position: fixed;
-                top: 0; left: -250px; 
-                width: 250px; height: 100%; 
-                flex-direction: column; justify-content: flex-start;
-                padding-top: 60px; z-index: 1000;
-                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-            }
+            body, .app-container { flex-direction: column; height: auto; min-height: 100vh; }
+            .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; padding-top: 60px; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
             .sidebar.active { left: 0; }
-            
-            /* ハンバーガーボタン（左上固定） */
-            .hamburger {
-                display: flex; justify-content: center; align-items: center;
-                position: fixed; top: 15px; left: 15px;
-                width: 50px; height: 50px; border-radius: 50%;
-                z-index: 2000;
-                background-color: #0277bd; color: white; border: none;
-                font-size: 24px; cursor: pointer;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            }
-
+            .hamburger { display: flex; justify-content: center; align-items: center; position: fixed; top: 15px; left: 15px; width: 50px; height: 50px; border-radius: 50%; z-index: 2000; background-color: #0277bd; color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
             .form-group { flex-direction: column; }
-            
-            label {
-                width: 100%; border-bottom: 2px solid #81d4fa;
-                border-left: none; margin-bottom: 5px; padding-left: 0;
-            }
+            label { width: 100%; border-bottom: 2px solid #81d4fa; border-left: none; margin-bottom: 5px; padding-left: 0; }
             .button-group { flex-direction: column-reverse; gap: 10px; }
             button { width: 100%; padding: 12px; }
             .condition-group .condition-label { width: calc(50% - 6px); }
-            
-            /* フィルターエリアも縦並び */
-            .filter-area { flex-direction: column; }
-            .filter-select, .filter-input { width: 100%; }
+            .filter-area { flex-direction: column; } .filter-select, .filter-input { width: 100%; }
         }
     </style>
 </head>
@@ -313,7 +215,7 @@
     <div id="register-overlay" class="overlay">
         <div class="auth-box">
             <h2>📝 新規ユーザー登録</h2>
-            <input type="text" id="reg-id" placeholder="ログインID（半角英数）" oninput="value = value.replace(/[^a-zA-Z0-9.]/g, '');">
+            <input type="text" id="reg-id" placeholder="ログインID（半角英数）">
             <input type="text" id="reg-name" placeholder="お名前">
             <input type="email" id="reg-email" placeholder="メールアドレス">
             <input type="password" id="reg-pass" placeholder="パスワード">
@@ -326,7 +228,7 @@
     <div id="reset-overlay" class="overlay">
         <div class="auth-box">
             <h2>🔒 パスワードリセット</h2>
-            <p style="text-align:left;">登録したIDとメールアドレスを入力してください。<br>仮パスワードを送信します。</p>
+            <p style="text-align:left;">登録したIDとメールアドレスを入力してください。</p>
             <input type="text" id="reset-id" placeholder="ログインID">
             <input type="email" id="reset-email" placeholder="登録メールアドレス">
             <button onclick="tryReset()" class="btn-primary" id="reset-btn">送信する</button>
@@ -340,15 +242,17 @@
     <div class="app-container" id="app-container">
         <div class="sidebar">
             <h2>メニュー</h2>
-            <button class="menu-btn" onclick="switchTab('member')">👥 メンバー管理</button>
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
+            <button class="menu-btn" onclick="switchTab('correction')">✏️ 日報修正</button>
+            <button class="menu-btn" onclick="switchTab('holiday')">🏖️ 休日設定</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
-            <button class="menu-btn" onclick="openCheckModal()">📅 記入確認</button>
-            <button class="menu-btn" onclick="switchTab('password')">🔑 パスワード変更</button>
+            <button class="menu-btn" onclick="switchTab('member')">👥 メンバー管理</button>
+            <button class="menu-btn" onclick="switchTab('password')">🔑 PW変更</button>
             <button class="menu-btn logout" onclick="logout()">🚪 ログアウト</button>
         </div>
 
         <div class="main-content">
+            
             <div id="tab-member" class="content-section">
                 <h1>メンバー管理</h1>
                 <div class="manager-container">
@@ -356,7 +260,6 @@
                         <h3 style="margin:0;">現在のメンバー</h3>
                         <button id="delete-member-btn" class="btn-sm btn-delete-member" onclick="deleteMember()">選択したメンバーを削除</button>
                     </div>
-                    <p style="margin-bottom:15px; color:#666; font-size:14px;">ユーザー登録すると自動でここに追加されます。</p>
                     <div id="manage-member-radios" class="condition-group">読み込み中...</div>
                 </div>
             </div>
@@ -398,11 +301,11 @@
                         <div class="input-wrapper"><textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea></div>
                     </div>
                     <div class="form-group">
-                        <label for="tomorrow">明日の業務内容</label>
+                        <label>明日の業務内容</label>
                         <div class="input-wrapper"><textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea></div>
                     </div>
                     <div class="form-group">
-                        <label for="comment">所見や感じたこと</label>
+                        <label>所見や感じたこと</label>
                         <div class="input-wrapper"><textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea></div>
                     </div>
                     <div class="form-group">
@@ -417,6 +320,46 @@
                         <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
                     </div>
                 </div>      
+            </div>
+
+            <div id="tab-correction" class="content-section">
+                <h1>日報修正</h1>
+                <div class="manager-container" style="text-align:center;">
+                    <p style="margin-bottom:20px;">修正したい日付を選択してください。<br>（ログイン中のユーザーの日報のみ修正できます）</p>
+                    <div style="max-width:300px; margin:0 auto 20px auto;">
+                        <input type="date" id="correction-date-input" style="padding:15px; font-size:18px;">
+                    </div>
+                    <button class="send-btn" onclick="findAndEditReport()">この日の日報を修正する</button>
+                </div>
+            </div>
+
+            <div id="tab-holiday" class="content-section">
+                <h1>休日設定</h1>
+                <div class="manager-container">
+                    <p style="text-align:center; margin-bottom:20px;">
+                        あなたの休日を設定します。<br>
+                        カレンダーの日付をタップして赤くし、最後に「保存」を押してください。<br>
+                        <small style="color:#666;">（一度に複数の日付を選択して一括保存できます）</small>
+                    </p>
+                    
+                    <div class="calendar-container">
+                        <div class="calendar-title-area">
+                            <button class="calendar-btn" onclick="changeHolidayMonth(-1)">◀ 前月</button>
+                            <h3 id="holiday-calendar-title" style="margin:0;">2024年 1月</h3>
+                            <button class="calendar-btn" onclick="changeHolidayMonth(1)">翌月 ▶</button>
+                        </div>
+                        <div class="calendar-grid" id="holiday-calendar-grid">
+                            </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="send-btn" onclick="saveBulkHolidays()" id="save-holiday-btn">変更を保存する</button>
+                    </div>
+                    <div style="margin-top:15px; font-size:12px; text-align:center;">
+                        <span style="display:inline-block; width:12px; height:12px; background:#ffcdd2; border:1px solid #e57373;"></span> 今回選択(保存待ち)
+                        <span style="display:inline-block; width:12px; height:12px; background:#cceeff; margin-left:10px;"></span> 現在の休日
+                    </div>
+                </div>
             </div>
 
             <div id="tab-history" class="content-section">
@@ -458,93 +401,38 @@
         </div>
     </div>
 
-    <div id="check-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeCheckModal()">×</span>
-            <h2>📅 記入確認カレンダー</h2>
-            <div style="margin-bottom: 15px;">
-                <p>チェックしたい人を選んでください：</p>
-                <div id="check-member-radios" class="condition-group"></div>
-            </div>
-            
-            <div class="mode-switch-area">
-                <label class="switch-label">
-                    <input type="checkbox" id="holiday-mode-check">
-                    <span>✏️ 休日設定モード</span>
-                </label>
-                <div style="font-size:12px; color:#666; margin-top:5px;">
-                    ※チェックを入れると、日付タップで「休み」を変更できます
-                </div>
-            </div>
-
-            <button class="send-btn" onclick="renderCalendar()" style="margin-top:15px;">表示・更新する</button>
-
-            <div id="calendar-area"></div>
-            
-            <div style="margin-top:10px; font-size:12px; text-align:right;">
-                <span style="display:inline-block; width:12px; height:12px; background:#fff; border:1px solid #ccc;"></span> 提出済
-                <span style="display:inline-block; width:12px; height:12px; background:#ffcccc; margin-left:10px;"></span> 未提出
-                <span style="display:inline-block; width:12px; height:12px; background:#cceeff; margin-left:10px;"></span> 休み
-            </div>
-        </div>
-    </div>
-
     <div id="toast">送信完了しました！</div>
 
     <script>
-        // ★重要：あなたのGAS URL（変更があれば書き換えてください）
+        // ★重要：GAS URL（あなたのURLのままです）
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyDvA1WA7D_EQRmD_nYrtD-3RWWm2sT3hASH9luQGxJ_OXm4zhOwqPe1OU0oows0W0lPQ/exec"; 
 
-        // --- 画面切り替え ---
-        function showLogin() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('login-overlay').style.display = 'flex'; }
-        function showRegister() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('register-overlay').style.display = 'flex'; }
-        function showReset() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('reset-overlay').style.display = 'flex'; }
-
-        function tryRegister() {
-            const id = document.getElementById('reg-id').value; const name = document.getElementById('reg-name').value; const email = document.getElementById('reg-email').value; const pass = document.getElementById('reg-pass').value; const msg = document.getElementById('reg-msg'); const btn = document.getElementById('reg-btn');
-            if(!id || !name || !email || !pass) { msg.innerText = "すべての項目を入力してください"; return; }
-            msg.innerText = "登録中..."; btn.disabled = true;
-            const data = { action: 'register', id: id, name: name, email: email, password: pass };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("登録しました！ログイン画面に戻ります。"); location.reload(); }).catch(err => { msg.innerText = "エラーが発生しました"; btn.disabled = false; });
-        }
-
-        function tryReset() {
-            const id = document.getElementById('reset-id').value; const email = document.getElementById('reset-email').value; const msg = document.getElementById('reset-msg'); const btn = document.getElementById('reset-btn');
-            if(!id || !email) { msg.innerText = "IDとメールアドレスを入力してください"; return; }
-            msg.innerText = "送信中..."; btn.disabled = true;
-            const data = { action: 'resetPassword', id: id, email: email };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("リセットリクエストを送信しました。"); showLogin(); document.getElementById('reset-id').value = ""; document.getElementById('reset-email').value = ""; msg.innerText = ""; btn.disabled = false; }).catch(err => { msg.innerText = "通信エラー"; btn.disabled = false; });
-        }
-
-        function changePassword() {
-            const currentPass = document.getElementById('cp-current').value; const newPass = document.getElementById('cp-new').value; const confirmPass = document.getElementById('cp-confirm').value; const msg = document.getElementById('cp-msg'); const myId = localStorage.getItem('login_user_id'); 
-            if (!currentPass || !newPass || !confirmPass) { msg.innerText = "すべての項目を入力してください"; return; }
-            if (newPass !== confirmPass) { msg.innerText = "新しいパスワードが一致しません"; return; }
-            msg.innerText = "変更中...";
-            const data = { action: 'changePassword', id: myId, currentPass: currentPass, newPass: newPass };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("パスワード変更リクエストを送信しました。"); document.getElementById('cp-current').value = ""; document.getElementById('cp-new').value = ""; document.getElementById('cp-confirm').value = ""; msg.innerText = ""; }).catch(err => { msg.innerText = "エラーが発生しました"; });
-        }
-
-        function logout() {
-            if(!confirm("ログアウトしますか？")) return;
-            localStorage.removeItem('login_user_id'); localStorage.removeItem('login_user_name'); localStorage.removeItem('login_time');
-            loggedInUser = null; lastSelection = { name: null, condition: null };
-            document.getElementById('app-container').style.display = 'none'; showLogin();
-            document.getElementById('login-id').value = ""; document.getElementById('login-password').value = ""; document.getElementById('login-msg').innerText = ""; alert("ログアウトしました");
-        }
-
+        // --- 共通変数 ---
         let allData = [], currentData = [], memberList = [], holidayList = []; 
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1, saveTimers = {}, isEditing = false, editingRowIndex = null, currentEditingFileUrl = "", targetReportDate = null, lastSelection = { name: null, condition: null }, loggedInUser = null; 
         
-        let displayYear = new Date().getFullYear();
-        let displayMonth = new Date().getMonth();
+        // 休日カレンダー用変数
+        let holidayDisplayYear = new Date().getFullYear();
+        let holidayDisplayMonth = new Date().getMonth();
+        let pendingHolidayChanges = new Set(); // 一括変更用の一時保存
+
+        // --- 画面遷移・ログイン関連 ---
+        function showLogin() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('login-overlay').style.display = 'flex'; }
+        function showRegister() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('register-overlay').style.display = 'flex'; }
+        function showReset() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('reset-overlay').style.display = 'flex'; }
 
         function checkLoginSession() {
             const savedId = localStorage.getItem('login_user_id'); const savedTime = localStorage.getItem('login_time'); const savedName = localStorage.getItem('login_user_name');
             if (savedId && savedTime && savedName) {
                 const now = new Date().getTime();
-                if ((now - parseInt(savedTime)) < 10 * 60 * 1000) { loggedInUser = savedName; document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); document.getElementById('app-container').style.display = 'flex'; fetchData(); return; }
+                if ((now - parseInt(savedTime)) < 60 * 60 * 1000) { // 60分有効
+                    loggedInUser = savedName; 
+                    document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); 
+                    document.getElementById('app-container').style.display = 'flex'; 
+                    fetchData(); 
+                    return; 
+                }
             }
             localStorage.removeItem('login_user_id'); localStorage.removeItem('login_user_name'); localStorage.removeItem('login_time');
         }
@@ -562,20 +450,165 @@
             }).catch(err => { msg.innerText = "通信エラー"; console.error(err); btn.disabled = false; });
         }
 
+        function tryRegister() {
+            const id = document.getElementById('reg-id').value; const name = document.getElementById('reg-name').value; const email = document.getElementById('reg-email').value; const pass = document.getElementById('reg-pass').value; const msg = document.getElementById('reg-msg'); const btn = document.getElementById('reg-btn');
+            if(!id || !name || !email || !pass) { msg.innerText = "すべての項目を入力してください"; return; }
+            msg.innerText = "登録中..."; btn.disabled = true;
+            const data = { action: 'register', id: id, name: name, email: email, password: pass };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("登録しました！ログイン画面に戻ります。"); location.reload(); }).catch(err => { msg.innerText = "エラーが発生しました"; btn.disabled = false; });
+        }
+
+        function logout() {
+            if(!confirm("ログアウトしますか？")) return;
+            localStorage.removeItem('login_user_id'); localStorage.removeItem('login_user_name'); localStorage.removeItem('login_time');
+            loggedInUser = null; lastSelection = { name: null, condition: null };
+            document.getElementById('app-container').style.display = 'none'; showLogin();
+            document.getElementById('login-id').value = ""; document.getElementById('login-password').value = ""; document.getElementById('login-msg').innerText = ""; alert("ログアウトしました");
+        }
+
         window.onload = function() { checkLoginSession(); setTodayDate(); };
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
 
         function switchTab(tabName) {
-            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active')); document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active')); 
+            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
-            const buttons = document.querySelectorAll('.menu-btn');
-            if(tabName === 'member') buttons[0].classList.add('active'); if(tabName === 'input') buttons[1].classList.add('active'); if(tabName === 'history') buttons[2].classList.add('active'); if(tabName === 'password') buttons[4].classList.add('active');
+            
+            // ボタンのActive表示切り替え
+            const btns = document.querySelectorAll('.menu-btn');
+            if(tabName==='input') btns[0].classList.add('active');
+            if(tabName==='correction') btns[1].classList.add('active');
+            if(tabName==='holiday') { btns[2].classList.add('active'); renderHolidayCalendar(); }
+            if(tabName==='history') btns[3].classList.add('active');
+            if(tabName==='member') btns[4].classList.add('active');
+            if(tabName==='password') btns[5].classList.add('active');
         }
+
+        // --- 休日一括設定ロジック ---
+        function changeHolidayMonth(diff) {
+            holidayDisplayMonth += diff;
+            if (holidayDisplayMonth > 11) { holidayDisplayMonth = 0; holidayDisplayYear++; }
+            else if (holidayDisplayMonth < 0) { holidayDisplayMonth = 11; holidayDisplayYear--; }
+            renderHolidayCalendar();
+        }
+
+        function renderHolidayCalendar() {
+            if (!loggedInUser) return;
+            const year = holidayDisplayYear;
+            const month = holidayDisplayMonth;
+            document.getElementById('holiday-calendar-title').innerText = `${year}年 ${month + 1}月`;
+            
+            const grid = document.getElementById('holiday-calendar-grid');
+            grid.innerHTML = '<div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) { grid.innerHTML += '<div class="calendar-day day-other-month"></div>'; }
+
+            for (let d = 1; d <= lastDay; d++) {
+                const dateStr = `${year}-${('0'+(month+1)).slice(-2)}-${('0'+d).slice(-2)}`;
+                const el = document.createElement('div');
+                el.className = 'calendar-day';
+                el.innerText = d;
+
+                // 既にDBにある休日か？
+                const isSavedHoliday = holidayList.some(h => {
+                   const hD = new Date(h[0]);
+                   return hD.getFullYear()===year && hD.getMonth()===month && hD.getDate()===d && h[1]===loggedInUser;
+                });
+
+                // 今タップして選択中か？
+                if (pendingHolidayChanges.has(dateStr)) {
+                    el.classList.add('day-selected');
+                } else if (isSavedHoliday) {
+                    el.classList.add('day-saved-holiday');
+                    el.innerText += " 休";
+                }
+
+                el.onclick = () => {
+                    if (pendingHolidayChanges.has(dateStr)) {
+                        pendingHolidayChanges.delete(dateStr); // 選択解除
+                    } else {
+                        pendingHolidayChanges.add(dateStr); // 選択
+                    }
+                    renderHolidayCalendar(); // 再描画
+                };
+                grid.appendChild(el);
+            }
+        }
+
+        async function saveBulkHolidays() {
+            if (pendingHolidayChanges.size === 0) { alert("変更したい日付を選択してください"); return; }
+            if (!confirm(`${pendingHolidayChanges.size}件の日付を変更しますか？`)) return;
+
+            const btn = document.getElementById('save-holiday-btn');
+            btn.disabled = true; btn.innerText = "保存中...";
+
+            // GASが1件ずつしか対応していないため、JSで並列処理して一括保存に見せる
+            const promises = Array.from(pendingHolidayChanges).map(dateStr => {
+                const data = { action: 'manageHoliday', date: dateStr, name: loggedInUser };
+                return fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            });
+
+            try {
+                await Promise.all(promises); // 全部のリクエストが終わるのを待つ
+                pendingHolidayChanges.clear(); // 選択解除
+                document.getElementById("toast").innerText = "休日設定を保存しました！"; showToast();
+                btn.disabled = false; btn.innerText = "変更を保存する";
+                fetchData(); // データを再取得してカレンダー更新
+            } catch (e) {
+                alert("保存中にエラーが発生しました");
+                btn.disabled = false; btn.innerText = "変更を保存する";
+            }
+        }
+
+        // --- 日報修正検索ロジック ---
+        function findAndEditReport() {
+            const dateVal = document.getElementById('correction-date-input').value;
+            if (!dateVal) { alert("日付を選択してください"); return; }
+            if (!loggedInUser) { alert("ログインしてください"); return; }
+
+            // データから検索
+            const targetRow = allData.find(row => {
+                const rowDate = new Date(row[0]);
+                const rowDateStr = `${rowDate.getFullYear()}-${('0'+(rowDate.getMonth()+1)).slice(-2)}-${('0'+rowDate.getDate()).slice(-2)}`;
+                return rowDateStr === dateVal && row[1] === loggedInUser;
+            });
+
+            if (targetRow) {
+                // 見つかったら修正モードへ
+                const rowIndex = targetRow[targetRow.length - 1];
+                editReport(rowIndex);
+            } else {
+                alert("その日の日報データは見つかりませんでした。\n「日報入力」タブから新規作成してください。");
+            }
+        }
+
+        // --- 通常のデータ処理 ---
+        function fetchData() {
+            const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "<p>データを取得中...</p>";
+            fetch(GAS_URL + '?t=' + new Date().getTime()).then(response => response.json()).then(data => {
+                if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections(); }
+                if (data.holidays) { holidayList = data.holidays; renderHolidayCalendar(); } 
+                allData = (data.reports || []).reverse(); currentData = allData;
+                if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; } applyFilter();
+            }).catch(err => { reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; console.error(err); });
+        }
+
+        async function sendData() {
+            const dateVal = document.getElementById('report-date').value; const name = getSelectedName(); const condition = getSelectedCondition(); const progress = document.getElementById('progress').value; const tomorrow = document.getElementById('tomorrow').value; const comment = document.getElementById('comment').value; const fileInput = document.getElementById('file-attach');
+            if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { alert("全ての項目を入力・選択してください"); return; }
+            const submitBtn = document.getElementById('submit-btn'); submitBtn.disabled = true; submitBtn.innerText = "送信中...";
+            let data = { targetDate: dateVal, name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
+            if (isEditing) { data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; } else { data.action = 'report'; }
+            if (fileInput.files.length > 0) { try { const file = fileInput.files[0]; const fileData = await readFileAsBase64(file); data.fileName = file.name; data.mimeType = file.type; data.fileData = fileData; } catch (e) { alert("ファイルの読み込みに失敗しました"); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return; } }
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = isEditing ? "修正しました！" : "送信完了しました！"; showToast(); resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信"; }).catch(err => { alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; });
+        }
+
+        // --- 以下、既存のヘルパー関数 ---
         function saveSelection(key, value) { localStorage.setItem(key, value); }
-        function setupAutoSave() {
-            const textFields = ['progress', 'tomorrow', 'comment'];
-            textFields.forEach(id => { document.getElementById(id).addEventListener('input', function() { saveSelection('saved_' + id, this.value); }); });
-        }
+        function setupAutoSave() { const textFields = ['progress', 'tomorrow', 'comment']; textFields.forEach(id => { document.getElementById(id).addEventListener('input', function() { saveSelection('saved_' + id, this.value); }); }); }
         function restoreSelections() {
             if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = loggedInUser; saveSelection('saved_name', loggedInUser); } } 
             else { const savedName = localStorage.getItem('saved_name'); if (savedName) { const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; } } }
@@ -601,46 +634,7 @@
             if (lastReport) { const tomorrowTask = lastReport[4]; if (!tomorrowTask) { alert("前回の報告に「明日の業務」が記入されていませんでした"); return; } if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) { document.getElementById('progress').value = tomorrowTask; saveSelection('saved_progress', tomorrowTask); document.getElementById("toast").innerText = "コピーしました！"; showToast(); } } else { alert("前回の報告データが見つかりませんでした"); }
         }
         function resetDate() { targetReportDate = null; document.getElementById('date-alert').style.display = 'none'; document.getElementById('form-container').classList.remove('past-mode'); setTodayDate(); }
-        
-        function startReportForDate(year, month, day) {
-            const mm = ('0' + (month + 1)).slice(-2); const dd = ('0' + day).slice(-2);
-            document.getElementById('report-date').value = `${year}-${mm}-${dd}`;
-            targetReportDate = `${year}/${month + 1}/${day}`; 
-            closeCheckModal(); switchTab('input');
-            document.getElementById('date-alert').style.display = 'flex'; document.getElementById('date-alert-text').innerText = `${targetReportDate} の日報を作成中`; document.getElementById('form-container').classList.add('past-mode');
-            const targetName = document.querySelector('input[name="check-target"]:checked')?.value;
-            if (targetName) { const nameRadios = document.querySelectorAll('#name-radios input[name="name"]'); nameRadios.forEach(r => { if (r.value === targetName) { r.checked = true; lastSelection.name = targetName; } else { r.checked = false; } }); saveSelection('saved_name', targetName); }
-        }
-
-        function updateManagerButtonState() { const name = getSelectedManagerName(); const deleteBtn = document.getElementById('delete-member-btn'); if (name) deleteBtn.style.display = 'block'; else deleteBtn.style.display = 'none'; }
-        function deleteMember() {
-            const name = getSelectedManagerName(); if (!name) return;
-            if (!confirm(`「${name}」さんを名簿から削除しますか？\n（日報データは削除されません）`)) return;
-            memberList = memberList.filter(m => m !== name); renderMemberRadios(); renderFilterOptions(); updateManagerButtonState();
-            const data = { action: 'deleteMember', targetName: name };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
-        }
-
-        async function sendData() {
-            const dateVal = document.getElementById('report-date').value; const name = getSelectedName(); const condition = getSelectedCondition(); const progress = document.getElementById('progress').value; const tomorrow = document.getElementById('tomorrow').value; const comment = document.getElementById('comment').value; const fileInput = document.getElementById('file-attach');
-            if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { alert("全ての項目を入力・選択してください"); return; }
-            const submitBtn = document.getElementById('submit-btn'); submitBtn.disabled = true; submitBtn.innerText = "送信中...";
-            let data = { targetDate: dateVal, name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
-            if (isEditing) { data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; } else { data.action = 'report'; }
-            if (fileInput.files.length > 0) { try { const file = fileInput.files[0]; const fileData = await readFileAsBase64(file); data.fileName = file.name; data.mimeType = file.type; data.fileData = fileData; } catch (e) { alert("ファイルの読み込みに失敗しました"); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return; } }
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = isEditing ? "修正しました！" : "送信完了しました！"; showToast(); resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信"; }).catch(err => { alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; });
-        }
         function readFileAsBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => { const result = reader.result; const base64 = result.split(',')[1]; resolve(base64); }; reader.onerror = error => reject(error); reader.readAsDataURL(file); }); }
-        
-        function fetchData() {
-            const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "<p>データを取得中...</p>";
-            fetch(GAS_URL + '?t=' + new Date().getTime()).then(response => response.json()).then(data => {
-                if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections(); }
-                if (data.holidays) { holidayList = data.holidays; } 
-                allData = (data.reports || []).reverse(); currentData = allData;
-                if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; } applyFilter();
-            }).catch(err => { reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; console.error(err); });
-        }
 
         function deleteReport(rowIndex) {
             if (!confirm("本当に削除しますか？\n（この操作は取り消せません）")) return;
@@ -660,226 +654,70 @@
         function cancelEdit() { isEditing = false; editingRowIndex = null; currentEditingFileUrl = ""; document.getElementById('page-title').innerText = "システム課日報"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "送信"; submitBtn.classList.remove('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'none'; document.getElementById('form-container').classList.remove('editing'); document.getElementById('current-file-msg').style.display = 'none'; setTodayDate(); }
         function renderFilterOptions() { const select = document.getElementById('filter-name'); select.innerHTML = '<option value="">全員</option>'; memberList.forEach(name => { const option = document.createElement('option'); option.value = name; option.innerText = name; select.appendChild(option); }); }
         function applyFilter() { const nameVal = document.getElementById('filter-name').value; const textVal = document.getElementById('filter-text').value.toLowerCase(); currentData = allData.filter(row => { const name = row[1]; const content = (row[3] + row[4] + row[5]).toLowerCase(); const nameMatch = (nameVal === "") || (name === nameVal); const textMatch = (textVal === "") || (content.includes(textVal)); return nameMatch && textMatch; }); renderPage(1); }
-        
         function renderMemberRadios() {
-            const inputContainer = document.getElementById('name-radios'); 
-            const manageContainer = document.getElementById('manage-member-radios'); 
-            const checkContainer = document.getElementById('check-member-radios'); 
-            
+            const inputContainer = document.getElementById('name-radios'); const manageContainer = document.getElementById('manage-member-radios'); 
             const currentReportName = document.querySelector('#name-radios input[name="name"]:checked')?.value;
             const currentManagerName = document.querySelector('#manage-member-radios input[name="manager-name"]:checked')?.value;
-            const currentCheckName = document.querySelector('#check-member-radios input[name="check-target"]:checked')?.value;
-
-            inputContainer.innerHTML = ""; manageContainer.innerHTML = ""; checkContainer.innerHTML = "";
-            
+            inputContainer.innerHTML = ""; manageContainer.innerHTML = "";
             memberList.forEach(name => {
                 const label1 = document.createElement('label'); label1.className = 'condition-label'; const input1 = document.createElement('input'); input1.type = 'radio'; input1.name = 'name'; input1.value = name; input1.onclick = function() { toggleRadio(this, 'name'); }; label1.appendChild(input1); label1.appendChild(document.createTextNode(name)); inputContainer.appendChild(label1);
                 const label2 = document.createElement('label'); label2.className = 'condition-label'; const input2 = document.createElement('input'); input2.type = 'radio'; input2.name = 'manager-name'; input2.value = name; input2.onchange = updateManagerButtonState; label2.appendChild(input2); label2.appendChild(document.createTextNode(name)); manageContainer.appendChild(label2);
-                const label3 = document.createElement('label'); label3.className = 'condition-label'; const input3 = document.createElement('input'); input3.type = 'radio'; input3.name = 'check-target'; input3.value = name; label3.appendChild(input3); label3.appendChild(document.createTextNode(name)); checkContainer.appendChild(label3);
             });
-
             if (currentReportName) { const r = inputContainer.querySelector(`input[value="${currentReportName}"]`); if(r) r.checked = true; }
             if (currentManagerName) { const r = manageContainer.querySelector(`input[value="${currentManagerName}"]`); if(r) r.checked = true; }
-            if (currentCheckName) { const r = checkContainer.querySelector(`input[value="${currentCheckName}"]`); if(r) r.checked = true; }
         }
-
+        function updateManagerButtonState() { const name = getSelectedManagerName(); const deleteBtn = document.getElementById('delete-member-btn'); if (name) deleteBtn.style.display = 'block'; else deleteBtn.style.display = 'none'; }
+        function deleteMember() {
+            const name = getSelectedManagerName(); if (!name) return;
+            if (!confirm(`「${name}」さんを名簿から削除しますか？\n（日報データは削除されません）`)) return;
+            memberList = memberList.filter(m => m !== name); renderMemberRadios(); renderFilterOptions(); updateManagerButtonState();
+            const data = { action: 'deleteMember', targetName: name };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
+        }
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container'); 
-            
-            // データの取り出し
-            const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }); 
-            const name = row[1]; 
-            const condition = row[2]; 
-            const progress = row[3]; 
-            const tomorrow = row[4]; 
-            const comment = row[5]; 
-            const savedLikes = row[6] ? row[6] : ""; 
-            const fileUrl = row[7] ? row[7] : ""; 
-            const rowIndex = row[row.length - 1]; 
-
-            // いいねボタンの生成
+            const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }); const name = row[1]; const condition = row[2]; const progress = row[3]; const tomorrow = row[4]; const comment = row[5]; const savedLikes = row[6] ? row[6] : ""; const fileUrl = row[7] ? row[7] : ""; const rowIndex = row[row.length - 1]; 
             let buttonsHtml = ''; 
             memberList.forEach(memberName => { 
                 let btnText = memberName + "いいね👍"; 
-                if (savedLikes) { 
-                    const parts = savedLikes.split(','); 
-                    const found = parts.find(p => p.trim().startsWith(memberName)); 
-                    if (found) btnText = found.trim(); 
-                } 
-                const isMyButton = (memberName === loggedInUser); 
-                const disabledAttr = isMyButton ? "" : "disabled"; 
+                if (savedLikes) { const parts = savedLikes.split(','); const found = parts.find(p => p.trim().startsWith(memberName)); if (found) btnText = found.trim(); } 
+                const isMyButton = (memberName === loggedInUser); const disabledAttr = isMyButton ? "" : "disabled"; 
                 buttonsHtml += `<button class="like-btn" onclick="addLike(this)" ${disabledAttr}>${btnText}</button> `; 
             });
-
-            // ファイル添付の表示
-            let fileHtml = ""; 
-            if (fileUrl) { 
-                if (fileUrl.indexOf("http") === 0) { 
-                    fileHtml = `<div class="report-row"><div class="report-label">📎 添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く</a></div></div>`; 
-                } else { 
-                    fileHtml = `<div class="report-row"><div class="report-label">⚠️ 添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; 
-                } 
-            }
-
-            // カード全体のHTML生成
+            let fileHtml = ""; if (fileUrl) { if (fileUrl.indexOf("http") === 0) { fileHtml = `<div class="report-row"><div class="report-label">📎 添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く</a></div></div>`; } else { fileHtml = `<div class="report-row"><div class="report-label">⚠️ 添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; } }
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `
-                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
-                
-                <div class="report-header-area">
-                    <span style="font-size: 1.4em; font-weight: bold; color: #333;">${name}</span>
-                    <span style="background: #fff; border: 1px solid #ff7f00; color: #ff7f00; padding: 4px 10px; border-radius: 15px; margin-left: 10px; font-weight: bold; font-size: 0.9em;">${condition}</span>
-                    <div style="color: #666; font-size: 0.85em; margin-top: 8px;">報告日時: ${date}</div>
-                </div>
-
-                <div class="report-row">
-                    <div class="report-label">✅ 今日の進捗状況</div>
-                    <div class="report-content">${progress}</div>
-                </div>
-
-                <div class="report-row">
-                    <div class="report-label">🚀 明日の業務内容</div>
-                    <div class="report-content">${tomorrow}</div>
-                </div>
-
-                <div class="report-row">
-                    <div class="report-label">💭 所見や感じたこと</div>
-                    <div class="report-content">${comment}</div>
-                </div>
-
-                ${fileHtml}
-
-                <div class="card-footer">
-                    <div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div>
-                    <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
-                </div>
-            `;
-            
-            const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); 
-            reportContainer.appendChild(div);
+            div.innerHTML = `<button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button><div class="report-header-area"><span style="font-size: 1.4em; font-weight: bold; color: #333;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; color: #ff7f00; padding: 4px 10px; border-radius: 15px; margin-left: 10px; font-weight: bold; font-size: 0.9em;">${condition}</span><div style="color: #666; font-size: 0.85em; margin-top: 8px;">報告日時: ${date}</div></div><div class="report-row"><div class="report-label">✅ 今日の進捗状況</div><div class="report-content">${progress}</div></div><div class="report-row"><div class="report-label">🚀 明日の業務内容</div><div class="report-content">${tomorrow}</div></div><div class="report-row"><div class="report-label">💭 所見や感じたこと</div><div class="report-content">${comment}</div></div>${fileHtml}<div class="card-footer"><div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div><button class="edit-btn" onclick="editReport(${rowIndex})">編集</button></div>`;
+            const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); reportContainer.appendChild(div);
         }
-
-        // ページネーション用
         function renderPage(page) {
-            currentPage = page;
-            const reportContainer = document.getElementById('report-container');
-            reportContainer.innerHTML = "";
-
-            const totalItems = currentData.length;
-            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-            const start = (page - 1) * ITEMS_PER_PAGE;
-            const end = start + ITEMS_PER_PAGE;
-            const pageItems = currentData.slice(start, end);
-
+            currentPage = page; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "";
+            const totalItems = currentData.length; const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE); const start = (page - 1) * ITEMS_PER_PAGE; const end = start + ITEMS_PER_PAGE; const pageItems = currentData.slice(start, end);
             pageItems.forEach(row => createReportItem(row));
-
-            // ページネーションボタン作成
-            const existingNav = document.querySelector('.Pagination');
-            if (existingNav) existingNav.remove();
-
-            if (totalPages > 1) {
-                const nav = document.createElement('div'); nav.className = 'Pagination';
-                for (let i = 1; i <= totalPages; i++) {
-                    const a = document.createElement('a');
-                    a.className = 'Pagination-Item-Link';
-                    if (i === currentPage) a.classList.add('isActive');
-                    a.innerText = i;
-                    a.onclick = () => { renderPage(i); window.scrollTo({top:0, behavior:'smooth'}); };
-                    nav.appendChild(a);
-                }
-                document.getElementById('data-list').appendChild(nav);
-            }
+            const existingNav = document.querySelector('.Pagination'); if (existingNav) existingNav.remove();
+            if (totalPages > 1) { const nav = document.createElement('div'); nav.className = 'Pagination'; for (let i = 1; i <= totalPages; i++) { const a = document.createElement('a'); a.className = 'Pagination-Item-Link'; if (i === currentPage) a.classList.add('isActive'); a.innerText = i; a.onclick = () => { renderPage(i); window.scrollTo({top:0, behavior:'smooth'}); }; nav.appendChild(a); } document.getElementById('data-list').appendChild(nav); }
         }
-
         function updateButtonColor(btn) { const text = btn.innerText; if (text.match(/\d+$/)) { btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00'; btn.style.fontWeight = 'bold'; } else { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = ''; } }
         function addLike(btn) { let text = btn.innerText; let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart); if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; } updateButtonColor(btn); triggerDebounceSave(btn); }
         function triggerDebounceSave(btn) { const parentDiv = btn.closest('.like-buttons'); const rowIndex = parentDiv.getAttribute('data-row-index'); if (saveTimers[rowIndex]) { clearTimeout(saveTimers[rowIndex]); } saveTimers[rowIndex] = setTimeout(() => { sendLikeToSheet(rowIndex, parentDiv); }, 2000); }
         function sendLikeToSheet(rowIndex, parentDiv) { const btns = parentDiv.querySelectorAll('.like-btn'); const likeData = Array.from(btns).map(b => b.innerText).join(','); const data = { action: 'like', rowIndex: rowIndex, likeData: likeData }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; }).catch(err => console.error("エラー", err)); }
         function showToast() { var x = document.getElementById("toast"); x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500); }
         
-        function openCheckModal() { 
-            document.getElementById('check-modal').style.display = 'flex'; 
-            const now = new Date(); displayYear = now.getFullYear(); displayMonth = now.getMonth();
-            const currentChecked = document.querySelector('input[name="check-target"]:checked');
-            if (!currentChecked && loggedInUser) {
-                const userRadio = document.querySelector(`#check-member-radios input[value="${loggedInUser}"]`);
-                if (userRadio) { userRadio.checked = true; renderCalendar(); }
-            } else if (currentChecked) { renderCalendar(); }
+        function changePassword() {
+            const currentPass = document.getElementById('cp-current').value; const newPass = document.getElementById('cp-new').value; const confirmPass = document.getElementById('cp-confirm').value; const msg = document.getElementById('cp-msg'); const myId = localStorage.getItem('login_user_id'); 
+            if (!currentPass || !newPass || !confirmPass) { msg.innerText = "すべての項目を入力してください"; return; }
+            if (newPass !== confirmPass) { msg.innerText = "新しいパスワードが一致しません"; return; }
+            msg.innerText = "変更中...";
+            const data = { action: 'changePassword', id: myId, currentPass: currentPass, newPass: newPass };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("パスワード変更リクエストを送信しました。"); document.getElementById('cp-current').value = ""; document.getElementById('cp-new').value = ""; document.getElementById('cp-confirm').value = ""; msg.innerText = ""; }).catch(err => { msg.innerText = "エラーが発生しました"; });
         }
-        function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
+        function tryReset() {
+            const id = document.getElementById('reset-id').value; const email = document.getElementById('reset-email').value; const msg = document.getElementById('reset-msg'); const btn = document.getElementById('reset-btn');
+            if(!id || !email) { msg.innerText = "IDとメールアドレスを入力してください"; return; }
+            msg.innerText = "送信中..."; btn.disabled = true;
+            const data = { action: 'resetPassword', id: id, email: email };
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("リセットリクエストを送信しました。"); showLogin(); document.getElementById('reset-id').value = ""; document.getElementById('reset-email').value = ""; msg.innerText = ""; btn.disabled = false; }).catch(err => { msg.innerText = "通信エラー"; btn.disabled = false; });
+        }
         
-        function changeMonth(diff) {
-            displayMonth += diff;
-            if (displayMonth > 11) { displayMonth = 0; displayYear++; } else if (displayMonth < 0) { displayMonth = 11; displayYear--; }
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            const targetName = document.querySelector('input[name="check-target"]:checked')?.value; 
-            if (!targetName) { alert("チェックする人を選んでください"); return; }
-            const calendarArea = document.getElementById('calendar-area'); calendarArea.innerHTML = ""; 
-            const year = displayYear; const month = displayMonth;
-            const lastDay = new Date(year, month + 1, 0).getDate();
-            const firstDayOfWeek = new Date(year, month, 1).getDay();
-            const nowObj = new Date(); const todayYear = nowObj.getFullYear(); const todayMonth = nowObj.getMonth(); const todayDate = nowObj.getDate();
-
-            const submittedDates = allData.filter(row => row[1] === targetName).map(row => { 
-                const d = new Date(row[0]); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; 
-            });
-            
-            const headerHtml = `
-                <div class="calendar-title-area">
-                    <button class="calendar-btn" onclick="changeMonth(-1)">◀ 前月</button>
-                    <h3 style="margin:0;">${year}年 ${month + 1}月 - ${targetName}さん</h3>
-                    <button class="calendar-btn" onclick="changeMonth(1)">翌月 ▶</button>
-                </div>
-                <div class="calendar-grid">
-                    <div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>
-            `;
-            
-            let bodyHtml = ""; 
-            for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
-            
-            for (let d = 1; d <= lastDay; d++) {
-                const checkDateStr = `${year}-${month}-${d}`; 
-                let className = "day-missing"; 
-                const isHoliday = holidayList.some(h => { const hDate = new Date(h[0]); return hDate.getFullYear() === year && hDate.getMonth() === month && hDate.getDate() === d && h[1] === targetName; });
-
-                let isFuture = false;
-                if (year > todayYear) isFuture = true;
-                else if (year === todayYear && month > todayMonth) isFuture = true;
-                else if (year === todayYear && month === todayMonth && d > todayDate) isFuture = true;
-
-                if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; } 
-                else if (isHoliday) { className = "day-holiday"; } 
-                else if (isFuture) { className = "day-future"; }
-                
-                const clickEvent = `onclick="handleDateClick(${year}, ${month}, ${d}, '${targetName}')"`;
-                bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
-            } 
-            calendarArea.innerHTML = headerHtml + "</div>" + bodyHtml + "</div>";
-        }
-
-        function handleDateClick(year, month, day, targetName) {
-            const isEditMode = document.getElementById('holiday-mode-check').checked;
-            const now = new Date(); const todayYear = now.getFullYear(); const todayMonth = now.getMonth(); const todayDate = now.getDate();
-            let isFuture = false;
-            if (year > todayYear) isFuture = true;
-            else if (year === todayYear && month > todayMonth) isFuture = true;
-            else if (year === todayYear && month === todayMonth && day > todayDate) isFuture = true;
-
-            if (isEditMode) { toggleHoliday(year, month, day, targetName); } 
-            else { if (isFuture) { alert("未来の日報はまだ作成できません"); return; } startReportForDate(year, month, day); }
-        }
-
-        function toggleHoliday(year, month, day, targetName) {
-            const dateStr = `${year}-${('0'+(month+1)).slice(-2)}-${('0'+day).slice(-2)}`;
-            const btn = document.querySelector('.send-btn'); 
-            const originalText = btn.innerText; btn.innerText = "通信中..."; btn.disabled = true;
-            const data = { action: 'manageHoliday', date: dateStr, name: targetName };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { fetchData(); setTimeout(() => { renderCalendar(); btn.innerText = originalText; btn.disabled = false; document.getElementById("toast").innerText = "休日設定を更新しました"; showToast(); }, 1000); }).catch(err => { alert("エラーが発生しました"); btn.innerText = originalText; btn.disabled = false; });
-        }
-
         function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
         document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
     </script>
