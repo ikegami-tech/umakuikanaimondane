@@ -638,14 +638,35 @@
         function cancelEdit() { isEditing = false; editingRowIndex = null; currentEditingFileUrl = ""; document.getElementById('page-title').innerText = "システム課日報"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "送信"; submitBtn.classList.remove('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'none'; document.getElementById('form-container').classList.remove('editing'); document.getElementById('current-file-msg').style.display = 'none'; setTodayDate(); }
         function renderFilterOptions() { const select = document.getElementById('filter-name'); select.innerHTML = '<option value="">全員</option>'; memberList.forEach(name => { const option = document.createElement('option'); option.value = name; option.innerText = name; select.appendChild(option); }); }
         function applyFilter() { const nameVal = document.getElementById('filter-name').value; const textVal = document.getElementById('filter-text').value.toLowerCase(); currentData = allData.filter(row => { const name = row[1]; const content = (row[3] + row[4] + row[5]).toLowerCase(); const nameMatch = (nameVal === "") || (name === nameVal); const textMatch = (textVal === "") || (content.includes(textVal)); return nameMatch && textMatch; }); renderPage(1); }
+        
+        // ★修正：リスト再構築時に選択状態を維持する
         function renderMemberRadios() {
-            const inputContainer = document.getElementById('name-radios'); const manageContainer = document.getElementById('manage-member-radios'); const checkContainer = document.getElementById('check-member-radios'); inputContainer.innerHTML = ""; manageContainer.innerHTML = ""; checkContainer.innerHTML = "";
+            const inputContainer = document.getElementById('name-radios'); 
+            const manageContainer = document.getElementById('manage-member-radios'); 
+            const checkContainer = document.getElementById('check-member-radios'); 
+            
+            // 1. 現在の選択状態を保存
+            const currentReportName = document.querySelector('#name-radios input[name="name"]:checked')?.value;
+            const currentManagerName = document.querySelector('#manage-member-radios input[name="manager-name"]:checked')?.value;
+            const currentCheckName = document.querySelector('#check-member-radios input[name="check-target"]:checked')?.value;
+
+            inputContainer.innerHTML = ""; 
+            manageContainer.innerHTML = ""; 
+            checkContainer.innerHTML = "";
+            
+            // 2. リストを再構築
             memberList.forEach(name => {
                 const label1 = document.createElement('label'); label1.className = 'condition-label'; const input1 = document.createElement('input'); input1.type = 'radio'; input1.name = 'name'; input1.value = name; input1.onclick = function() { toggleRadio(this, 'name'); }; label1.appendChild(input1); label1.appendChild(document.createTextNode(name)); inputContainer.appendChild(label1);
                 const label2 = document.createElement('label'); label2.className = 'condition-label'; const input2 = document.createElement('input'); input2.type = 'radio'; input2.name = 'manager-name'; input2.value = name; input2.onchange = updateManagerButtonState; label2.appendChild(input2); label2.appendChild(document.createTextNode(name)); manageContainer.appendChild(label2);
                 const label3 = document.createElement('label'); label3.className = 'condition-label'; const input3 = document.createElement('input'); input3.type = 'radio'; input3.name = 'check-target'; input3.value = name; label3.appendChild(input3); label3.appendChild(document.createTextNode(name)); checkContainer.appendChild(label3);
             });
+
+            // 3. 選択状態を復元
+            if (currentReportName) { const r = inputContainer.querySelector(`input[value="${currentReportName}"]`); if(r) r.checked = true; }
+            if (currentManagerName) { const r = manageContainer.querySelector(`input[value="${currentManagerName}"]`); if(r) r.checked = true; }
+            if (currentCheckName) { const r = checkContainer.querySelector(`input[value="${currentCheckName}"]`); if(r) r.checked = true; }
         }
+
         function toggleAddMember() { const area = document.getElementById('add-member-form'); if (area.style.display === 'flex') { area.style.display = 'none'; } else { area.style.display = 'flex'; document.getElementById('new-member-name').focus(); } }
         function addNewMember() { const newNameInput = document.getElementById('new-member-name'); const newName = newNameInput.value; if (!newName) { alert("名前を入力してください"); return; } memberList.push(newName); renderMemberRadios(); renderFilterOptions(); toggleAddMember(); newNameInput.value = ""; const data = { action: 'addMember', newName: newName }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); }
         function renderPage(pageNumber) { currentPage = pageNumber; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = ""; if (currentData.length === 0) { reportContainer.innerHTML = "<p>該当する報告はありません。</p>"; return; } const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE; const endIndex = startIndex + ITEMS_PER_PAGE; const pageData = currentData.slice(startIndex, endIndex); pageData.forEach(row => { createReportItem(row); }); renderPagination(); }
@@ -671,9 +692,24 @@
         function sendLikeToSheet(rowIndex, parentDiv) { const btns = parentDiv.querySelectorAll('.like-btn'); const likeData = Array.from(btns).map(b => b.innerText).join(','); const data = { action: 'like', rowIndex: rowIndex, likeData: likeData }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; }).catch(err => console.error("エラー", err)); }
         function showToast() { var x = document.getElementById("toast"); x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500); }
         
+        // ★修正：モーダルオープン時に自動選択する
         function openCheckModal() { 
-            // 毎回最新のデータを取ってくるためにfetchDataを呼んでもいいが、重くなるので既存データで描画
             document.getElementById('check-modal').style.display = 'flex'; 
+            
+            // すでに選択されているか確認
+            const currentChecked = document.querySelector('input[name="check-target"]:checked');
+            
+            // まだ選択されておらず、ログイン中のユーザーがいれば、その人を選択
+            if (!currentChecked && loggedInUser) {
+                const userRadio = document.querySelector(`#check-member-radios input[value="${loggedInUser}"]`);
+                if (userRadio) {
+                    userRadio.checked = true;
+                    renderCalendar(); // 即座にカレンダーを描画
+                }
+            } else if (currentChecked) {
+                // すでに選択されているなら、念のため再描画
+                renderCalendar();
+            }
         }
         function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
         
@@ -689,42 +725,29 @@
             const today = now.getDate(); 
             const lastDay = new Date(year, month + 1, 0).getDate();
             
-            // 提出済みリスト作成
             const submittedDates = allData.filter(row => row[1] === targetName).map(row => { 
                 const d = new Date(row[0]); 
                 return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; 
             });
             
             const headerHtml = `<h3 style="text-align:center;">${year}年 ${month + 1}月 - ${targetName}さん</h3><div class="calendar-grid"><div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>`;
-            
-            let bodyHtml = ""; 
-            const firstDayOfWeek = new Date(year, month, 1).getDay();
-            
-            // 月初の空白
+            let bodyHtml = ""; const firstDayOfWeek = new Date(year, month, 1).getDay();
             for (let i = 0; i < firstDayOfWeek; i++) { bodyHtml += `<div class="calendar-day" style="background:#f9f9f9; cursor:default;"></div>`; }
             
-            // 日付のループ
             for (let d = 1; d <= lastDay; d++) {
                 const checkDateStr = `${year}-${month}-${d}`; 
-                let className = "day-missing"; // デフォルトは未提出(赤)
+                let className = "day-missing"; 
                 
-                // 休日判定
                 const isHoliday = holidayList.some(h => {
                     const hDate = new Date(h[0]);
                     return hDate.getFullYear() === year && hDate.getMonth() === month && hDate.getDate() === d && h[1] === targetName;
                 });
 
-                // 色分けロジック
-                if (submittedDates.includes(checkDateStr)) { 
-                    className = "day-submitted"; // 提出済(白)
-                } else if (isHoliday) { 
-                    className = "day-holiday";   // 休日(青)
-                } else if (d > today) {
-                    className = "day-future";    // 未来(グレー)
-                }
+                if (submittedDates.includes(checkDateStr)) { className = "day-submitted"; } 
+                else if (isHoliday) { className = "day-holiday"; } 
+                else if (d > today) { className = "day-future"; }
                 
-                // ★修正点：未来の日付でもクリックイベント（onclick）を必ず付与する
-                // （クリックした後に、モードによって処理を分ける方式に変更）
+                // ★修正：未来の日付でもクリックイベントを付与する（モード判定のため）
                 const clickEvent = `onclick="handleDateClick(${year}, ${month}, ${d}, '${targetName}')"`;
                 
                 bodyHtml += `<div class="calendar-day ${className}" ${clickEvent}>${d}</div>`;
@@ -734,26 +757,24 @@
 
         // ★追加：日付クリック時の処理分岐
         function handleDateClick(year, month, day, targetName) {
-            const isHolidayMode = document.getElementById('holiday-mode-check').checked;
+            const isEditMode = document.getElementById('holiday-mode-check').checked;
             const now = new Date();
             const todayDate = now.getDate();
             const thisMonth = now.getMonth();
             const thisYear = now.getFullYear();
 
-            // クリックされた日が「未来」かどうか判定
-            // (年またぎ等は簡易的に考慮せず、当月内の日付大小で比較しています)
+            // 未来判定
             const isFuture = (year > thisYear) || (year === thisYear && month > thisMonth) || (year === thisYear && month === thisMonth && day > todayDate);
 
-            if (isHolidayMode) {
-                // ★休日設定モードなら、過去でも未来でも変更OK
+            if (isEditMode) {
+                // 休日設定モードなら、未来でも変更OK
                 toggleHoliday(year, month, day, targetName);
             } else {
-                // ★通常モード（日報入力）なら、未来はブロック
+                // 通常モードなら、未来はブロック
                 if (isFuture) {
                     alert("未来の日報はまだ作成できません");
                     return;
                 }
-                // 過去・今日なら日報作成へ
                 startReportForDate(year, month, day);
             }
         }
@@ -769,11 +790,9 @@
             
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
             .then(() => { 
-                // ローカルのデータも仮更新して再描画（サーバーからのフェッチを待たずに反映させるため）
-                // 簡易的にリロードをかけるのが確実
-                fetchData(); // データを再取得
+                fetchData(); // データを再取得（ここでrenderMemberRadiosが呼ばれるが、修正済みなので選択は維持される）
                 setTimeout(() => {
-                    renderCalendar(); // 少し待ってから再描画（fetchDataが完了してないかもだが、UX的には少し待つ演出）
+                    renderCalendar(); 
                     btn.innerText = originalText; btn.disabled = false;
                     document.getElementById("toast").innerText = "休日設定を更新しました"; showToast();
                 }, 1000);
