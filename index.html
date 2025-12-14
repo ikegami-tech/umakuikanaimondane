@@ -908,7 +908,7 @@
 
             // 現在の時間を使って「今、何番目の色にするか」を計算
             // Date.now() / 15000 の計算結果で順番に切り替わります
-            const index = Math.floor(Date.now() / 15000) % colors.length;
+            const index = Math.floor(Date.now() / 8000) % colors.length;
 
             // 背景色を適用
             document.body.style.backgroundColor = colors[index];
