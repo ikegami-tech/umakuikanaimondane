@@ -554,7 +554,7 @@
             checkLoginSession(); 
             setTodayDate(); 
             updateBackgroundByTime(); // ▼ 背景色セットを実行
-            setInterval(updateBackgroundByTime, 60000); // ▼ 1分ごとに背景色をチェック
+            setInterval(updateBackgroundByTime, 15000); // 15秒に変更
         };
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
 
@@ -893,30 +893,25 @@
         function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
         document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
     // ==========================================
-        // ■ 新機能：時間帯による背景色の変更
+        // ■ 新機能：15秒ごとに背景色を変更
         // ==========================================
         function updateBackgroundByTime() {
-            const hour = new Date().getHours(); // 現在の「時」(0〜23)を取得
-            const body = document.body;
-            let color = "#e3f2fd"; // 基本の色（いつもの水色）
+            // 切り替える色のリスト（パステルカラー）
+            const colors = [
+                "#e3f2fd", // 水色（いつもの色）
+                "#e8f5e9", // ミントグリーン
+                "#fff3e0", // オレンジ
+                "#fce4ec", // ピンク
+                "#f3e5f5", // ラベンダー
+                "#fffde7"  // クリームイエロー
+            ];
 
-            if (hour >= 5 && hour < 11) {
-                // 朝 (5:00 〜 10:59) : 爽やかなミントグリーン
-                color = "#e8f5e9"; 
-            } else if (hour >= 11 && hour < 16) {
-                // 昼 (11:00 〜 15:59) : いつものライトブルー
-                color = "#e3f2fd"; 
-            } else if (hour >= 16 && hour < 19) {
-                // 夕方 (16:00 〜 18:59) : 夕焼けのオレンジ
-                color = "#fff3e0"; 
-            } else {
-                // 夜 (19:00 〜 4:59) : 落ち着いたクールグレー
-                // ※文字が読みやすいよう、暗すぎない色にしています
-                color = "#eceff1"; 
-            }
+            // 現在の時間を使って「今、何番目の色にするか」を計算
+            // Date.now() / 15000 の計算結果で順番に切り替わります
+            const index = Math.floor(Date.now() / 15000) % colors.length;
 
             // 背景色を適用
-            body.style.backgroundColor = color;
+            document.body.style.backgroundColor = colors[index];
         }
     </script>
 </body>
