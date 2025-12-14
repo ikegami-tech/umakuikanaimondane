@@ -496,12 +496,93 @@
             // ボタンのActive表示切り替え
             const btns = document.querySelectorAll('.menu-btn');
             if(tabName==='input') btns[0].classList.add('active');
-            if(tabName==='correction') btns[1].classList.add('active');
+            if(tabName==='correction') { btns[1].classList.add('active'); renderReportCheckCalendar(); }
             if(tabName==='holiday') { btns[2].classList.add('active'); renderHolidayCalendar(); }
             if(tabName==='history') btns[3].classList.add('active');
             if(tabName==='member') btns[4].classList.add('active');
             if(tabName==='password') btns[5].classList.add('active');
         }
+        // --- ▼ 日報確認カレンダー用ロジック（ここから追加） ▼ ---
+        
+        let checkDisplayYear = new Date().getFullYear();
+        let checkDisplayMonth = new Date().getMonth();
+
+        // 月を切り替えるボタン
+        function changeReportCheckMonth(diff) {
+            checkDisplayMonth += diff;
+            if (checkDisplayMonth > 11) { checkDisplayMonth = 0; checkDisplayYear++; }
+            else if (checkDisplayMonth < 0) { checkDisplayMonth = 11; checkDisplayYear--; }
+            renderReportCheckCalendar();
+        }
+
+        // カレンダーを描画する関数
+        function renderReportCheckCalendar() {
+            if (!loggedInUser) return;
+            const year = checkDisplayYear;
+            const month = checkDisplayMonth;
+            document.getElementById('report-check-title').innerText = `${year}年 ${month + 1}月`;
+            
+            const grid = document.getElementById('report-check-grid');
+            grid.innerHTML = '<div class="calendar-header">日</div><div class="calendar-header">月</div><div class="calendar-header">火</div><div class="calendar-header">水</div><div class="calendar-header">木</div><div class="calendar-header">金</div><div class="calendar-header">土</div>';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+
+            // 空白セル
+            for (let i = 0; i < firstDay; i++) { grid.innerHTML += '<div class="calendar-day day-other-month"></div>'; }
+
+            // 日付セル
+            for (let d = 1; d <= lastDay; d++) {
+                const el = document.createElement('div');
+                el.className = 'calendar-day';
+                el.innerText = d;
+
+                // その日に日報があるかチェック
+                const targetRow = allData.find(row => {
+                    const rDate = new Date(row[0]);
+                    return row[1] === loggedInUser && rDate.getFullYear() === year && rDate.getMonth() === month && rDate.getDate() === d;
+                });
+
+                if (targetRow) {
+                    el.classList.add('day-submitted-check');
+                    el.innerText += " ✔";
+                }
+
+                // クリック時の動作
+                el.onclick = () => {
+                    if (targetRow) {
+                        // 提出済みなら編集モードへ
+                        const rowIndex = targetRow[targetRow.length - 1];
+                        editReport(rowIndex);
+                    } else {
+                        // 未提出なら新規作成モードへ（日付セットして入力タブへ移動）
+                        startNewReportAt(year, month, d);
+                    }
+                };
+                grid.appendChild(el);
+            }
+        }
+
+        // 未提出の日をクリックしたときの処理
+        function startNewReportAt(year, month, day) {
+            switchTab('input'); // 入力タブへ移動
+            const mm = ('0' + (month + 1)).slice(-2);
+            const dd = ('0' + day).slice(-2);
+            document.getElementById('report-date').value = `${year}-${mm}-${dd}`;
+            
+            // フォームをリセットしつつ日付アラートを出す
+            document.getElementById('date-alert').style.display = 'flex';
+            document.getElementById('date-alert-text').innerText = `${year}/${month+1}/${day} の日報を作成します`;
+            document.getElementById('form-container').classList.add('past-mode');
+            
+            // 編集モードなどは解除
+            isEditing = false;
+            editingRowIndex = null;
+            document.getElementById('submit-btn').innerText = "送信";
+            document.getElementById('submit-btn').classList.remove('update-mode');
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+        }
+        // --- ▲ 日報確認カレンダー用ロジック（ここまで） ▲ ---
 
         // --- 休日一括設定ロジック ---
         function changeHolidayMonth(diff) {
