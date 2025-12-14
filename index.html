@@ -168,8 +168,8 @@
         #weather-widget {
             display: inline-flex; align-items: center; gap: 8px;
             background-color: #f1f8ff; border: 1px solid #b3e5fc;
-            padding: 6px 15px; border-radius: 20px; font-size: 14px; color: #0277bd; font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 6px 15px; border-radius: 20px; font-size: 13px; color: #0277bd; font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap;
         }
         #weather-icon { font-size: 20px; }
 
@@ -912,7 +912,7 @@
         }
 
         // ==========================================
-        // ■ 新機能：天気取得 (Open-Meteo)
+        // ■ 新機能：天気・気温・湿度・場所の取得
         // ==========================================
         function getWeather() {
             if (!navigator.geolocation) {
@@ -924,21 +924,38 @@
             function success(pos) {
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
-                // Open-Meteo APIへリクエスト
-                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`)
-                .then(res => res.json())
-                .then(data => {
-                    const temp = data.current_weather.temperature;
-                    const code = data.current_weather.weathercode;
+
+                // 1. 天気と湿度を取得 (Open-Meteo)
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`;
+                
+                // 2. 場所名を取得 (OpenStreetMap / Nominatim)
+                // zoom=10で市区町村レベルを取得
+                const locationUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`;
+
+                Promise.all([
+                    fetch(weatherUrl).then(r => r.json()),
+                    fetch(locationUrl).then(r => r.json())
+                ]).then(([weatherData, locationData]) => {
+                    // 天気データの解析
+                    const current = weatherData.current;
+                    const temp = current.temperature_2m;
+                    const humidity = current.relative_humidity_2m;
+                    const code = current.weather_code;
                     const icon = getWeatherIcon(code);
-                    
+
+                    // 場所データの解析
+                    // addressオブジェクトから「区(ward)」「市(city)」「町(town)」のいずれかを探す
+                    const addr = locationData.address;
+                    const city = addr.ward || addr.city || addr.town || addr.village || "現在地";
+
                     // 画面表示
                     document.getElementById('weather-icon').innerText = icon.emoji;
-                    document.getElementById('weather-text').innerText = `${icon.text} ${temp}℃`;
+                    // 例: [新宿区] ☀️ 快晴 18℃ / 💧45%
+                    document.getElementById('weather-text').innerText = `[${city}] ${icon.text} ${temp}℃ / 💧${humidity}%`;
                 })
                 .catch(e => {
                     console.error(e);
-                    document.getElementById('weather-text').innerText = "天気取得エラー";
+                    document.getElementById('weather-text').innerText = "取得エラー";
                 });
             }
 
