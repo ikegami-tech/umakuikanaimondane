@@ -10,9 +10,10 @@
         body { 
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             margin: 0; padding: 0; 
-            background-color: #e3f2fd; 
+            background-color: #e3f2fd; /* 初期色 */
             height: 100vh; display: flex;
             color: #333;
+            transition: background-color 3.0s ease; /* 背景色をじわっと変える */
         }
 
         /* --- オーバーレイ --- */
@@ -159,6 +160,18 @@
         
         .btn-copy { background: #fff; color: #28a745; border: 1px solid #28a745; font-weight: bold; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
         #cancel-edit-btn { display: none; padding: 10px 30px; background: #999; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
+
+        /* 天気表示エリア */
+        .weather-area-top {
+            display: flex; justify-content: flex-end; margin-bottom: 15px;
+        }
+        #weather-widget {
+            display: inline-flex; align-items: center; gap: 8px;
+            background-color: #f1f8ff; border: 1px solid #b3e5fc;
+            padding: 6px 15px; border-radius: 20px; font-size: 14px; color: #0277bd; font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        #weather-icon { font-size: 20px; }
 
         /* ハンバーガーメニュー */
         .hamburger { display: none; }
@@ -339,6 +352,13 @@
             <div id="tab-input" class="content-section active">
                 <h1 id="page-title">システム課日報</h1>
                 <div class="form-container" id="form-container">
+                    <div class="weather-area-top">
+                        <div id="weather-widget">
+                            <span id="weather-icon">⏳</span>
+                            <span id="weather-text" style="margin-left:5px;">天気取得中...</span>
+                        </div>
+                    </div>
+
                     <div id="date-alert" class="date-alert-box">
                         <span id="date-alert-text"></span>
                         <button onclick="resetDate()" style="background:white; color:#ff4d4d; border:none; border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold;">今日に戻す</button>
@@ -486,7 +506,7 @@
     <div id="toast">送信完了しました！</div>
 
     <script>
-        // ★重要：GAS URL（変更なし）
+        // ★重要：GAS URL（あなたのURLに書き換えてください）
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyDvA1WA7D_EQRmD_nYrtD-3RWWm2sT3hASH9luQGxJ_OXm4zhOwqPe1OU0oows0W0lPQ/exec"; 
 
         // --- 共通変数 ---
@@ -553,31 +573,23 @@
         window.onload = function() { 
             checkLoginSession(); 
             setTodayDate(); 
-            updateBackgroundByTime(); // ▼ 背景色セットを実行
-            setInterval(updateBackgroundByTime, 8000); // 15秒に変更
+            updateBackgroundByTime(); 
+            setInterval(updateBackgroundByTime, 15000); 
+            getWeather(); 
         };
+
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
 
-        // --- タブ切り替え（修正版） ---
+        // --- タブ切り替え ---
         function switchTab(tabName) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active')); 
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            // サイドバーのボタンを光らせる処理
             const btns = document.querySelectorAll('.menu-btn');
-            // 一旦すべてのボタンからactiveを外すのは上でやっているので、該当するものだけ追加
             if(tabName==='input') btns[0].classList.add('active');
-            if(tabName==='check') { 
-                // 日報確認ボタン（インデックス1）
-                btns[1].classList.add('active'); 
-                renderCheckCalendar(); 
-            }
-            if(tabName==='holiday') { 
-                // 休日設定ボタン（インデックス2）
-                btns[2].classList.add('active'); 
-                renderHolidayCalendar(); 
-            }
+            if(tabName==='check') { btns[1].classList.add('active'); renderCheckCalendar(); }
+            if(tabName==='holiday') { btns[2].classList.add('active'); renderHolidayCalendar(); }
             if(tabName==='history') btns[3].classList.add('active');
             if(tabName==='member') btns[4].classList.add('active');
             if(tabName==='password') btns[5].classList.add('active');
@@ -680,7 +692,6 @@
             const lastDay = new Date(year, month + 1, 0).getDate();
             const today = new Date(); today.setHours(0,0,0,0);
 
-            // 自分の休日と提出状況を取得
             const myHolidays = holidayList.filter(h => h[1] === loggedInUser).map(h => {
                 const d = new Date(h[0]); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
             });
@@ -702,13 +713,11 @@
                 const isSubmitted = myReports.includes(dateKey);
                 const isPastOrToday = currentDate <= today;
 
-                // 色塗りロジック
                 if (isSubmitted) { el.classList.add('day-submitted'); }
                 else if (isHoliday) { el.classList.add('day-holiday-confirmed'); el.innerText += " 休"; }
                 else if (isPastOrToday) { el.classList.add('day-missing'); el.innerText += " 未"; }
                 else { el.classList.add('day-future'); }
 
-                // クリックで入力画面へ
                 el.onclick = () => {
                     switchTab('input');
                     document.getElementById('report-date').value = dateStrForInput;
@@ -721,7 +730,7 @@
                         document.getElementById("toast").innerText = "修正モードで開きました"; showToast();
                     } else {
                         resetForm();
-                        document.getElementById('report-date').value = dateStrForInput; // リセット後に日付再設定
+                        document.getElementById('report-date').value = dateStrForInput;
                         if(currentDate < today) {
                             document.getElementById('date-alert').style.display = 'flex';
                             document.getElementById('date-alert-text').innerText = "過去の日報を作成中";
@@ -751,7 +760,7 @@
                 if (data.holidays) { 
                     holidayList = data.holidays; 
                     renderHolidayCalendar(); 
-                    renderCheckCalendar(); // 確認カレンダーも更新
+                    renderCheckCalendar();
                 } 
                 
                 allData = (data.reports || []).reverse(); 
@@ -892,26 +901,63 @@
         
         function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
         document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
-    // ==========================================
+
+        // ==========================================
         // ■ 新機能：15秒ごとに背景色を変更
         // ==========================================
         function updateBackgroundByTime() {
-            // 切り替える色のリスト（パステルカラー）
-            const colors = [
-                "#e3f2fd", // 水色（いつもの色）
-                "#e8f5e9", // ミントグリーン
-                "#fff3e0", // オレンジ
-                "#fce4ec", // ピンク
-                "#f3e5f5", // ラベンダー
-                "#fffde7"  // クリームイエロー
-            ];
-
-            // 現在の時間を使って「今、何番目の色にするか」を計算
-            // Date.now() / 15000 の計算結果で順番に切り替わります
-            const index = Math.floor(Date.now() / 8000) % colors.length;
-
-            // 背景色を適用
+            const colors = ["#e3f2fd", "#e8f5e9", "#fff3e0", "#fce4ec", "#f3e5f5", "#fffde7"];
+            const index = Math.floor(Date.now() / 15000) % colors.length;
             document.body.style.backgroundColor = colors[index];
+        }
+
+        // ==========================================
+        // ■ 新機能：天気取得 (Open-Meteo)
+        // ==========================================
+        function getWeather() {
+            if (!navigator.geolocation) {
+                document.getElementById('weather-text').innerText = "位置情報オフ";
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(success, error);
+
+            function success(pos) {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                // Open-Meteo APIへリクエスト
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`)
+                .then(res => res.json())
+                .then(data => {
+                    const temp = data.current_weather.temperature;
+                    const code = data.current_weather.weathercode;
+                    const icon = getWeatherIcon(code);
+                    
+                    // 画面表示
+                    document.getElementById('weather-icon').innerText = icon.emoji;
+                    document.getElementById('weather-text').innerText = `${icon.text} ${temp}℃`;
+                })
+                .catch(e => {
+                    console.error(e);
+                    document.getElementById('weather-text').innerText = "天気取得エラー";
+                });
+            }
+
+            function error() {
+                document.getElementById('weather-text').innerText = "位置情報を許可してください";
+            }
+        }
+
+        // WMOコードを絵文字に変換する辞書
+        function getWeatherIcon(code) {
+            if (code === 0) return { emoji: "☀️", text: "快晴" };
+            if (code >= 1 && code <= 3) return { emoji: "☁️", text: "曇り" };
+            if (code === 45 || code === 48) return { emoji: "🌫️", text: "霧" };
+            if (code >= 51 && code <= 67) return { emoji: "☔", text: "雨" };
+            if (code >= 71 && code <= 77) return { emoji: "☃️", text: "雪" };
+            if (code >= 80 && code <= 82) return { emoji: "☔", text: "にわか雨" };
+            if (code >= 85 && code <= 86) return { emoji: "☃️", text: "雪" };
+            if (code >= 95 && code <= 99) return { emoji: "⚡", text: "雷雨" };
+            return { emoji: "❓", text: "不明" };
         }
     </script>
 </body>
