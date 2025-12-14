@@ -12,7 +12,7 @@
             background-color: #e3f2fd; height: 100vh; display: flex; color: #333;
         }
 
-        /* --- オーバーレイ（ログイン等） --- */
+        /* --- オーバーレイ --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(51, 51, 51, 0.9); z-index: 9999;
@@ -71,11 +71,43 @@
         input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
         textarea { height: 100px; resize: vertical; }
 
-        /* --- ラジオボタン --- */
-        .condition-group { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 5px; }
-        .condition-label { border: 1px solid transparent; border-radius: 6px; padding: 5px 8px; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; }
-        .condition-group .condition-label { width: calc(25% - 6px); justify-content: flex-start; }
-        .condition-label:has(input[type="radio"]:checked) { border-color: #0288d1; background-color: #e1f5fe; font-weight: bold; }
+        /* --- ラジオボタン（修正箇所） --- */
+        .condition-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 6px; /* ボタン同士の隙間を少し詰める(8px→6px) */
+            padding-top: 5px; 
+        }
+        .condition-label { 
+            border: 1px solid transparent; 
+            border-radius: 6px; 
+            padding: 6px 10px; /* パディング調整 */
+            font-size: 0.95rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 4px; /* 丸印と文字の隙間を詰める */
+            
+            /* ★ここが重要：改行禁止・幅自動調整 */
+            white-space: nowrap; 
+            width: auto; 
+            flex: 0 0 auto; 
+            background-color: #f9f9f9; /* 薄いグレーの背景を追加してボタンっぽく */
+            border: 1px solid #eee;
+        }
+        
+        .condition-label:has(input[type="radio"]:checked) { 
+            border-color: #0288d1; 
+            background-color: #e1f5fe; 
+            font-weight: bold; 
+            color: #0277bd;
+        }
+        /* ラジオボタン自体の余白微調整 */
+        .condition-label input[type="radio"] {
+            margin: 0; 
+            width: auto;
+        }
 
         /* --- ボタン類 --- */
         .button-group { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
@@ -148,9 +180,11 @@
             label { width: 100%; border-bottom: 2px solid #81d4fa; border-left: none; margin-bottom: 5px; padding-left: 0; }
             .button-group { flex-direction: column-reverse; gap: 10px; }
             button { width: 100%; padding: 12px; }
-            .condition-group .condition-label { width: calc(50% - 6px); }
             .filter-area { flex-direction: column; }
             .filter-select, .filter-input { width: 100%; }
+            
+            /* スマホでラジオボタンが見切れないように横スクロール対応させる場合 */
+            /* .condition-group { flex-wrap: nowrap; overflow-x: auto; } */
         }
     </style>
 </head>
