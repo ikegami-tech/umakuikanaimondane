@@ -155,38 +155,38 @@
         .item { 
             position: relative; 
             background-color: #fff; 
-            border: 1px solid #e0e0e0; /* 枠線を優しく */
+            border: 1px solid #e0e0e0; 
             border-radius: 8px; 
-            padding: 25px; /* 全体の余白を増やす */
+            padding: 25px; 
             margin-bottom: 25px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 少し浮き上がらせる */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
         }
         .report-row { 
             display: block; 
-            margin-bottom: 25px; /* 項目ごとの間隔を広げる */
+            margin-bottom: 25px; 
             border-bottom: none; 
             padding-bottom: 0; 
         }
         .report-label { 
-            display: block; /* 横幅いっぱいに */
+            display: block; 
             width: 100%;
             font-weight: bold; 
             font-size: 1rem; 
-            color: #01579b; /* 濃い青色 */
-            background-color: #e1f5fe; /* 薄い水色の背景 */
-            padding: 8px 15px; /* 内側の余白 */
+            color: #01579b; 
+            background-color: #e1f5fe; 
+            padding: 8px 15px; 
             border-radius: 6px; 
-            margin-bottom: 12px; /* ★内容との間にしっかり隙間を作る */
-            border-left: 5px solid #0288d1; /* 左側にアクセントライン */
+            margin-bottom: 12px; 
+            border-left: 5px solid #0288d1; 
         }
         .report-content {
-            font-size: 1.05rem; /* 文字を少し大きく */
-            line-height: 1.8; /* 行間を広げて読みやすく */
+            font-size: 1.05rem; 
+            line-height: 1.8; 
             color: #333;
             padding: 10px 15px;
-            background-color: #fafafa; /* 背景をほんの少しグレーに */
+            background-color: #fafafa; 
             border-radius: 4px;
-            white-space: pre-wrap; /* 改行を反映 */
+            white-space: pre-wrap; 
         }
         .report-header-area {
             margin-bottom: 20px; 
@@ -198,7 +198,7 @@
             gap: 15px;
         }
         
-        /* カード下部のフッターエリア（いいね＆編集ボタン） */
+        /* カード下部のフッターエリア */
         .card-footer {
             margin-top: 20px; padding-top: 15px;
             border-top: 1px dashed #e0e0e0;
@@ -214,11 +214,7 @@
         .like-btn:hover { background-color: #e1f5fe; border-color: #0288d1; }
         
         .like-btn:disabled {
-            background-color: #f5f5f5; 
-            color: #aaa;                
-            border-color: #ddd;         
-            cursor: not-allowed;        
-            opacity: 0.7;
+            background-color: #f5f5f5; color: #aaa; border-color: #ddd; cursor: not-allowed; opacity: 0.7;
         }
         .like-btn:disabled:hover { background-color: #f5f5f5; border-color: #ddd; }
         
@@ -386,6 +382,7 @@
                             <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調" onclick="toggleRadio(this, 'condition')">😄 絶好調</label>
                             <label class="condition-label"><input type="radio" name="condition" value="👍 良い" onclick="toggleRadio(this, 'condition')">👍 良い</label>
                             <label class="condition-label"><input type="radio" name="condition" value="😊 普通" onclick="toggleRadio(this, 'condition')">😊 普通</label>
+                            <label class="condition-label"><input type="radio" name="condition" value="🤔 考え中" onclick="toggleRadio(this, 'condition')">🤔 考え中</label>
                             <label class="condition-label"><input type="radio" name="condition" value="😇 不調" onclick="toggleRadio(this, 'condition')">😇 不調</label>
                             <label class="condition-label"><input type="radio" name="condition" value="🫠 疲労" onclick="toggleRadio(this, 'condition')">🫠 疲労</label>
                             <label class="condition-label"><input type="radio" name="condition" value="🤢 二日酔い" onclick="toggleRadio(this, 'condition')">🤢 二日酔い</label>
@@ -686,9 +683,6 @@
             if (currentCheckName) { const r = checkContainer.querySelector(`input[value="${currentCheckName}"]`); if(r) r.checked = true; }
         }
 
-        // ===============================================
-        // ▼ 修正箇所: 過去レポート表示関数 ▼
-        // ===============================================
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container'); 
             
