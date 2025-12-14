@@ -946,7 +946,7 @@
                     // 場所データの解析
                     // addressオブジェクトから「区(ward)」「市(city)」「町(town)」のいずれかを探す
                     const addr = locationData.address;
-                    const city = addr.ward || addr.city || addr.town || addr.village || "現在地";
+                    const city = "新宿区";
 
                     // 画面表示
                     document.getElementById('weather-icon').innerText = icon.emoji;
