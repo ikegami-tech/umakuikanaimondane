@@ -747,16 +747,45 @@
             }
         }
 
-        // --- 通常のデータ処理 ---
+        // ▼ 修正版: データの読み込み関数（順番を修正）
         function fetchData() {
-            const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "<p>データを取得中...</p>";
-            fetch(GAS_URL + '?t=' + new Date().getTime()).then(response => response.json()).then(data => {
-                if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections(); }
-                if (data.holidays) { holidayList = data.holidays; renderHolidayCalendar(); } 
-　　　　　　　　　renderReportCheckCalendar(); // ★ここに追加！ 
-                allData = (data.reports || []).reverse(); currentData = allData;
-                if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; } applyFilter();
-            }).catch(err => { reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; console.error(err); });
+            const reportContainer = document.getElementById('report-container'); 
+            reportContainer.innerHTML = "<p>データを取得中...</p>";
+            
+            fetch(GAS_URL + '?t=' + new Date().getTime())
+            .then(response => response.json())
+            .then(data => {
+                // 1. メンバーと休日の読み込み
+                if (data.members) { 
+                    memberList = data.members; 
+                    renderMemberRadios(); 
+                    renderFilterOptions(); 
+                    setupAutoSave(); 
+                    restoreSelections(); 
+                }
+                if (data.holidays) { 
+                    holidayList = data.holidays; 
+                    renderHolidayCalendar(); 
+                } 
+                
+                // 2. ★重要★ 先に日報データを allData に入れる
+                allData = (data.reports || []).reverse(); 
+                
+                // 3. ★重要★ データが入った後にカレンダーを描画する（これで色が付きます）
+                renderReportCheckCalendar(); 
+
+                // 4. 過去の報告リストを表示
+                currentData = allData;
+                if (currentData.length === 0) { 
+                    reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; 
+                    return; 
+                } 
+                applyFilter();
+            })
+            .catch(err => { 
+                reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; 
+                console.error(err); 
+            });
         }
 
         async function sendData() {
