@@ -565,6 +565,7 @@
         }
 
         // カレンダーを描画する関数
+        // ▼ 修正版: カレンダーを描画する関数（日付判定を強化）
         function renderReportCheckCalendar() {
             if (!loggedInUser) return;
             const year = checkDisplayYear;
@@ -577,6 +578,18 @@
             const firstDay = new Date(year, month, 1).getDay();
             const lastDay = new Date(year, month + 1, 0).getDate();
 
+            // 提出済みの日付リストを作成（判定を確実にするため）
+            const submittedDays = [];
+            allData.forEach(row => {
+                // 名前が一致し、かつ日付が有効な場合
+                if (row[1] === loggedInUser && row[0]) {
+                    const rDate = new Date(row[0]);
+                    if (rDate.getFullYear() === year && rDate.getMonth() === month) {
+                        submittedDays.push(rDate.getDate());
+                    }
+                }
+            });
+
             // 空白セル
             for (let i = 0; i < firstDay; i++) { grid.innerHTML += '<div class="calendar-day day-other-month"></div>'; }
 
@@ -586,25 +599,25 @@
                 el.className = 'calendar-day';
                 el.innerText = d;
 
-                // その日に日報があるかチェック
-                const targetRow = allData.find(row => {
-                    const rDate = new Date(row[0]);
-                    return row[1] === loggedInUser && rDate.getFullYear() === year && rDate.getMonth() === month && rDate.getDate() === d;
-                });
+                // リストの中に今日(d)が含まれているかチェック
+                const isSubmitted = submittedDays.includes(d);
 
-                if (targetRow) {
+                if (isSubmitted) {
                     el.classList.add('day-submitted-check');
                     el.innerText += " ✔";
                 }
 
                 // クリック時の動作
                 el.onclick = () => {
-                    if (targetRow) {
-                        // 提出済みなら編集モードへ
-                        const rowIndex = targetRow[targetRow.length - 1];
-                        editReport(rowIndex);
+                    if (isSubmitted) {
+                        // 提出済みならそのデータを探して編集モードへ
+                        const targetRow = allData.find(row => {
+                            const rDate = new Date(row[0]);
+                            return row[1] === loggedInUser && rDate.getFullYear() === year && rDate.getMonth() === month && rDate.getDate() === d;
+                        });
+                        if (targetRow) editReport(targetRow[targetRow.length - 1]);
                     } else {
-                        // 未提出なら新規作成モードへ（日付セットして入力タブへ移動）
+                        // 未提出なら新規作成
                         startNewReportAt(year, month, d);
                     }
                 };
