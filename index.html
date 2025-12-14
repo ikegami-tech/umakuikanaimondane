@@ -554,7 +554,7 @@
             checkLoginSession(); 
             setTodayDate(); 
             updateBackgroundByTime(); // ▼ 背景色セットを実行
-            setInterval(updateBackgroundByTime, 15000); // 15秒に変更
+            setInterval(updateBackgroundByTime, 8000); // 15秒に変更
         };
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
 
