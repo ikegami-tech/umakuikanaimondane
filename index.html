@@ -322,13 +322,26 @@
             </div>
 
             <div id="tab-correction" class="content-section">
-                <h1>日報修正</h1>
-                <div class="manager-container" style="text-align:center;">
-                    <p style="margin-bottom:20px;">修正したい日付を選択してください。<br>（ログイン中のユーザーの日報のみ修正できます）</p>
-                    <div style="max-width:300px; margin:0 auto 20px auto;">
-                        <input type="date" id="correction-date-input" style="padding:15px; font-size:18px;">
+                <h1>日報確認</h1>
+                <div class="manager-container">
+                    <p style="text-align:center; margin-bottom:20px;">
+                        日付をタップすると、その日の日報を作成・修正できます。<br>
+                    </p>
+                    
+                    <div class="calendar-container">
+                        <div class="calendar-title-area">
+                            <button class="calendar-btn" onclick="changeReportCheckMonth(-1)">◀ 前月</button>
+                            <h3 id="report-check-title" style="margin:0;">----年 --月</h3>
+                            <button class="calendar-btn" onclick="changeReportCheckMonth(1)">翌月 ▶</button>
+                        </div>
+                        <div class="calendar-grid" id="report-check-grid">
+                            </div>
                     </div>
-                    <button class="send-btn" onclick="findAndEditReport()">この日の日報を修正する</button>
+
+                    <div style="margin-top:15px; font-size:12px; text-align:center;">
+                        <span style="display:inline-block; width:12px; height:12px; background:#fff; border:1px solid #ccc;"></span> 未提出
+                        <span style="display:inline-block; width:12px; height:12px; background:#cceeff; border:1px solid #0288d1; margin-left:10px;"></span> 提出済
+                    </div>
                 </div>
             </div>
 
