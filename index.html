@@ -214,24 +214,35 @@
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
 
+        /* =========================================
+           ▼ スマホ対応（水色テーマ＆ハンバーガーメニュー） ▼
+           ========================================= */
         @media (max-width: 768px) {
             body, .app-container { flex-direction: column; height: auto; min-height: 100vh; }
             .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; padding-top: 60px; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
             .sidebar.active { left: 0; }
             .hamburger { display: flex; justify-content: center; align-items: center; position: fixed; top: 15px; left: 15px; width: 50px; height: 50px; border-radius: 50%; z-index: 2000; background-color: #0277bd; color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+            
             .form-group { flex-direction: column; }
             label { width: 100%; border-bottom: 2px solid #81d4fa; border-left: none; margin-bottom: 5px; padding-left: 0; }
             .button-group { flex-direction: column-reverse; gap: 10px; }
             button { width: 100%; padding: 12px; }
+            
+            /* コンディションボタンは2列に */
             .condition-group .condition-label { width: calc(50% - 6px); }
+            
             .filter-area { flex-direction: column; } .filter-select, .filter-input { width: 100%; }
-        }
-        /* 日報確認カレンダー用のスタイル */
-        .day-submitted-check { 
-            background-color: #cceeff !important; 
-            color: #0277bd; 
-            font-weight: bold; 
-            border: 2px solid #0288d1 !important; 
+
+            /* ▼ カレンダータイトル修正（今回追加した部分） ▼ */
+            .calendar-title-area {
+                flex-wrap: wrap; /* 折り返しを許可 */
+            }
+            .calendar-title-area h3 {
+                width: 100%;       /* 年月を横幅いっぱいに */
+                order: -1;         /* 無理やり一番上に移動させる魔法 */
+                margin-bottom: 10px !important; /* 下に隙間をあける */
+                text-align: center;
+            }
         }
     </style>
 </head>
