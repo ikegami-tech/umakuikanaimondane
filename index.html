@@ -753,6 +753,7 @@
             fetch(GAS_URL + '?t=' + new Date().getTime()).then(response => response.json()).then(data => {
                 if (data.members) { memberList = data.members; renderMemberRadios(); renderFilterOptions(); setupAutoSave(); restoreSelections(); }
                 if (data.holidays) { holidayList = data.holidays; renderHolidayCalendar(); } 
+　　　　　　　　　renderReportCheckCalendar(); // ★ここに追加！ 
                 allData = (data.reports || []).reverse(); currentData = allData;
                 if (currentData.length === 0) { reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; return; } applyFilter();
             }).catch(err => { reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; console.error(err); });
