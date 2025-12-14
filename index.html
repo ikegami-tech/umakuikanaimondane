@@ -462,6 +462,8 @@
                 </div>
             </div>
 
+            <button class="send-btn" onclick="renderCalendar()" style="margin-top:15px;">表示・更新する</button>
+
             <div id="calendar-area"></div>
             
             <div style="margin-top:10px; font-size:12px; text-align:right;">
@@ -520,7 +522,6 @@
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1, saveTimers = {}, isEditing = false, editingRowIndex = null, currentEditingFileUrl = "", targetReportDate = null, lastSelection = { name: null, condition: null }, loggedInUser = null; 
         
-        // ★追加：表示する年月を管理する変数
         let displayYear = new Date().getFullYear();
         let displayMonth = new Date().getMonth();
 
@@ -687,11 +688,9 @@
         function sendLikeToSheet(rowIndex, parentDiv) { const btns = parentDiv.querySelectorAll('.like-btn'); const likeData = Array.from(btns).map(b => b.innerText).join(','); const data = { action: 'like', rowIndex: rowIndex, likeData: likeData }; fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { console.log("いいね保存"); delete saveTimers[rowIndex]; }).catch(err => console.error("エラー", err)); }
         function showToast() { var x = document.getElementById("toast"); x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500); }
         
-        // ★修正：モーダルオープン時に「今月」にリセットする
         function openCheckModal() { 
             document.getElementById('check-modal').style.display = 'flex'; 
             
-            // 表示月を「今」にリセット
             const now = new Date();
             displayYear = now.getFullYear();
             displayMonth = now.getMonth();
@@ -709,10 +708,8 @@
         }
         function closeCheckModal() { document.getElementById('check-modal').style.display = 'none'; }
         
-        // ★追加：月移動ボタンの処理
         function changeMonth(diff) {
             displayMonth += diff;
-            // 年またぎの処理（1月より前、12月より後）
             if (displayMonth > 11) {
                 displayMonth = 0;
                 displayYear++;
@@ -723,20 +720,17 @@
             renderCalendar();
         }
 
-        // ★修正：カレンダー描画（displayYear, displayMonthを使う）
         function renderCalendar() {
             const targetName = document.querySelector('input[name="check-target"]:checked')?.value; 
             if (!targetName) { alert("チェックする人を選んでください"); return; }
             
             const calendarArea = document.getElementById('calendar-area'); calendarArea.innerHTML = ""; 
             
-            // 表示対象の年月（displayYear, displayMonth）を使う
             const year = displayYear;
             const month = displayMonth;
             const lastDay = new Date(year, month + 1, 0).getDate();
             const firstDayOfWeek = new Date(year, month, 1).getDay();
 
-            // 今日の日付取得用（未来判定用）
             const nowObj = new Date();
             const todayYear = nowObj.getFullYear();
             const todayMonth = nowObj.getMonth();
@@ -747,7 +741,6 @@
                 return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; 
             });
             
-            // ヘッダーに移動ボタンを追加
             const headerHtml = `
                 <div class="calendar-title-area">
                     <button class="calendar-btn" onclick="changeMonth(-1)">◀ 前月</button>
@@ -770,7 +763,6 @@
                     return hDate.getFullYear() === year && hDate.getMonth() === month && hDate.getDate() === d && h[1] === targetName;
                 });
 
-                // 未来かどうかの判定
                 let isFuture = false;
                 if (year > todayYear) isFuture = true;
                 else if (year === todayYear && month > todayMonth) isFuture = true;
@@ -787,7 +779,6 @@
             calendarArea.innerHTML = headerHtml + "</div>" + bodyHtml + "</div>";
         }
 
-        // ★修正：未来判定ロジックをカレンダー描画と統一
         function handleDateClick(year, month, day, targetName) {
             const isEditMode = document.getElementById('holiday-mode-check').checked;
             const now = new Date();
@@ -801,10 +792,8 @@
             else if (year === todayYear && month === todayMonth && day > todayDate) isFuture = true;
 
             if (isEditMode) {
-                // 休日設定モードなら、過去未来関係なく変更OK
                 toggleHoliday(year, month, day, targetName);
             } else {
-                // 通常モードなら、未来はブロック
                 if (isFuture) {
                     alert("未来の日報はまだ作成できません");
                     return;
