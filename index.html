@@ -507,7 +507,7 @@
 
     <script>
         // ★重要：GAS URL（あなたのURLに書き換えてください）
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyDvA1WA7D_EQRmD_nYrtD-3RWWm2sT3hASH9luQGxJ_OXm4zhOwqPe1OU0oows0W0lPQ/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbz4QfjV6PlR3vmerQPaqsp0YA8bZiZl1L7raTR6Ai0ea40uAGGo06EsQINeZD-KdILpfw/exec"; 
 
         // --- 共通変数 ---
         let allData = [], currentData = [], memberList = [], holidayList = []; 
@@ -603,8 +603,10 @@
             renderHolidayCalendar();
         }
 
+        // ▼ 修正版：休日設定カレンダー（全員共通）
         function renderHolidayCalendar() {
-            if (!loggedInUser) return;
+            // if (!loggedInUser) return; // ←全員共通なので、この行は削除またはコメントアウトしてもOK
+
             const year = holidayDisplayYear;
             const month = holidayDisplayMonth;
             document.getElementById('holiday-calendar-title').innerText = `${year}年 ${month + 1}月`;
@@ -623,11 +625,16 @@
                 el.className = 'calendar-day';
                 el.innerText = d;
 
+                // ▼ 修正：日付だけで判定する（名前は見ない）
                 const isSavedHoliday = holidayList.some(h => {
-                    const hD = new Date(h[0]);
-                    return hD.getFullYear()===year && hD.getMonth()===month && hD.getDate()===d && h[1]===loggedInUser;
+                   const hD = new Date(h[0]);
+                   return hD.getFullYear() === year && 
+                          hD.getMonth() === month && 
+                          hD.getDate() === d;
+                   // ↑ ここにあった「&& h[1] === loggedInUser」を削除しました
                 });
 
+                // 今タップして選択中か？
                 if (pendingHolidayChanges.has(dateStr)) {
                     el.classList.add('day-selected');
                 } else if (isSavedHoliday) {
