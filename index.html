@@ -253,6 +253,25 @@
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
 
+            /* --- メッセージ表示エリア（新機能） --- */
+        #feedback-area {
+            display: none; /* 最初は隠しておく */
+            background-color: #fff3e0;
+            border: 2px solid #ffb74d;
+            color: #ef6c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            animation: fadeIn 0.5s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #feedback-area span { font-size: 1.2em; margin-right: 5px; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* スマホ対応 */
         @media (max-width: 768px) {
             body, .app-container { flex-direction: column; height: auto; min-height: 100vh; }
@@ -395,6 +414,9 @@
                         <label>明日の業務内容</label>
                         <div class="input-wrapper"><textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea></div>
                     </div>
+                    
+                    <div id="feedback-area"></div>
+                    
                     <div class="form-group">
                         <label>所見や感じたこと</label>
                         <div class="input-wrapper"><textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea></div>
@@ -507,10 +529,11 @@
 
     <script>
         // ★重要：GAS URL（あなたのURLに書き換えてください）
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbz4QfjV6PlR3vmerQPaqsp0YA8bZiZl1L7raTR6Ai0ea40uAGGo06EsQINeZD-KdILpfw/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyIzXVD5Lk808VbKkJ7zxF3t5EiFvKaqjlOWCEYoYdMBmx3Hwk3xGZKtQAStoA1MER6RA/exec"; 
 
         // --- 共通変数 ---
         let allData = [], currentData = [], memberList = [], holidayList = []; 
+        let magicMessages = []; // ★追加：OK
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1, saveTimers = {}, isEditing = false, editingRowIndex = null, currentEditingFileUrl = "", targetReportDate = null, lastSelection = { name: null, condition: null }, loggedInUser = null; 
         
@@ -570,12 +593,14 @@
             document.getElementById('login-id').value = ""; document.getElementById('login-password').value = ""; document.getElementById('login-msg').innerText = ""; alert("ログアウトしました");
         }
 
+        // ★★★ 修正箇所：window.onload はここに一つだけまとめる！ ★★★
         window.onload = function() { 
             checkLoginSession(); 
             setTodayDate(); 
             updateBackgroundByTime(); 
             setInterval(updateBackgroundByTime, 15000); 
-            getWeather(); 
+            getWeather();
+            setupMagicMessage(); // ★これをここに追加するだけでOKです！
         };
 
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
@@ -603,10 +628,7 @@
             renderHolidayCalendar();
         }
 
-        // ▼ 修正版：休日設定カレンダー（全員共通）
         function renderHolidayCalendar() {
-            // if (!loggedInUser) return; // ←全員共通なので、この行は削除またはコメントアウトしてもOK
-
             const year = holidayDisplayYear;
             const month = holidayDisplayMonth;
             document.getElementById('holiday-calendar-title').innerText = `${year}年 ${month + 1}月`;
@@ -625,16 +647,13 @@
                 el.className = 'calendar-day';
                 el.innerText = d;
 
-                // ▼ 修正：日付だけで判定する（名前は見ない）
                 const isSavedHoliday = holidayList.some(h => {
                    const hD = new Date(h[0]);
                    return hD.getFullYear() === year && 
                           hD.getMonth() === month && 
                           hD.getDate() === d;
-                   // ↑ ここにあった「&& h[1] === loggedInUser」を削除しました
                 });
 
-                // 今タップして選択中か？
                 if (pendingHolidayChanges.has(dateStr)) {
                     el.classList.add('day-selected');
                 } else if (isSavedHoliday) {
@@ -769,6 +788,9 @@
                     renderHolidayCalendar(); 
                     renderCheckCalendar();
                 } 
+                if (data.magicMessages) {
+                    magicMessages = data.magicMessages;
+                }
                 
                 allData = (data.reports || []).reverse(); 
                 currentData = allData;
@@ -921,6 +943,7 @@
         // ==========================================
         // ■ 新機能：天気・気温・湿度・場所の取得
         // ==========================================
+        // ★★★ 修正箇所：ここにあった window.onload は削除しました ★★★
         function getWeather() {
             if (!navigator.geolocation) {
                 document.getElementById('weather-text').innerText = "位置情報オフ";
@@ -951,13 +974,12 @@
                     const icon = getWeatherIcon(code);
 
                     // 場所データの解析
-                    // addressオブジェクトから「区(ward)」「市(city)」「町(town)」のいずれかを探す
                     const addr = locationData.address;
-                    const city = "新宿区";
+                    // 市町村区の取得（優先順位をつけて探す）
+                    const city = addr.ward || addr.city || addr.town || addr.village || "現在地";
 
                     // 画面表示
                     document.getElementById('weather-icon').innerText = icon.emoji;
-                    // 例: [新宿区] ☀️ 快晴 18℃ / 💧45%
                     document.getElementById('weather-text').innerText = `[${city}] ${icon.text} ${temp}℃ / 💧${humidity}%`;
                 })
                 .catch(e => {
@@ -982,6 +1004,40 @@
             if (code >= 85 && code <= 86) return { emoji: "☃️", text: "雪" };
             if (code >= 95 && code <= 99) return { emoji: "⚡", text: "雷雨" };
             return { emoji: "❓", text: "不明" };
+        }
+        
+        // ==========================================
+        // ■ 新機能：特定の言葉に反応してメッセージを表示
+        // ==========================================
+        function setupMagicMessage() {
+            const commentBox = document.getElementById('comment');
+            const feedbackArea = document.getElementById('feedback-area');
+
+            // 文字が入力されるたびに実行
+            commentBox.addEventListener('input', function() {
+                const text = this.value;
+                let foundMessage = "";
+
+                // スプレッドシートから取得したキーワードを全部チェック
+                for (let i = 0; i < magicMessages.length; i++) {
+                    const keyword = magicMessages[i][0];
+                    const message = magicMessages[i][1];
+                    
+                    // 入力された文字の中にキーワードが含まれているか？
+                    if (text.indexOf(keyword) !== -1) {
+                        foundMessage = message;
+                        break; // ひとつ見つけたら終了（優先順位はシートの上の方が高い）
+                    }
+                }
+
+                // メッセージが見つかったら表示、なければ隠す
+                if (foundMessage) {
+                    feedbackArea.style.display = 'block';
+                    feedbackArea.innerHTML = "<span>🤖</span> " + foundMessage;
+                } else {
+                    feedbackArea.style.display = 'none';
+                }
+            });
         }
     </script>
 </body>
