@@ -250,52 +250,33 @@
         .Pagination-Item-Link.isActive { background: #0288d1; color: white; border-color: #0288d1; pointer-events: none; }
         
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
-            /* --- ここからコピー（右下表示・送信時のみ表示版） --- */
-    #toast { 
-        visibility: hidden; /* 普段は完全に見えなくする */
-        min-width: 250px; 
-        background-color: #333; /* 黒背景 */
-        color: #fff; /* 白文字 */
-        text-align: center; 
-        border-radius: 4px; 
-        padding: 16px; 
-        position: fixed; 
-        z-index: 3000; 
-    
-        /* 右下に配置する設定 */
-        right: 30px; 
-        bottom: 30px; 
-    
-        font-size: 16px; 
-        opacity: 0; 
-        transition: opacity 0.5s, bottom 0.5s; 
+        
+        /* --- 送信メッセージ（トースト）：右下に配置・普段は見えない --- */
+        #toast { 
+            visibility: hidden; /* 普段は完全に見えなくする */
+            min-width: 250px; 
+            background-color: #333; /* 黒背景 */
+            color: #fff; /* 白文字 */
+            text-align: center; 
+            border-radius: 4px; 
+            padding: 16px; 
+            position: fixed; 
+            z-index: 3000; 
+            
+            /* 右下に配置する設定 */
+            right: 30px; 
+            bottom: 30px; 
+            
+            font-size: 16px; 
+            opacity: 0; 
+            transition: opacity 0.5s, bottom 0.5s; 
         }
 
         /* JavaScriptが「表示せよ」と命令した時だけ有効になる設定 */
-    #toast.show { 
-        visibility: visible; 
-        opacity: 1; 
-        bottom: 50px; /* ふわっと少し浮き上がるアニメーション */
-        }
-            /* --- ここまでコピー --- */
-
-            /* --- メッセージ表示エリア（新機能） --- */
-        #feedback-area {
-            display: none; /* 最初は隠しておく */
-            background-color: #fff3e0;
-            border: 2px solid #ffb74d;
-            color: #ef6c00;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            animation: fadeIn 0.5s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        #feedback-area span { font-size: 1.2em; margin-right: 5px; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        #toast.show { 
+            visibility: visible; 
+            opacity: 1; 
+            bottom: 50px; /* ふわっと少し浮き上がるアニメーション */
         }
 
         /* スマホ対応 */
@@ -441,8 +422,6 @@
                         <div class="input-wrapper"><textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea></div>
                     </div>
                     
-                    <div id="feedback-area"></div>
-                    
                     <div class="form-group">
                         <label>所見や感じたこと</label>
                         <div class="input-wrapper"><textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea></div>
@@ -559,7 +538,7 @@
 
         // --- 共通変数 ---
         let allData = [], currentData = [], memberList = [], holidayList = []; 
-        let magicMessages = []; // ★追加：OK
+        let magicMessages = []; 
         const ITEMS_PER_PAGE = 10;
         let currentPage = 1, saveTimers = {}, isEditing = false, editingRowIndex = null, currentEditingFileUrl = "", targetReportDate = null, lastSelection = { name: null, condition: null }, loggedInUser = null; 
         
@@ -619,14 +598,13 @@
             document.getElementById('login-id').value = ""; document.getElementById('login-password').value = ""; document.getElementById('login-msg').innerText = ""; alert("ログアウトしました");
         }
 
-        // ★★★ 修正箇所：window.onload はここに一つだけまとめる！ ★★★
+        // ★★★ 修正箇所：setupMagicMessage() の呼び出しを消しました ★★★
         window.onload = function() { 
             checkLoginSession(); 
             setTodayDate(); 
             updateBackgroundByTime(); 
             setInterval(updateBackgroundByTime, 15000); 
             getWeather();
-            setupMagicMessage(); // ★これをここに追加するだけでOKです！
         };
 
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
@@ -839,7 +817,25 @@
             let data = { targetDate: dateVal, name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
             if (isEditing) { data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; } else { data.action = 'report'; }
             if (fileInput.files.length > 0) { try { const file = fileInput.files[0]; const fileData = await readFileAsBase64(file); data.fileName = file.name; data.mimeType = file.type; data.fileData = fileData; } catch (e) { alert("ファイルの読み込みに失敗しました"); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return; } }
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = isEditing ? "修正しました！" : "送信完了しました！"; showToast(); resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信"; }).catch(err => { alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; });
+            
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { 
+                
+                // ★★★ 修正箇所：送信完了時にメッセージをチェックしてトーストに表示 ★★★
+                let messageToShow = isEditing ? "修正しました！" : "送信完了しました！";
+
+                // キーワードチェック
+                for (let i = 0; i < magicMessages.length; i++) {
+                   if (comment.indexOf(magicMessages[i][0]) !== -1) {
+                       messageToShow = magicMessages[i][1]; // キーワードがあればメッセージを書き換え
+                       break;
+                   }
+                }
+
+                document.getElementById("toast").innerText = messageToShow; 
+                showToast(); 
+
+                resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信"; 
+            }).catch(err => { alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; });
         }
 
         // --- 以下、既存のヘルパー関数 ---
@@ -969,7 +965,6 @@
         // ==========================================
         // ■ 新機能：天気・気温・湿度・場所の取得
         // ==========================================
-        // ★★★ 修正箇所：ここにあった window.onload は削除しました ★★★
         function getWeather() {
             if (!navigator.geolocation) {
                 document.getElementById('weather-text').innerText = "位置情報オフ";
@@ -1030,40 +1025,6 @@
             if (code >= 85 && code <= 86) return { emoji: "☃️", text: "雪" };
             if (code >= 95 && code <= 99) return { emoji: "⚡", text: "雷雨" };
             return { emoji: "❓", text: "不明" };
-        }
-        
-        // ==========================================
-        // ■ 新機能：特定の言葉に反応してメッセージを表示
-        // ==========================================
-        function setupMagicMessage() {
-            const commentBox = document.getElementById('comment');
-            const feedbackArea = document.getElementById('feedback-area');
-
-            // 文字が入力されるたびに実行
-            commentBox.addEventListener('input', function() {
-                const text = this.value;
-                let foundMessage = "";
-
-                // スプレッドシートから取得したキーワードを全部チェック
-                for (let i = 0; i < magicMessages.length; i++) {
-                    const keyword = magicMessages[i][0];
-                    const message = magicMessages[i][1];
-                    
-                    // 入力された文字の中にキーワードが含まれているか？
-                    if (text.indexOf(keyword) !== -1) {
-                        foundMessage = message;
-                        break; // ひとつ見つけたら終了（優先順位はシートの上の方が高い）
-                    }
-                }
-
-                // メッセージが見つかったら表示、なければ隠す
-                if (foundMessage) {
-                    feedbackArea.style.display = 'block';
-                    feedbackArea.innerHTML = "<span>🤖</span> " + foundMessage;
-                } else {
-                    feedbackArea.style.display = 'none';
-                }
-            });
         }
     </script>
 </body>
