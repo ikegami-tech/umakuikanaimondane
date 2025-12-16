@@ -250,32 +250,32 @@
         .Pagination-Item-Link.isActive { background: #0288d1; color: white; border-color: #0288d1; pointer-events: none; }
         
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
-        /* --- ここからコピー（新しいコード） --- */
+        /* --- ここからコピー（右下表示・送信時のみ表示版） --- */
 #toast { 
-    visibility: hidden; /* 最初は隠す */
+    visibility: hidden; /* 普段は完全に見えなくする */
     min-width: 250px; 
-    background-color: #333; 
-    color: #fff; 
+    background-color: #333; /* 黒背景 */
+    color: #fff; /* 白文字 */
     text-align: center; 
     border-radius: 4px; 
     padding: 16px; 
     position: fixed; 
-    z-index: 3000; /* 他の要素より手前に表示 */
+    z-index: 3000; 
     
-    /* 画面の上部・中央に配置する設定 */
-    left: 50%; 
-    transform: translateX(-50%); 
-    top: 20px; /* 上から20pxの位置 */
+    /* 右下に配置する設定 */
+    right: 30px; 
+    bottom: 30px; 
     
     font-size: 16px; 
     opacity: 0; 
-    transition: opacity 0.5s; /* ふわっと表示させる */
+    transition: opacity 0.5s, bottom 0.5s; 
 }
 
-/* 表示するときの設定 */
+/* JavaScriptが「表示せよ」と命令した時だけ有効になる設定 */
 #toast.show { 
     visibility: visible; 
     opacity: 1; 
+    bottom: 50px; /* ふわっと少し浮き上がるアニメーション */
 }
 /* --- ここまでコピー --- */
 
