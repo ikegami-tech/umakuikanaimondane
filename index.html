@@ -250,8 +250,34 @@
         .Pagination-Item-Link.isActive { background: #0288d1; color: white; border-color: #0288d1; pointer-events: none; }
         
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 200; right: 30px; bottom: 30px; font-size: 16px; opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
-        #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        /* --- ここからコピー（新しいコード） --- */
+#toast { 
+    visibility: hidden; /* 最初は隠す */
+    min-width: 250px; 
+    background-color: #333; 
+    color: #fff; 
+    text-align: center; 
+    border-radius: 4px; 
+    padding: 16px; 
+    position: fixed; 
+    z-index: 3000; /* 他の要素より手前に表示 */
+    
+    /* 画面の上部・中央に配置する設定 */
+    left: 50%; 
+    transform: translateX(-50%); 
+    top: 20px; /* 上から20pxの位置 */
+    
+    font-size: 16px; 
+    opacity: 0; 
+    transition: opacity 0.5s; /* ふわっと表示させる */
+}
+
+/* 表示するときの設定 */
+#toast.show { 
+    visibility: visible; 
+    opacity: 1; 
+}
+/* --- ここまでコピー --- */
 
             /* --- メッセージ表示エリア（新機能） --- */
         #feedback-area {
