@@ -250,34 +250,34 @@
         .Pagination-Item-Link.isActive { background: #0288d1; color: white; border-color: #0288d1; pointer-events: none; }
         
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
-        /* --- ここからコピー（右下表示・送信時のみ表示版） --- */
-#toast { 
-    visibility: hidden; /* 普段は完全に見えなくする */
-    min-width: 250px; 
-    background-color: #333; /* 黒背景 */
-    color: #fff; /* 白文字 */
-    text-align: center; 
-    border-radius: 4px; 
-    padding: 16px; 
-    position: fixed; 
-    z-index: 3000; 
+            /* --- ここからコピー（右下表示・送信時のみ表示版） --- */
+    #toast { 
+        visibility: hidden; /* 普段は完全に見えなくする */
+        min-width: 250px; 
+        background-color: #333; /* 黒背景 */
+        color: #fff; /* 白文字 */
+        text-align: center; 
+        border-radius: 4px; 
+        padding: 16px; 
+        position: fixed; 
+        z-index: 3000; 
     
-    /* 右下に配置する設定 */
-    right: 30px; 
-    bottom: 30px; 
+        /* 右下に配置する設定 */
+        right: 30px; 
+        bottom: 30px; 
     
-    font-size: 16px; 
-    opacity: 0; 
-    transition: opacity 0.5s, bottom 0.5s; 
-}
+        font-size: 16px; 
+        opacity: 0; 
+        transition: opacity 0.5s, bottom 0.5s; 
+        }
 
-/* JavaScriptが「表示せよ」と命令した時だけ有効になる設定 */
-#toast.show { 
-    visibility: visible; 
-    opacity: 1; 
-    bottom: 50px; /* ふわっと少し浮き上がるアニメーション */
-}
-/* --- ここまでコピー --- */
+        /* JavaScriptが「表示せよ」と命令した時だけ有効になる設定 */
+    #toast.show { 
+        visibility: visible; 
+        opacity: 1; 
+        bottom: 50px; /* ふわっと少し浮き上がるアニメーション */
+        }
+            /* --- ここまでコピー --- */
 
             /* --- メッセージ表示エリア（新機能） --- */
         #feedback-area {
