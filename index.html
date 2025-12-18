@@ -923,42 +923,7 @@
         }
 // ▲▲▲ 新しい sendData 関数（ここまでコピー） ▲▲▲
             
-            // 6. サーバー(GAS)に送信！
-            fetch(GAS_URL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'text/plain' }, 
-                body: JSON.stringify(data) 
-            })
-            .then(response => response.json()) 
-            .then(responseData => { 
-                
-                // 7. AIからのメッセージを取り出す
-                let messageToShow = "送信完了！";
-                if (responseData.geminiMessage) {
-                    messageToShow = responseData.geminiMessage;
-                }
-
-                // ★★★ ここが変更点：ダイアログを表示する処理 ★★★
-                const replyContent = document.getElementById("ai-reply-content");
-                replyContent.innerText = messageToShow; // AIの言葉をセット
-                
-                const overlay = document.getElementById("ai-reply-overlay");
-                overlay.style.display = 'flex'; // ダイアログを表示
-
-                // 9. 画面をリセット
-                resetForm(); 
-                fetchData(); 
-                submitBtn.disabled = false; 
-                submitBtn.innerText = "送信"; 
-            })
-            .catch(err => { 
-                console.error(err);
-                alert("送信しましたが、AIからの返信取得に失敗しました。\n(GASのデプロイ更新を忘れていませんか？)"); 
-                submitBtn.disabled = false; 
-                submitBtn.innerText = isEditing ? "更新" : "送信"; 
-            });
-        }
-
+            
         // --- 以下、既存のヘルパー関数 ---
         function saveSelection(key, value) { localStorage.setItem(key, value); }
         function setupAutoSave() { const textFields = ['progress', 'tomorrow', 'comment']; textFields.forEach(id => { document.getElementById(id).addEventListener('input', function() { saveSelection('saved_' + id, this.value); }); }); }
