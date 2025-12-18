@@ -876,7 +876,7 @@
             })
             .catch(err => { 
                 console.error(err);
-                alert("送信しましたが、AIからの返信取得に失敗した可能性があります。"); 
+                alert("送信しましたが、AIからの返信取得に失敗しました。\n(GASのデプロイ更新を忘れていませんか？)"); 
                 submitBtn.disabled = false; 
                 submitBtn.innerText = isEditing ? "更新" : "送信"; 
             });
