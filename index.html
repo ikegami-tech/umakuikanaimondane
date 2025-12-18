@@ -447,6 +447,18 @@
                         <label>所見や感じたこと</label>
                         <div class="input-wrapper"><textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea></div>
                     </div>
+                    
+                    <div class="form-group">
+                        <label>返事設定</label>
+                        <div class="input-wrapper condition-group">
+                            <label class="condition-label"><input type="radio" name="replyType" value="上司" checked>👔 上司</label>
+                            <label class="condition-label"><input type="radio" name="replyType" value="同僚">🤝 同僚</label>
+                            <label class="condition-label"><input type="radio" name="replyType" value="部下">🔰 部下</label>
+                            <label class="condition-label"><input type="radio" name="replyType" value="恋人">💕 恋人</label>
+                            <label class="condition-label"><input type="radio" name="replyType" value="幼馴染">🚲 幼馴染</label>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label>資料添付</label>
                         <div class="input-wrapper">
@@ -830,8 +842,9 @@
             });
         }
 
+        // ▼▼▼ 新しい sendData 関数（ここからコピー） ▼▼▼
         async function sendData() {
-            // 1. 画面の入力値を取得
+            // 1. 入力値を取得
             const dateVal = document.getElementById('report-date').value; 
             const name = getSelectedName(); 
             const condition = getSelectedCondition(); 
@@ -840,25 +853,34 @@
             const comment = document.getElementById('comment').value; 
             const fileInput = document.getElementById('file-attach');
 
+            // ★追加：返事設定（誰から返事が欲しいか）を取得
+            const replyTypeEl = document.querySelector('input[name="replyType"]:checked');
+            const replyType = replyTypeEl ? replyTypeEl.value : "上司";
+
             // 2. 未入力チェック
             if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { 
                 alert("全ての項目を入力・選択してください"); return; 
             }
 
-            // 3. ボタンを「考え中...」に変える
+            // 3. ボタンを待機中に
             const submitBtn = document.getElementById('submit-btn'); 
             submitBtn.disabled = true; 
             submitBtn.innerText = "AIが返信を考え中..."; 
 
-            // 4. 送信データを作る
-            let data = { targetDate: dateVal, name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
+            // 4. 送信データの作成（ここに replyType を追加しました）
+            let data = { 
+                targetDate: dateVal, name: name, condition: condition, 
+                progress: progress, tomorrow: tomorrow, comment: comment, 
+                replyType: replyType 
+            };
+            
             if (isEditing) { 
                 data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; 
             } else { 
                 data.action = 'report'; 
             }
 
-            // 5. ファイルがあれば添付処理
+            // 5. ファイル添付処理
             if (fileInput.files.length > 0) { 
                 try { 
                     const file = fileInput.files[0]; 
@@ -869,6 +891,37 @@
                     submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return; 
                 } 
             }
+            
+            // 6. 送信実行
+            fetch(GAS_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain' }, 
+                body: JSON.stringify(data) 
+            })
+            .then(response => response.json()) 
+            .then(responseData => { 
+                // 返信メッセージを表示
+                let messageToShow = "送信完了！";
+                if (responseData.geminiMessage) {
+                    messageToShow = responseData.geminiMessage;
+                }
+                document.getElementById("ai-reply-content").innerText = messageToShow; 
+                document.getElementById("ai-reply-overlay").style.display = 'flex'; 
+
+                // リセット処理
+                resetForm(); 
+                fetchData(); 
+                submitBtn.disabled = false; 
+                submitBtn.innerText = "送信"; 
+            })
+            .catch(err => { 
+                console.error(err);
+                alert("送信しましたが、AI返信の取得に失敗しました。"); 
+                submitBtn.disabled = false; 
+                submitBtn.innerText = isEditing ? "更新" : "送信"; 
+            });
+        }
+// ▲▲▲ 新しい sendData 関数（ここまでコピー） ▲▲▲
             
             // 6. サーバー(GAS)に送信！
             fetch(GAS_URL, { 
