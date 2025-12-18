@@ -534,7 +534,7 @@
 
     <script>
         // ★重要：GAS URL（あなたのURLに書き換えてください）
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby0VLgT9MTWjdun9Fw0DVAt-sXENeTypq6jhNwJmjcScrbpEgOOT7_uNO_J4ywhLNb4jQ/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyIzXVD5Lk808VbKkJ7zxF3t5EiFvKaqjlOWCEYoYdMBmx3Hwk3xGZKtQAStoA1MER6RA/exec"; 
 
         // --- 共通変数 ---
         let allData = [], currentData = [], memberList = [], holidayList = []; 
@@ -598,7 +598,6 @@
             document.getElementById('login-id').value = ""; document.getElementById('login-password').value = ""; document.getElementById('login-msg').innerText = ""; alert("ログアウトしました");
         }
 
-        // ★★★ 修正箇所：setupMagicMessage() の呼び出しを消しました ★★★
         window.onload = function() { 
             checkLoginSession(); 
             setTodayDate(); 
@@ -811,25 +810,77 @@
         }
 
         async function sendData() {
-            const dateVal = document.getElementById('report-date').value; const name = getSelectedName(); const condition = getSelectedCondition(); const progress = document.getElementById('progress').value; const tomorrow = document.getElementById('tomorrow').value; const comment = document.getElementById('comment').value; const fileInput = document.getElementById('file-attach');
-            if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { alert("全ての項目を入力・選択してください"); return; }
-            const submitBtn = document.getElementById('submit-btn'); submitBtn.disabled = true; submitBtn.innerText = "送信中...";
-            let data = { targetDate: dateVal, name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
-            if (isEditing) { data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; } else { data.action = 'report'; }
-            if (fileInput.files.length > 0) { try { const file = fileInput.files[0]; const fileData = await readFileAsBase64(file); data.fileName = file.name; data.mimeType = file.type; data.fileData = fileData; } catch (e) { alert("ファイルの読み込みに失敗しました"); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return; } }
-            
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { 
-                
-                // ★★★ 修正箇所：送信完了時にメッセージをチェックしてトーストに表示 ★★★
-                let messageToShow = isEditing ? "修正しました！" : "送信完了しました！";
+            // 1. 画面の入力値を取得
+            const dateVal = document.getElementById('report-date').value; 
+            const name = getSelectedName(); 
+            const condition = getSelectedCondition(); 
+            const progress = document.getElementById('progress').value; 
+            const tomorrow = document.getElementById('tomorrow').value; 
+            const comment = document.getElementById('comment').value; 
+            const fileInput = document.getElementById('file-attach');
 
-                // キーワードチェック
-                for (let i = 0; i < magicMessages.length; i++) {
-                   if (comment.indexOf(magicMessages[i][0]) !== -1) {
-                       messageToShow = magicMessages[i][1]; // キーワードがあればメッセージを書き換え
-                       break;
-                   }
+            // 2. 未入力チェック
+            if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { 
+                alert("全ての項目を入力・選択してください"); return; 
+            }
+
+            // 3. ボタンを「考え中...」に変える
+            const submitBtn = document.getElementById('submit-btn'); 
+            submitBtn.disabled = true; 
+            submitBtn.innerText = "AIが返信を考え中..."; 
+
+            // 4. 送信データを作る
+            let data = { targetDate: dateVal, name: name, condition: condition, progress: progress, tomorrow: tomorrow, comment: comment };
+            if (isEditing) { 
+                data.action = 'edit'; data.rowIndex = editingRowIndex; data.currentFileUrl = currentEditingFileUrl; 
+            } else { 
+                data.action = 'report'; 
+            }
+
+            // 5. ファイルがあれば添付処理
+            if (fileInput.files.length > 0) { 
+                try { 
+                    const file = fileInput.files[0]; 
+                    const fileData = await readFileAsBase64(file); 
+                    data.fileName = file.name; data.mimeType = file.type; data.fileData = fileData; 
+                } catch (e) { 
+                    alert("ファイルの読み込みに失敗しました"); 
+                    submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; return; 
+                } 
+            }
+            
+            // 6. サーバー(GAS)に送信！
+            fetch(GAS_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain' }, 
+                body: JSON.stringify(data) 
+            })
+            .then(response => response.json()) 
+            .then(responseData => { 
+                
+                // 7. AIからのメッセージを取り出す
+                let messageToShow = "送信完了！";
+                if (responseData.geminiMessage) {
+                    messageToShow = responseData.geminiMessage;
                 }
+
+                // 8. 右下の黒い箱(トースト)にAIの言葉を表示
+                document.getElementById("toast").innerText = messageToShow;
+                showToast(); 
+
+                // 9. 画面をリセット
+                resetForm(); 
+                fetchData(); 
+                submitBtn.disabled = false; 
+                submitBtn.innerText = "送信"; 
+            })
+            .catch(err => { 
+                console.error(err);
+                alert("送信しましたが、AIからの返信取得に失敗した可能性があります。"); 
+                submitBtn.disabled = false; 
+                submitBtn.innerText = isEditing ? "更新" : "送信"; 
+            });
+        }
 
         // --- 以下、既存のヘルパー関数 ---
         function saveSelection(key, value) { localStorage.setItem(key, value); }
