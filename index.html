@@ -310,6 +310,27 @@
     </style>
 </head>
 <body>
+    <div id="ai-reply-overlay" class="overlay">
+        <div class="auth-box" style="width: 90%; max-width: 600px; text-align: left;">
+            <h2 style="text-align:center; color:#0288d1;">🤖 AIからの返信</h2>
+            
+            <div id="ai-reply-content" style="
+                background: #f8fbff; 
+                padding: 20px; 
+                border: 1px solid #b3e5fc;
+                border-radius: 8px; 
+                margin-bottom: 20px; 
+                max-height: 400px; 
+                overflow-y: auto; 
+                line-height: 1.8;
+                white-space: pre-wrap; /* 改行を反映させる */
+                font-size: 16px;
+                color: #333;">
+            </div>
+
+            <button onclick="closeAiDialog()" class="btn-primary">閉じる</button>
+        </div>
+    </div>
 
     <div id="login-overlay" class="overlay">
         <div class="auth-box">
@@ -864,9 +885,12 @@
                     messageToShow = responseData.geminiMessage;
                 }
 
-                // 8. 右下の黒い箱(トースト)にAIの言葉を表示
-                document.getElementById("toast").innerText = messageToShow;
-                showToast(); 
+                // ★★★ ここが変更点：ダイアログを表示する処理 ★★★
+                const replyContent = document.getElementById("ai-reply-content");
+                replyContent.innerText = messageToShow; // AIの言葉をセット
+                
+                const overlay = document.getElementById("ai-reply-overlay");
+                overlay.style.display = 'flex'; // ダイアログを表示
 
                 // 9. 画面をリセット
                 resetForm(); 
@@ -1070,6 +1094,11 @@
             if (code >= 95 && code <= 99) return { emoji: "⚡", text: "雷雨" };
             return { emoji: "❓", text: "不明" };
         }
+        // ▼▼▼ ここからコピー ▼▼▼
+        function closeAiDialog() {
+            document.getElementById("ai-reply-overlay").style.display = 'none';
+        }
+// ▲▲▲ ここまでコピー ▲▲▲
     </script>
 </body>
 </html>
