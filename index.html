@@ -831,13 +831,6 @@
                    }
                 }
 
-                document.getElementById("toast").innerText = messageToShow; 
-                showToast(); 
-
-                resetForm(); fetchData(); submitBtn.disabled = false; submitBtn.innerText = "送信"; 
-            }).catch(err => { alert("送信エラー: " + err); submitBtn.disabled = false; submitBtn.innerText = isEditing ? "更新" : "送信"; });
-        }
-
         // --- 以下、既存のヘルパー関数 ---
         function saveSelection(key, value) { localStorage.setItem(key, value); }
         function setupAutoSave() { const textFields = ['progress', 'tomorrow', 'comment']; textFields.forEach(id => { document.getElementById(id).addEventListener('input', function() { saveSelection('saved_' + id, this.value); }); }); }
