@@ -842,7 +842,7 @@
             });
         }
 
-        // ▼▼▼ 新しい sendData 関数（ここからコピー） ▼▼▼
+       // ▼▼▼ 新しい sendData 関数（AI返信表示修正版） ▼▼▼
         async function sendData() {
             // 1. 入力値を取得
             const dateVal = document.getElementById('report-date').value; 
@@ -853,7 +853,7 @@
             const comment = document.getElementById('comment').value; 
             const fileInput = document.getElementById('file-attach');
 
-            // ★追加：返事設定（誰から返事が欲しいか）を取得
+            // 返事設定を取得
             const replyTypeEl = document.querySelector('input[name="replyType"]:checked');
             const replyType = replyTypeEl ? replyTypeEl.value : "上司";
 
@@ -867,7 +867,7 @@
             submitBtn.disabled = true; 
             submitBtn.innerText = "AIが返信を考え中..."; 
 
-            // 4. 送信データの作成（ここに replyType を追加しました）
+            // 4. 送信データの作成
             let data = { 
                 targetDate: dateVal, name: name, condition: condition, 
                 progress: progress, tomorrow: tomorrow, comment: comment, 
@@ -900,11 +900,19 @@
             })
             .then(response => response.json()) 
             .then(responseData => { 
-                // 返信メッセージを表示
-                let messageToShow = "送信完了！";
+                // ★修正点：必ずAIの返信を表示するように修正しました
+                let messageToShow = "";
+                
+                // GASから geminiMessage か message が返ってきているか確認
                 if (responseData.geminiMessage) {
                     messageToShow = responseData.geminiMessage;
+                } else if (responseData.message) {
+                    messageToShow = responseData.message;
+                } else {
+                    messageToShow = "送信完了しました！（AIからの返信データなし）";
                 }
+
+                // ダイアログに文章をセットして表示
                 document.getElementById("ai-reply-content").innerText = messageToShow; 
                 document.getElementById("ai-reply-overlay").style.display = 'flex'; 
 
@@ -916,12 +924,11 @@
             })
             .catch(err => { 
                 console.error(err);
-                alert("送信しましたが、AI返信の取得に失敗しました。"); 
+                alert("送信しましたが、AI返信の取得に失敗しました。\n" + err); 
                 submitBtn.disabled = false; 
                 submitBtn.innerText = isEditing ? "更新" : "送信"; 
             });
         }
-// ▲▲▲ 新しい sendData 関数（ここまでコピー） ▲▲▲
             
             
         // --- 以下、既存のヘルパー関数 ---
