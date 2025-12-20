@@ -1018,8 +1018,14 @@
             // 作成日時(row[9])が存在し、かつそれがID(行番号)でない場合
             if (row[9] && typeof row[9] !== 'number' && !isNaN(new Date(row[9]).getTime())) {
                 const createdDate = new Date(row[9]);
-                // リアルタイム日時を表示 (例: 12/20 09:22)
-                displayDateStr = createdDate.toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                
+                const y = createdDate.getFullYear();
+                const m = createdDate.getMonth() + 1;
+                const d = createdDate.getDate();
+                const h = createdDate.getHours();
+                const min = ('0' + createdDate.getMinutes()).slice(-2); // 分を2桁に揃える
+                displayDateStr = `${y}年${m}月${d}日 ${h}時${min}分`;
+                
             } else {
                 // 古いデータなどで作成日時がない場合は、これまで通りターゲット日付を使用
                 displayDateStr = targetDateObj.toLocaleDateString('ja-JP') + " (日時記録なし)";
