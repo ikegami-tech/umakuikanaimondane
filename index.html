@@ -995,11 +995,6 @@
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container');
             
-            // --- データ取得 ---
-            // row[0]: 日報の日付（ターゲット日付）
-            // row[9]: 作成日時（リアルタイム）, row[10]: 更新日時（リアルタイム）
-            // ※doGetで最後尾にID(行番号)がついているため、それを避けて取得する
-            
             const rowIndex = row[row.length - 1]; // IDは必ず一番後ろ
             
             const targetDateObj = new Date(row[0]);
@@ -1011,27 +1006,29 @@
             const savedLikes = row[6] ? row[6] : "";
             const fileUrl = row[7] ? row[7] : "";
             
-            // --- ★日時の表示ロジック修正 ---
+            // --- 日時の表示変数 ---
             let displayDateStr = "";
             let updateInfoStr = "";
 
-            // 作成日時(row[9])が存在し、かつそれがID(行番号)でない場合
+            // ■作成日時 (報告日時) の作成
             if (row[9] && typeof row[9] !== 'number' && !isNaN(new Date(row[9]).getTime())) {
                 const createdDate = new Date(row[9]);
-                
                 const y = createdDate.getFullYear();
                 const m = createdDate.getMonth() + 1;
                 const d = createdDate.getDate();
                 const h = createdDate.getHours();
-                const min = ('0' + createdDate.getMinutes()).slice(-2); // 分を2桁に揃える
+                const min = ('0' + createdDate.getMinutes()).slice(-2);
+                // 例: 2025年12月20日 9時00分
                 displayDateStr = `${y}年${m}月${d}日 ${h}時${min}分`;
-                
             } else {
-                // 古いデータなどで作成日時がない場合は、これまで通りターゲット日付を使用
-                displayDateStr = targetDateObj.toLocaleDateString('ja-JP') + " (日時記録なし)";
+                // 古いデータ用
+                const y = targetDateObj.getFullYear();
+                const m = targetDateObj.getMonth() + 1;
+                const d = targetDateObj.getDate();
+                displayDateStr = `${y}年${m}月${d}日 (日時記録なし)`;
             }
 
-            // 更新日時(row[10])が存在する場合
+            // ■最終更新日時の作成
             if (row[10] && typeof row[10] !== 'number' && !isNaN(new Date(row[10]).getTime())) {
                 const updatedDate = new Date(row[10]);
                 
@@ -1040,8 +1037,10 @@
                 const uD = updatedDate.getDate();
                 const uH = updatedDate.getHours();
                 const uMin = ('0' + updatedDate.getMinutes()).slice(-2);
-                // 更新がある場合のみ表示
-                updateInfoStr = `<span style="font-size:0.85em; color:#888; margin-left:8px;">(最終更新: ${updatedStr})</span>`;
+                
+                // 例: (最終更新: 2025年12月20日 9時52分)
+                // ※ここでエラーが出ていた変数は使わず、直接ここに文字を入れました
+                updateInfoStr = `<span style="font-size:0.85em; color:#888; margin-left:8px;">(最終更新: ${uY}年${uM}月${uD}日 ${uH}時${uMin}分)</span>`;
             }
 
             let buttonsHtml = ''; 
