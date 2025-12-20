@@ -1034,7 +1034,12 @@
             // 更新日時(row[10])が存在する場合
             if (row[10] && typeof row[10] !== 'number' && !isNaN(new Date(row[10]).getTime())) {
                 const updatedDate = new Date(row[10]);
-                const updatedStr = updatedDate.toLocaleString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                
+                const uY = updatedDate.getFullYear();
+                const uM = updatedDate.getMonth() + 1;
+                const uD = updatedDate.getDate();
+                const uH = updatedDate.getHours();
+                const uMin = ('0' + updatedDate.getMinutes()).slice(-2);
                 // 更新がある場合のみ表示
                 updateInfoStr = `<span style="font-size:0.85em; color:#888; margin-left:8px;">(最終更新: ${updatedStr})</span>`;
             }
