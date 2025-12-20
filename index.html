@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>シスろぐ</title>
-        <style>
+    <style>
         /* --- 基本リセット --- */
         * { box-sizing: border-box; }
         body { 
@@ -307,6 +307,54 @@
                 text-align: center;
             }
         }
+            /* --- ゲーム画面用 CSS --- */
+        .game-area {
+            display: none; /* 初期状態は非表示 */
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* 3x3 のグリッド表示 */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3列 */
+            gap: 10px; /* 画像間の隙間 */
+            max-width: 400px; /* 全体の幅 */
+            margin: 0 auto;
+        }
+
+        .game-cell {
+            aspect-ratio: 1 / 1; /* 正方形を維持 */
+            background-color: #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.2s;
+            position: relative;
+        }
+        
+        .game-cell:hover {
+            transform: scale(1.05);
+            border-color: #4fc3f7;
+        }
+
+        .game-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 選択された時のスタイル（仮） */
+        .game-cell.selected {
+            border-color: #0288d1;
+            box-shadow: 0 0 10px rgba(2, 136, 209, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -379,6 +427,7 @@
             <button class="menu-btn" onclick="switchTab('holiday')">🏖️ 休日設定</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
             <button class="menu-btn" onclick="switchTab('member')">👥 メンバー管理</button>
+            <button class="menu-btn" onclick="switchTab('game')">🎮 ゲーム</button>
             <button class="menu-btn" onclick="switchTab('password')">🔑 PW変更</button>
             <button class="menu-btn logout" onclick="logout()">🚪 ログアウト</button>
         </div>
@@ -396,6 +445,28 @@
                 </div>
             </div>
 
+            <div id="tab-game" class="content-section">
+                <h1>息抜きゲーム</h1>
+                <div class="manager-container" style="text-align: center;">
+                    <p style="margin-bottom:20px;">カテゴリーを選んでスタートしてください。</p>
+                    
+                    <div class="condition-group" style="justify-content: center; margin-bottom: 20px;">
+                        <label class="condition-label"><input type="radio" name="game-category" value="game">🎮 ゲーム</label>
+                        <label class="condition-label"><input type="radio" name="game-category" value="music">🎵 音楽</label>
+                        <label class="condition-label"><input type="radio" name="game-category" value="anime">📺 アニメ</label>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="send-btn" onclick="startGame()">スタート</button>
+                    </div>
+
+                    <div id="game-area" class="game-area">
+                        <h3 id="game-title" style="color:#0277bd; margin-bottom:15px;">画像を選択してください</h3>
+                        <div id="game-grid" class="game-grid">
+                            </div>
+                    </div>
+                </div>
+            </div>
             <div id="tab-input" class="content-section active">
                 <h1 id="page-title">システム課日報</h1>
                 <div class="form-container" id="form-container">
@@ -567,7 +638,7 @@
 
     <script>
         // ★重要：GAS URL（あなたのURLに書き換えてください）
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbypPIFgEf2fo3M9NDP3UTtUv8Hakpp3yEwEwWdz0Lac3eU0RkoheG6_F75-u9AYEg5nVw/exec"; 
+        const GAS_URL = "[https://script.google.com/macros/s/AKfycbypPIFgEf2fo3M9NDP3UTtUv8Hakpp3yEwEwWdz0Lac3eU0RkoheG6_F75-u9AYEg5nVw/exec](https://script.google.com/macros/s/AKfycbypPIFgEf2fo3M9NDP3UTtUv8Hakpp3yEwEwWdz0Lac3eU0RkoheG6_F75-u9AYEg5nVw/exec)"; 
 
         // --- 共通変数 ---
         let allData = [], currentData = [], memberList = [], holidayList = []; 
@@ -648,12 +719,14 @@
             document.getElementById('tab-' + tabName).classList.add('active');
             
             const btns = document.querySelectorAll('.menu-btn');
+            
             if(tabName==='input') btns[0].classList.add('active');
             if(tabName==='check') { btns[1].classList.add('active'); renderCheckCalendar(); }
             if(tabName==='holiday') { btns[2].classList.add('active'); renderHolidayCalendar(); }
             if(tabName==='history') btns[3].classList.add('active');
             if(tabName==='member') btns[4].classList.add('active');
-            if(tabName==='password') btns[5].classList.add('active');
+            if(tabName==='game') btns[5].classList.add('active'); // ★追加
+            if(tabName==='password') btns[6].classList.add('active'); // ★番号をずらす
         }
 
         // --- 休日一括設定ロジック ---
@@ -1065,7 +1138,7 @@
                 } else { 
                     fileHtml = `<div class="report-row"><div class="report-label">⚠️ 添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; 
                 } 
-            }
+            } 
 
             const div = document.createElement('div'); div.className = 'item';
             div.innerHTML = `
@@ -1194,11 +1267,59 @@
             if (code >= 95 && code <= 99) return { emoji: "⚡", text: "雷雨" };
             return { emoji: "❓", text: "不明" };
         }
-        // ▼▼▼ ここからコピー ▼▼▼
+        
         function closeAiDialog() {
             document.getElementById("ai-reply-overlay").style.display = 'none';
         }
-// ▲▲▲ ここまでコピー ▲▲▲
+        
+        // ==========================================
+        // ■ ゲーム機能
+        // ==========================================
+        function startGame() {
+            // 1. ラジオボタンの値を取得
+            const categoryEl = document.querySelector('input[name="game-category"]:checked');
+            if (!categoryEl) {
+                alert("カテゴリーを選択してください！");
+                return;
+            }
+            const category = categoryEl.value;
+
+            // 2. 表示エリアの準備
+            const gameArea = document.getElementById('game-area');
+            const grid = document.getElementById('game-grid');
+            const title = document.getElementById('game-title');
+            
+            grid.innerHTML = ""; // 前回の内容をリセット
+            gameArea.style.display = 'block'; // エリアを表示
+
+            // タイトル設定
+            let categoryName = "";
+            if(category === "game") categoryName = "ゲーム";
+            if(category === "music") categoryName = "音楽";
+            if(category === "anime") categoryName = "アニメ";
+            title.innerText = `【${categoryName}】関連のタイルを選んでください`;
+
+            // 3. 画像（ダミー）を3x3で生成
+            // 本来は画像URL配列などを用意しますが、ここでは動作確認用にダミー画像サービスを使います
+            for (let i = 1; i <= 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'game-cell';
+                
+                // 画像を表示（プレースホルダー画像）
+                // 実際の実装では、categoryに応じた画像URLリストからランダムに設定します
+                const img = document.createElement('img');
+                img.src = `https://placehold.jp/30/81d4fa/ffffff/150x150.png?text=${categoryName}${i}`;
+                img.alt = `画像${i}`;
+
+                // クリックイベント（選択状態の切り替え）
+                cell.onclick = function() {
+                    this.classList.toggle('selected');
+                };
+
+                cell.appendChild(img);
+                grid.appendChild(cell);
+            }
+        }
     </script>
 </body>
 </html>
