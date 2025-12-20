@@ -993,8 +993,46 @@
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
         function createReportItem(row) {
-            const reportContainer = document.getElementById('report-container'); 
-            const date = new Date(row[0]).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }); const name = row[1]; const condition = row[2]; const progress = row[3]; const tomorrow = row[4]; const comment = row[5]; const savedLikes = row[6] ? row[6] : ""; const fileUrl = row[7] ? row[7] : ""; const rowIndex = row[row.length - 1]; 
+            const reportContainer = document.getElementById('report-container');
+            
+            // --- データ取得 ---
+            // row[0]: 日報の日付（ターゲット日付）
+            // row[9]: 作成日時（リアルタイム）, row[10]: 更新日時（リアルタイム）
+            // ※doGetで最後尾にID(行番号)がついているため、それを避けて取得する
+            
+            const rowIndex = row[row.length - 1]; // IDは必ず一番後ろ
+            
+            const targetDateObj = new Date(row[0]);
+            const name = row[1];
+            const condition = row[2];
+            const progress = row[3];
+            const tomorrow = row[4];
+            const comment = row[5];
+            const savedLikes = row[6] ? row[6] : "";
+            const fileUrl = row[7] ? row[7] : "";
+            
+            // --- ★日時の表示ロジック修正 ---
+            let displayDateStr = "";
+            let updateInfoStr = "";
+
+            // 作成日時(row[9])が存在し、かつそれがID(行番号)でない場合
+            if (row[9] && typeof row[9] !== 'number' && !isNaN(new Date(row[9]).getTime())) {
+                const createdDate = new Date(row[9]);
+                // リアルタイム日時を表示 (例: 12/20 09:22)
+                displayDateStr = createdDate.toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } else {
+                // 古いデータなどで作成日時がない場合は、これまで通りターゲット日付を使用
+                displayDateStr = targetDateObj.toLocaleDateString('ja-JP') + " (日時記録なし)";
+            }
+
+            // 更新日時(row[10])が存在する場合
+            if (row[10] && typeof row[10] !== 'number' && !isNaN(new Date(row[10]).getTime())) {
+                const updatedDate = new Date(row[10]);
+                const updatedStr = updatedDate.toLocaleString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                // 更新がある場合のみ表示
+                updateInfoStr = `<span style="font-size:0.85em; color:#888; margin-left:8px;">(最終更新: ${updatedStr})</span>`;
+            }
+
             let buttonsHtml = ''; 
             memberList.forEach(memberName => { 
                 let btnText = memberName + "いいね👍"; 
@@ -1002,10 +1040,37 @@
                 const isMyButton = (memberName === loggedInUser); const disabledAttr = isMyButton ? "" : "disabled"; 
                 buttonsHtml += `<button class="like-btn" onclick="addLike(this)" ${disabledAttr}>${btnText}</button> `; 
             });
-            let fileHtml = ""; if (fileUrl) { if (fileUrl.indexOf("http") === 0) { fileHtml = `<div class="report-row"><div class="report-label">📎 添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く</a></div></div>`; } else { fileHtml = `<div class="report-row"><div class="report-label">⚠️ 添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; } }
+
+            let fileHtml = ""; 
+            if (fileUrl) { 
+                if (fileUrl.indexOf("http") === 0) { 
+                    fileHtml = `<div class="report-row"><div class="report-label">📎 添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く</a></div></div>`; 
+                } else { 
+                    fileHtml = `<div class="report-row"><div class="report-label">⚠️ 添付エラー</div><div class="report-content" style="color:red; font-weight:bold;">${fileUrl}</div></div>`; 
+                } 
+            }
+
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `<button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button><div class="report-header-area"><span style="font-size: 1.4em; font-weight: bold; color: #333;">${name}</span><span style="background: #fff; border: 1px solid #ff7f00; color: #ff7f00; padding: 4px 10px; border-radius: 15px; margin-left: 10px; font-weight: bold; font-size: 0.9em;">${condition}</span><div style="color: #666; font-size: 0.85em; margin-top: 8px;">報告日時: ${date}</div></div><div class="report-row"><div class="report-label">✅ 今日の進捗状況</div><div class="report-content">${progress}</div></div><div class="report-row"><div class="report-label">🚀 明日の業務内容</div><div class="report-content">${tomorrow}</div></div><div class="report-row"><div class="report-label">💭 所見や感じたこと</div><div class="report-content">${comment}</div></div>${fileHtml}<div class="card-footer"><div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div><button class="edit-btn" onclick="editReport(${rowIndex})">編集</button></div>`;
-            const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); reportContainer.appendChild(div);
+            div.innerHTML = `
+                <button class="delete-btn" onclick="deleteReport(${rowIndex})">×</button>
+                <div class="report-header-area">
+                    <span style="font-size: 1.4em; font-weight: bold; color: #333;">${name}</span>
+                    <span style="background: #fff; border: 1px solid #ff7f00; color: #ff7f00; padding: 4px 10px; border-radius: 15px; margin-left: 10px; font-weight: bold; font-size: 0.9em;">${condition}</span>
+                    <div style="color: #666; font-size: 0.85em; margin-top: 8px;">
+                        報告日時: <strong>${displayDateStr}</strong> ${updateInfoStr}
+                    </div>
+                </div>
+                <div class="report-row"><div class="report-label">✅ 今日の進捗状況</div><div class="report-content">${progress}</div></div>
+                <div class="report-row"><div class="report-label">🚀 明日の業務内容</div><div class="report-content">${tomorrow}</div></div>
+                <div class="report-row"><div class="report-label">💭 所見や感じたこと</div><div class="report-content">${comment}</div></div>
+                ${fileHtml}
+                <div class="card-footer">
+                    <div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div>
+                    <button class="edit-btn" onclick="editReport(${rowIndex})">編集</button>
+                </div>`;
+            
+            const btns = div.querySelectorAll('.like-btn'); btns.forEach(btn => updateButtonColor(btn)); 
+            reportContainer.appendChild(div);
         }
         function renderPage(page) {
             currentPage = page; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "";
