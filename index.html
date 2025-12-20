@@ -355,6 +355,35 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* --- 難易度選択ダイアログ用 --- */
+        .difficulty-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .difficulty-btn {
+            padding: 12px;
+            border: 1px solid #0288d1;
+            background: white;
+            color: #0288d1;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        .difficulty-btn:hover {
+            background: #e1f5fe;
+        }
+        /* 宇宙級だけ特別感 */
+        .difficulty-btn.cosmos {
+            border-color: #9c27b0;
+            color: #9c27b0;
+        }
+        .difficulty-btn.cosmos:hover {
+            background: #f3e5f5;
+        }
     </style>
 </head>
 <body>
@@ -371,12 +400,26 @@
                 max-height: 400px; 
                 overflow-y: auto; 
                 line-height: 1.8;
-                white-space: pre-wrap; /* 改行を反映させる */
+                white-space: pre-wrap;
                 font-size: 16px;
                 color: #333;">
             </div>
 
             <button onclick="closeAiDialog()" class="btn-primary">閉じる</button>
+        </div>
+    </div>
+
+    <div id="difficulty-overlay" class="overlay">
+        <div class="auth-box" style="width: 300px;">
+            <h2 style="color:#0288d1;">🔥 難易度を選択</h2>
+            <div class="difficulty-options">
+                <button class="difficulty-btn" onclick="setDifficulty('初級')">🐣 初級</button>
+                <button class="difficulty-btn" onclick="setDifficulty('中級')">🐥 中級</button>
+                <button class="difficulty-btn" onclick="setDifficulty('上級')">🦅 上級</button>
+                <button class="difficulty-btn" onclick="setDifficulty('超級')">👹 超級</button>
+                <button class="difficulty-btn cosmos" onclick="setDifficulty('宇宙級')">🌌 宇宙級</button>
+            </div>
+            <button onclick="closeDifficultyDialog()" class="btn-secondary" style="margin-top:15px;">キャンセル</button>
         </div>
     </div>
 
@@ -448,25 +491,28 @@
             <div id="tab-game" class="content-section">
                 <h1>息抜きゲーム</h1>
                 <div class="manager-container" style="text-align: center;">
-                    <p style="margin-bottom:20px;">カテゴリーを選んでスタートしてください。</p>
+                    <p style="margin-bottom:20px;">カテゴリーを選ぶと難易度設定が開きます。</p>
                     
                     <div class="condition-group" style="justify-content: center; margin-bottom: 20px;">
-                        <label class="condition-label"><input type="radio" name="game-category" value="game">🎮 ゲーム</label>
-                        <label class="condition-label"><input type="radio" name="game-category" value="music">🎵 音楽</label>
-                        <label class="condition-label"><input type="radio" name="game-category" value="anime">📺 アニメ</label>
+                        <label class="condition-label"><input type="radio" name="game-category" value="game" onclick="openDifficultyDialog(this)">🎮 ゲーム</label>
+                        <label class="condition-label"><input type="radio" name="game-category" value="music" onclick="openDifficultyDialog(this)">🎵 音楽</label>
+                        <label class="condition-label"><input type="radio" name="game-category" value="anime" onclick="openDifficultyDialog(this)">📺 アニメ</label>
                     </div>
 
+                    <p id="game-status-display" style="font-size:14px; color:#666; height:20px; font-weight:bold;"></p>
+
                     <div class="button-group">
-                        <button class="send-btn" onclick="startGame()">スタート</button>
+                        <button id="game-start-btn" class="send-btn" onclick="startGame()" disabled>カテゴリーを選択してください</button>
                     </div>
 
                     <div id="game-area" class="game-area">
-                        <h3 id="game-title" style="color:#0277bd; margin-bottom:15px;">画像を選択してください</h3>
+                        <h3 id="game-title" style="color:#0277bd; margin-bottom:15px;"></h3>
                         <div id="game-grid" class="game-grid">
                             </div>
                     </div>
                 </div>
             </div>
+
             <div id="tab-input" class="content-section active">
                 <h1 id="page-title">システム課日報</h1>
                 <div class="form-container" id="form-container">
@@ -1273,18 +1319,75 @@
         }
         
         // ==========================================
-        // ■ ゲーム機能
+        // ■ ゲーム機能（修正版）
         // ==========================================
-        function startGame() {
-            // 1. ラジオボタンの値を取得
-            const categoryEl = document.querySelector('input[name="game-category"]:checked');
-            if (!categoryEl) {
-                alert("カテゴリーを選択してください！");
-                return;
-            }
-            const category = categoryEl.value;
+        
+        // 選ばれた設定を保存する変数
+        let currentGameSettings = {
+            category: null,
+            difficulty: null,
+            categoryName: ""
+        };
 
-            // 2. 表示エリアの準備
+        // 1. ラジオボタンが押されたら難易度ダイアログを開く
+        function openDifficultyDialog(radioBtn) {
+            currentGameSettings.category = radioBtn.value;
+            
+            // カテゴリー名の取得（表示用）
+            if (radioBtn.value === "game") currentGameSettings.categoryName = "ゲーム";
+            if (radioBtn.value === "music") currentGameSettings.categoryName = "音楽";
+            if (radioBtn.value === "anime") currentGameSettings.categoryName = "アニメ";
+
+            // オーバーレイを表示
+            document.getElementById('difficulty-overlay').style.display = 'flex';
+        }
+
+        // 2. 難易度が選ばれたら設定を保存して閉じる
+        function setDifficulty(level) {
+            currentGameSettings.difficulty = level;
+            
+            // ダイアログを閉じる
+            document.getElementById('difficulty-overlay').style.display = 'none';
+            
+            // UI更新
+            updateGameUI();
+        }
+
+        // キャンセルした場合（ラジオボタンの選択も解除する）
+        function closeDifficultyDialog() {
+            document.getElementById('difficulty-overlay').style.display = 'none';
+            // ラジオボタンのチェックを外す
+            const radios = document.querySelectorAll('input[name="game-category"]');
+            radios.forEach(r => r.checked = false);
+            currentGameSettings.category = null;
+            currentGameSettings.difficulty = null;
+            updateGameUI();
+        }
+
+        // UI（ボタンの状態やテキスト）を更新する関数
+        function updateGameUI() {
+            const btn = document.getElementById('game-start-btn');
+            const statusText = document.getElementById('game-status-display');
+
+            if (currentGameSettings.category && currentGameSettings.difficulty) {
+                // 両方選ばれている場合：スタートボタン有効化
+                btn.disabled = false;
+                btn.innerText = "スタート";
+                statusText.innerText = `設定: ${currentGameSettings.categoryName} / ${currentGameSettings.difficulty}`;
+                statusText.style.color = "#0277bd";
+            } else {
+                // まだ選ばれていない場合：スタートボタン無効化
+                btn.disabled = true;
+                btn.innerText = "カテゴリーを選択してください";
+                statusText.innerText = "";
+            }
+        }
+
+        // 3. スタートボタンが押されたらゲーム画面生成
+        function startGame() {
+            if (!currentGameSettings.category || !currentGameSettings.difficulty) return;
+
+            // 表示エリアの準備
             const gameArea = document.getElementById('game-area');
             const grid = document.getElementById('game-grid');
             const title = document.getElementById('game-title');
@@ -1293,25 +1396,20 @@
             gameArea.style.display = 'block'; // エリアを表示
 
             // タイトル設定
-            let categoryName = "";
-            if(category === "game") categoryName = "ゲーム";
-            if(category === "music") categoryName = "音楽";
-            if(category === "anime") categoryName = "アニメ";
-            title.innerText = `【${categoryName}】関連のタイルを選んでください`;
+            title.innerText = `【${currentGameSettings.categoryName}】コース (${currentGameSettings.difficulty})`;
 
-            // 3. 画像（ダミー）を3x3で生成
-            // 本来は画像URL配列などを用意しますが、ここでは動作確認用にダミー画像サービスを使います
+            // 画像（ダミー）を3x3で生成
+            // ※難易度によって画像の枚数を変えるなどの拡張もここで可能です
             for (let i = 1; i <= 9; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'game-cell';
                 
-                // 画像を表示（プレースホルダー画像）
-                // 実際の実装では、categoryに応じた画像URLリストからランダムに設定します
                 const img = document.createElement('img');
-                img.src = `https://placehold.jp/30/81d4fa/ffffff/150x150.png?text=${categoryName}${i}`;
+                // ダミー画像生成
+                img.src = `https://placehold.jp/30/81d4fa/ffffff/150x150.png?text=${currentGameSettings.categoryName}${i}`;
                 img.alt = `画像${i}`;
 
-                // クリックイベント（選択状態の切り替え）
+                // クリックイベント
                 cell.onclick = function() {
                     this.classList.toggle('selected');
                 };
