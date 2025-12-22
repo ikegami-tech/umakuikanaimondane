@@ -557,8 +557,8 @@
                         <div class="input-wrapper"><textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea></div>
                     </div>
                     <div class="form-group">
-                        <label>明日の業務内容</label>
-                        <div class="input-wrapper"><textarea id="tomorrow" placeholder="明日実施予定の業務を記入してください"></textarea></div>
+                        <label>次の業務内容</label>
+                        <div class="input-wrapper"><textarea id="tomorrow" placeholder="次の実施予定の業務を記入してください"></textarea></div>
                     </div>
                     
                     <div class="form-group">
@@ -1076,7 +1076,7 @@
         function copyLastTomorrow() {
             const name = getSelectedName(); if (!name) { alert("まずは名前を選択してください"); return; }
             const lastReport = allData.find(row => row[1] === name);
-            if (lastReport) { const tomorrowTask = lastReport[4]; if (!tomorrowTask) { alert("前回の報告に「明日の業務」が記入されていませんでした"); return; } if (confirm("前回の「明日の業務」を、今回の「今日の進捗」にコピーしますか？")) { document.getElementById('progress').value = tomorrowTask; saveSelection('saved_progress', tomorrowTask); document.getElementById("toast").innerText = "コピーしました！"; showToast(); } } else { alert("前回の報告データが見つかりませんでした"); }
+            if (lastReport) { const tomorrowTask = lastReport[4]; if (!tomorrowTask) { alert("前回の報告に「次の業務」が記入されていませんでした"); return; } if (confirm("前回の「次の業務」を、今回の「今日の進捗」にコピーしますか？")) { document.getElementById('progress').value = tomorrowTask; saveSelection('saved_progress', tomorrowTask); document.getElementById("toast").innerText = "コピーしました！"; showToast(); } } else { alert("前回の報告データが見つかりませんでした"); }
         }
         function resetDate() { targetReportDate = null; document.getElementById('date-alert').style.display = 'none'; document.getElementById('form-container').classList.remove('past-mode'); setTodayDate(); }
         function readFileAsBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => { const result = reader.result; const base64 = result.split(',')[1]; resolve(base64); }; reader.onerror = error => reject(error); reader.readAsDataURL(file); }); }
@@ -1203,7 +1203,7 @@
                     </div>
                 </div>
                 <div class="report-row"><div class="report-label">✅ 今日の進捗状況</div><div class="report-content">${progress}</div></div>
-                <div class="report-row"><div class="report-label">🚀 明日の業務内容</div><div class="report-content">${tomorrow}</div></div>
+                <div class="report-row"><div class="report-label">🚀 次の業務内容</div><div class="report-content">${tomorrow}</div></div>
                 <div class="report-row"><div class="report-label">💭 所見や感じたこと</div><div class="report-content">${comment}</div></div>
                 ${fileHtml}
                 <div class="card-footer">
