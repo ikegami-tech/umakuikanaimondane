@@ -1038,7 +1038,8 @@
                 console.error(err); 
             });
         }
-function renderLastReport() {
+// 修正：登録メンバー全員の「最新の日報」を表示するように変更
+        function renderLastReport() {
             const reportContainer = document.getElementById('last-report-container');
             if(!reportContainer) return; // エラー回避
             reportContainer.innerHTML = ""; 
@@ -1046,6 +1047,7 @@ function renderLastReport() {
             const seenUsers = new Set();
             const latestReports = [];
 
+            // 全データ（新しい順）を走査して、各メンバーの最初の1件（最新）だけをピックアップ
             allData.forEach(row => {
                 const name = row[1];
                 if (name && memberList.includes(name)) {
@@ -1061,16 +1063,10 @@ function renderLastReport() {
                 return;
             }
 
-            // 最新1件（自分のものがあれば自分、なければ誰か）を表示
-            // ※基本はログインユーザーのものを優先表示するロジックが良ければフィルタしますが、
-            // ここでは「各メンバーの最新日報」を全員分出すか、単に自分の最新だけ出すかによります。
-            // いったん「自分」の最新1件を表示する形にします。
-            const myLatest = latestReports.find(r => r[1] === loggedInUser);
-            if(myLatest){
-                createReportItem(myLatest, reportContainer); // コンテナを渡す
-            } else {
-                reportContainer.innerHTML = "<p>あなたの日報はまだありません。</p>";
-            }
+            // ▼▼▼ 修正：ここで自分だけを抽出せず、全員分を表示する ▼▼▼
+            latestReports.forEach(row => {
+                createReportItem(row, reportContainer); // 全員の最新日報を表示
+            });
         }
         
         async function sendData() {
