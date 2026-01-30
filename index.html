@@ -840,12 +840,6 @@
             if(tabName==='history') renderLastReport();
         }
 
-            // 3. 各機能の初期化処理
-            if(tabName==='check') renderCheckCalendar();
-            if(tabName==='holiday') renderHolidayCalendar();
-            if(tabName==='input') setTodayDate(); // 入力画面に戻ったら日付リセットなど
-        }
-
         // --- 休日一括設定ロジック ---
         function changeHolidayMonth(diff) {
             holidayDisplayMonth += diff;
