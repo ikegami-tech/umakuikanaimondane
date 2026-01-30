@@ -587,6 +587,14 @@
                         <div class="input-wrapper"><textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea></div>
                     </div>
                     
+                   <div class="form-group">
+                        <label>資料添付</label>
+                        <div class="input-wrapper">
+                            <input type="file" id="file-attach">
+                            <div id="current-file-msg" style="font-size:12px; color:blue; display:none;">※新しいファイルを添付すると上書きされます</div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>返事設定</label>
                         <div class="input-wrapper condition-group">
@@ -597,14 +605,7 @@
                             <label class="condition-label"><input type="radio" name="replyType" value="幼馴染">🚲 幼馴染</label>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>資料添付</label>
-                        <div class="input-wrapper">
-                            <input type="file" id="file-attach">
-                            <div id="current-file-msg" style="font-size:12px; color:blue; display:none;">※新しいファイルを添付すると上書きされます</div>
-                        </div>
-                    </div>
+                    ```
                     <div class="button-group">
                         <button id="cancel-edit-btn" onclick="cancelEdit()">キャンセル</button>
                         <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
