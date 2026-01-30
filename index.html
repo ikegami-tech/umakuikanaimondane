@@ -989,9 +989,15 @@
         }
 
         // --- 通常のデータ処理 ---
+       // 修正：2つの表示エリア（前回・一覧）に対応させたデータ取得関数
         function fetchData() {
-            const reportContainer = document.getElementById('report-container'); 
-            reportContainer.innerHTML = "<p>データを取得中...</p>";
+            // 新しいIDを取得する
+            const lastContainer = document.getElementById('last-report-container');
+            const allContainer = document.getElementById('all-report-container');
+            
+            // 両方に「読み込み中」を表示（エラー回避のため存在確認を入れる）
+            if (lastContainer) lastContainer.innerHTML = "<p>データを取得中...</p>";
+            if (allContainer) allContainer.innerHTML = "<p>データを取得中...</p>";
             
             fetch(GAS_URL + '?t=' + new Date().getTime())
             .then(response => response.json())
@@ -999,6 +1005,7 @@
                 if (data.members) { 
                     memberList = data.members; 
                     renderMemberRadios(); 
+                    renderFilterOptions(); 
                     setupAutoSave(); 
                     restoreSelections(); 
                 }
@@ -1013,14 +1020,22 @@
                 
                 allData = (data.reports || []).reverse(); 
                 currentData = allData;
+                
                 if (currentData.length === 0) { 
-                    reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; 
+                    const noDataMsg = "<p>まだ報告が登録されていません。</p>";
+                    if (lastContainer) lastContainer.innerHTML = noDataMsg;
+                    if (allContainer) allContainer.innerHTML = noDataMsg;
                     return; 
                 } 
-                renderLastReport();
+                
+                // 両方の画面を描画する
+                renderLastReport(); // 前回の日報
+                renderPage(1);      // 過去の報告一覧（1ページ目）
             })
             .catch(err => { 
-                reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; 
+                const errMsg = "<p>データの読み込みに失敗しました。</p>";
+                if (lastContainer) lastContainer.innerHTML = errMsg;
+                if (allContainer) allContainer.innerHTML = errMsg;
                 console.error(err); 
             });
         }
