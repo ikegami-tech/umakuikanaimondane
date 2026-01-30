@@ -1196,24 +1196,31 @@ function renderLastReport() {
             const data = { action: 'deleteMember', targetName: name };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
-       function createReportItem(row) {
+       // ★修正：AI返信の表示エリアを追加した関数
+        function createReportItem(row) {
             const reportContainer = document.getElementById('report-container');
-            
             const rowIndex = row[row.length - 1]; 
             
             const targetDateObj = new Date(row[0]);
             const name = row[1] || "名称不明";
             const condition = row[2] || "-";
             
-            // 【修正】データが空(undefinedや空文字)の場合は「記載なし」と表示
-            const progress = (row[3] && row[3] !== "undefined") ? row[3] : "（記載なし）";
-            const tomorrow = (row[4] && row[4] !== "undefined") ? row[4] : "（記載なし）";
-            const comment  = (row[5] && row[5] !== "undefined") ? row[5] : "（記載なし）";
+            // 空文字チェック関数
+            const checkText = (text) => {
+                if (!text || text === "undefined" || text.trim() === "") return "（記載なし）";
+                return text;
+            };
+
+            const progress = checkText(row[3]);
+            const tomorrow = checkText(row[4]);
+            const comment  = checkText(row[5]);
             
             const savedLikes = row[6] ? row[6] : "";
             const fileUrl = row[7] ? row[7] : "";
             
-            // --- 日時の表示処理 ---
+            // ★追加：AI返信（インデックス8）を取得
+            const aiReply = (row[8] && row[8] !== "undefined" && row[8].trim() !== "") ? row[8] : "（返信データなし）";
+            
             let displayDateStr = "";
             let updateInfoStr = "";
             const dayMap = ['日', '月', '火', '水', '木', '金', '土'];
@@ -1235,7 +1242,6 @@ function renderLastReport() {
                 displayDateStr = `${y}年${m}月${d}日(${day})`;
             }
 
-            // 更新日時
             if (row[10] && typeof row[10] !== 'number' && !isNaN(new Date(row[10]).getTime())) {
                 const updatedDate = new Date(row[10]);
                 const uM = updatedDate.getMonth() + 1;
@@ -1254,7 +1260,7 @@ function renderLastReport() {
             });
 
             let fileHtml = ""; 
-            if (fileUrl) { 
+            if (fileUrl && fileUrl !== "undefined") { 
                 if (fileUrl.indexOf("http") === 0) { 
                     fileHtml = `<div class="report-row"><div class="report-label">📎 添付資料</div><div class="report-content"><a href="${fileUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">資料を開く</a></div></div>`; 
                 } else { 
@@ -1275,6 +1281,12 @@ function renderLastReport() {
                 <div class="report-row"><div class="report-label">✅ 今日の進捗状況</div><div class="report-content">${progress}</div></div>
                 <div class="report-row"><div class="report-label">🚀 次の業務内容</div><div class="report-content">${tomorrow}</div></div>
                 <div class="report-row"><div class="report-label">💭 所見や感じたこと</div><div class="report-content">${comment}</div></div>
+                
+                <div class="report-row">
+                    <div class="report-label" style="background-color: #f3e5f5; border-left-color: #9c27b0; color: #7b1fa2;">🤖 AIからの返信</div>
+                    <div class="report-content" style="background-color: #fcf4fd;">${aiReply}</div>
+                </div>
+                
                 ${fileHtml}
                 <div class="card-footer">
                     <div class="like-buttons" data-row-index="${rowIndex}">${buttonsHtml}</div>
