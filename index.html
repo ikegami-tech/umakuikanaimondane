@@ -56,6 +56,48 @@
             display: flex; flex-direction: column; gap: 15px; flex-shrink: 0;
             transition: left 0.3s ease;
         }
+        /* --- サイドバー（修正） --- */
+        .sidebar {
+            width: 220px; 
+            background-color: #0277bd; 
+            color: white; padding: 20px;
+            display: flex; flex-direction: column; gap: 10px; /* gapを少し狭める */
+            flex-shrink: 0;
+            transition: left 0.3s ease;
+        }
+        /* ↓ 元の .menu-btn.logout { margin-top: auto; ... } を削除または上書きするために記述 */
+        .menu-btn.logout { 
+            margin-top: 0 !important; /* 自動マージンを解除 */
+            background: rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.3); 
+        }
+
+        /* --- 新しいサブメニュー用スタイル --- */
+        /* 設定ボタンを一番下に押し下げるためのスペーサー */
+        .sidebar-spacer { margin-top: auto; }
+
+        .submenu {
+            display: none; /* 初期状態は非表示 */
+            flex-direction: column;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.15); /* 少し暗くする */
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 5px;
+            animation: fadeIn 0.3s ease;
+        }
+        .submenu.open { display: flex; } /* JSでクラスをつけると表示 */
+
+        .menu-btn.sub-item {
+            font-size: 13px; /* 少し小さく */
+            padding: 10px 10px 10px 20px; /* インデント */
+            border-left: 2px solid transparent;
+        }
+        .menu-btn.sub-item:hover, .menu-btn.sub-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 2px solid #4fc3f7;
+            color: #fff;
+        }
         .sidebar h2 { font-size: 18px; text-align: center; margin-bottom: 10px; border-bottom: 1px solid #4fc3f7; padding-bottom: 10px; }
         .menu-btn {
             background: transparent; color: white; border: none; padding: 12px;
@@ -451,16 +493,22 @@
 
     <button class="hamburger" onclick="toggleMenu()">☰</button>
 
-    <div class="app-container" id="app-container">
-        <div class="sidebar">
+    <div class="sidebar">
             <h2>メニュー</h2>
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
-            <button class="menu-btn" onclick="switchTab('check')">📅 日報確認</button>
-            <button class="menu-btn" onclick="switchTab('holiday')">🏖️ 休日設定</button>
             <button class="menu-btn" onclick="switchTab('history')">📂 過去の報告</button>
-            <button class="menu-btn" onclick="switchTab('member')">👥 メンバー管理</button>
-            <button class="menu-btn" onclick="switchTab('game')">🎮 ゲーム</button>
             <button class="menu-btn" onclick="switchTab('password')">🔑 PW変更</button>
+
+            <div class="sidebar-spacer"></div>
+
+            <button class="menu-btn" onclick="toggleSettings()" id="setting-btn">⚙️ 設定 ▼</button>
+            <div id="setting-submenu" class="submenu">
+                <button class="menu-btn sub-item" onclick="switchTab('check')">📅 日報確認</button>
+                <button class="menu-btn sub-item" onclick="switchTab('holiday')">🏖️ 休日設定</button>
+                <button class="menu-btn sub-item" onclick="switchTab('member')">👥 メンバー管理</button>
+                <button class="menu-btn sub-item" onclick="switchTab('game')">🎮 ゲーム</button>
+            </div>
+
             <button class="menu-btn logout" onclick="logout()">🚪 ログアウト</button>
         </div>
 
@@ -739,22 +787,47 @@
         };
 
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
-
-        // --- タブ切り替え ---
+// 設定メニューの開閉
+        function toggleSettings() {
+            const submenu = document.getElementById('setting-submenu');
+            const btn = document.getElementById('setting-btn');
+            submenu.classList.toggle('open');
+            
+            if (submenu.classList.contains('open')) {
+                btn.innerText = "⚙️ 設定 ▲";
+            } else {
+                btn.innerText = "⚙️ 設定 ▼";
+            }
+        }
+        // --- タブ切り替え（修正版） ---
         function switchTab(tabName) {
-            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active')); 
-            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+            // 1. コンテンツの表示切り替え
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            const btns = document.querySelectorAll('.menu-btn');
+            // 2. サイドバーボタンのハイライト切り替え
+            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             
-            if(tabName==='input') btns[0].classList.add('active');
-            if(tabName==='check') { btns[1].classList.add('active'); renderCheckCalendar(); }
-            if(tabName==='holiday') { btns[2].classList.add('active'); renderHolidayCalendar(); }
-            if(tabName==='history') btns[3].classList.add('active');
-            if(tabName==='member') btns[4].classList.add('active');
-            if(tabName==='game') btns[5].classList.add('active'); // ★追加
-            if(tabName==='password') btns[6].classList.add('active'); // ★番号をずらす
+            // onclick属性の値が一致するボタンを探してactiveにする
+            const targetBtn = document.querySelector(`.menu-btn[onclick="switchTab('${tabName}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+                
+                // もしサブメニュー内のボタンなら、設定メニューも開いておく
+                if (targetBtn.classList.contains('sub-item')) {
+                    const submenu = document.getElementById('setting-submenu');
+                    const settingBtn = document.getElementById('setting-btn');
+                    if (!submenu.classList.contains('open')) {
+                        submenu.classList.add('open');
+                        settingBtn.innerText = "⚙️ 設定 ▲";
+                    }
+                }
+            }
+
+            // 3. 各機能の初期化処理
+            if(tabName==='check') renderCheckCalendar();
+            if(tabName==='holiday') renderHolidayCalendar();
+            if(tabName==='input') setTodayDate(); // 入力画面に戻ったら日付リセットなど
         }
 
         // --- 休日一括設定ロジック ---
