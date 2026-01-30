@@ -550,16 +550,13 @@
                         <button onclick="resetDate()" style="background:white; color:#ff4d4d; border:none; border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold;">今日に戻す</button>
                     </div>
                     <div class="form-group">
-                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="display: flex; justify-content: space-between; align-items: center; padding-right: 0;">
                             <span>日付</span>
-                            <button type="button" onclick="if(confirm('入力中の内容をすべて消去してリセットしますか？')) resetForm()" style="background: #ff4d4d; color: white; border: none; border-radius: 20px; padding: 4px 10px; cursor: pointer; font-size: 11px; font-weight: bold;">
+                            <button type="button" onclick="if(confirm('入力中の内容をすべて消去してリセットしますか？')) resetForm()" 
+                                style="background: #ff4d4d; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px; font-weight: bold; margin-right: 0;">
                                 🧹 リセット
                             </button>
                         </label>
-                        <div class="input-wrapper"><input type="date" id="report-date"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>日付</label>
                         <div class="input-wrapper"><input type="date" id="report-date"></div>
                     </div>
                     <div class="form-group">
@@ -1010,8 +1007,7 @@
                 console.error(err); 
             });
         }
-// ★修正：メンバーリストにある人の最新日報のみを表示する関数
-        function renderLastReport() {
+function renderLastReport() {
             const reportContainer = document.getElementById('report-container');
             reportContainer.innerHTML = ""; // クリア
 
@@ -1022,8 +1018,8 @@
             allData.forEach(row => {
                 const name = row[1]; // 名前
                 
-                // 【重要】メンバーリストに登録されている名前のデータだけを対象にする
-                // これにより「全社共通」や「ヘッダー行」などの不正データを除外します
+                // 【重要】メンバーリストに登録されている名前だけを対象にする
+                // これにより「全社共通」やヘッダー行、空行を除外します
                 if (name && memberList.includes(name)) {
                     if (!seenUsers.has(name)) {
                         seenUsers.add(name);
@@ -1041,10 +1037,11 @@
                 createReportItem(row);
             });
             
+            // ページネーション削除
             const existingNav = document.querySelector('.Pagination'); 
             if (existingNav) existingNav.remove();
         }
-       // ▼▼▼ 新しい sendData 関数（AI返信表示修正版） ▼▼▼
+        
         async function sendData() {
             // 1. 入力値を取得
             const dateVal = document.getElementById('report-date').value; 
@@ -1201,8 +1198,7 @@
             const data = { action: 'deleteMember', targetName: name };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
-       // ★修正：undefined対策を追加した表示関数
-        function createReportItem(row) {
+       function createReportItem(row) {
             const reportContainer = document.getElementById('report-container');
             
             const rowIndex = row[row.length - 1]; 
@@ -1211,10 +1207,10 @@
             const name = row[1] || "名称不明";
             const condition = row[2] || "-";
             
-            // 【修正】データがない場合は空文字や代替テキストを入れる
-            const progress = row[3] || "（記載なし）";
-            const tomorrow = row[4] || "（記載なし）";
-            const comment = row[5] || "（記載なし）";
+            // 【修正】データが空(undefinedや空文字)の場合は「記載なし」と表示
+            const progress = (row[3] && row[3] !== "undefined") ? row[3] : "（記載なし）";
+            const tomorrow = (row[4] && row[4] !== "undefined") ? row[4] : "（記載なし）";
+            const comment  = (row[5] && row[5] !== "undefined") ? row[5] : "（記載なし）";
             
             const savedLikes = row[6] ? row[6] : "";
             const fileUrl = row[7] ? row[7] : "";
