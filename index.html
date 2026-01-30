@@ -663,15 +663,9 @@
                 </div>
             </div>
 
-            <div id="tab-history" class="content-section">
+            <<div id="tab-history" class="content-section">
+                <h1>前回の日報</h1>
                 <div id="data-list">
-                    <div class="list-header">
-                        <h2>過去の報告一覧</h2>
-                        <div class="filter-area">
-                            <select id="filter-name" class="filter-select" onchange="applyFilter()"><option value="">全員</option></select>
-                            <input type="text" id="filter-text" class="filter-input" placeholder="検索..." oninput="applyFilter()">
-                        </div>
-                    </div>
                     <div id="report-container">読み込み中...</div>
                 </div>
             </div>
@@ -983,7 +977,6 @@
                 if (data.members) { 
                     memberList = data.members; 
                     renderMemberRadios(); 
-                    renderFilterOptions(); 
                     setupAutoSave(); 
                     restoreSelections(); 
                 }
@@ -1002,14 +995,37 @@
                     reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>"; 
                     return; 
                 } 
-                applyFilter();
+                renderLastReport();
             })
             .catch(err => { 
                 reportContainer.innerHTML = "<p>データの読み込みに失敗しました。</p>"; 
                 console.error(err); 
             });
         }
+// ★新規追加：自分の最新の日報を1件だけ表示する関数
+        function renderLastReport() {
+            const reportContainer = document.getElementById('report-container');
+            reportContainer.innerHTML = ""; // クリア
 
+            if (!loggedInUser) {
+                reportContainer.innerHTML = "<p>ログイン情報が取得できません。</p>";
+                return;
+            }
+
+            // allDataは既に新しい順(reverse)になっているので、findで最初に見つかる自分のデータが「前回の日報」
+            const myLastReport = allData.find(row => row[1] === loggedInUser);
+
+            if (myLastReport) {
+                // 既存のカード作成関数を使って表示
+                createReportItem(myLastReport);
+                
+                // ページネーションがあれば削除
+                const existingNav = document.querySelector('.Pagination'); 
+                if (existingNav) existingNav.remove();
+            } else {
+                reportContainer.innerHTML = "<p>まだ日報を提出していません。</p>";
+            }
+        }
        // ▼▼▼ 新しい sendData 関数（AI返信表示修正版） ▼▼▼
         async function sendData() {
             // 1. 入力値を取得
