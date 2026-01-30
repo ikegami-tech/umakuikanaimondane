@@ -536,15 +536,14 @@
 
                     <div id="game-area" class="game-area">
                         <h3 id="game-title" style="color:#0277bd; margin-bottom:15px;"></h3>
-                        <div id="game-grid" class="game-grid">
-                            </div>
+                        <div id="game-grid" class="game-grid"></div>
                     </div>
                 </div>
             </div>
 
             <div id="tab-input" class="content-section active">
                 <h1 id="page-title">システム課日報</h1>
-               <div class="form-container" id="form-container">
+                <div class="form-container" id="form-container">
                     
                     <div id="date-alert" class="date-alert-box">
                         <span id="date-alert-text"></span>
@@ -559,7 +558,6 @@
                         <label>名前</label>
                         <div class="input-wrapper"><div id="name-radios" class="condition-group">読み込み中...</div></div>
                     </div>
-
                     <div class="form-group">
                         <label>体調</label>
                         <div class="input-wrapper">
@@ -572,7 +570,6 @@
                             <input type="text" id="condition-other-text" placeholder="具体的な内容を記入してください" style="display:none; margin-top:10px;" oninput="updateConditionState()">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label style="display: flex; flex-direction: column; gap: 8px;">
                             <span>今日の進捗状況</span>
@@ -580,7 +577,6 @@
                         </label>
                         <div class="input-wrapper"><textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea></div>
                     </div>
-
                     <div class="form-group">
                         <label>次の業務内容</label>
                         <div class="input-wrapper"><textarea id="tomorrow" placeholder="次の実施予定の業務を記入してください"></textarea></div>
@@ -609,7 +605,7 @@
                             <label class="condition-label"><input type="radio" name="replyType" value="幼馴染">🚲 幼馴染</label>
                         </div>
                     </div>
-
+                    
                     <div class="button-group">
                         <button id="cancel-edit-btn" onclick="cancelEdit()">キャンセル</button>
                         
@@ -620,6 +616,8 @@
 
                         <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
                     </div>
+                </div>
+            </div> <div id="tab-check" class="content-section">
                 <h1>日報提出チェック</h1>
                 <div class="manager-container">
                     <p style="text-align:center; margin-bottom:20px;">
@@ -635,8 +633,7 @@
                             <h3 id="check-calendar-title" style="margin:0;">2024年 1月</h3>
                             <button class="calendar-btn" onclick="changeCheckMonth(1)">翌月 ▶</button>
                         </div>
-                        <div class="calendar-grid" id="check-calendar-grid">
-                            </div>
+                        <div class="calendar-grid" id="check-calendar-grid"></div>
                     </div>
                 </div>
             </div>
@@ -656,8 +653,7 @@
                             <h3 id="holiday-calendar-title" style="margin:0;">2024年 1月</h3>
                             <button class="calendar-btn" onclick="changeHolidayMonth(1)">翌月 ▶</button>
                         </div>
-                        <div class="calendar-grid" id="holiday-calendar-grid">
-                            </div>
+                        <div class="calendar-grid" id="holiday-calendar-grid"></div>
                     </div>
 
                     <div class="button-group">
@@ -671,7 +667,7 @@
             </div>
 
             <div id="tab-history" class="content-section">
-                <div id="data-list">
+                <h1>前回の日報</h1>
                 <div id="data-list">
                     <div id="report-container">読み込み中...</div>
                 </div>
