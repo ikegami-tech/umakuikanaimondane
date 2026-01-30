@@ -1002,29 +1002,37 @@
                 console.error(err); 
             });
         }
-// ★新規追加：自分の最新の日報を1件だけ表示する関数
+// ★修正：全メンバーの最新の日報を1件ずつ表示する関数
         function renderLastReport() {
             const reportContainer = document.getElementById('report-container');
             reportContainer.innerHTML = ""; // クリア
 
-            if (!loggedInUser) {
-                reportContainer.innerHTML = "<p>ログイン情報が取得できません。</p>";
+            // 1. 既に新しい順(reverse済み)の allData を走査し、
+            //    名前(row[1])ごとに「最初に出てきた行」だけをピックアップする
+            const seenUsers = new Set();
+            const latestReports = [];
+
+            allData.forEach(row => {
+                const name = row[1]; // 名前
+                if (!seenUsers.has(name)) {
+                    seenUsers.add(name);
+                    latestReports.push(row);
+                }
+            });
+
+            if (latestReports.length === 0) {
+                reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>";
                 return;
             }
 
-            // allDataは既に新しい順(reverse)になっているので、findで最初に見つかる自分のデータが「前回の日報」
-            const myLastReport = allData.find(row => row[1] === loggedInUser);
-
-            if (myLastReport) {
-                // 既存のカード作成関数を使って表示
-                createReportItem(myLastReport);
-                
-                // ページネーションがあれば削除
-                const existingNav = document.querySelector('.Pagination'); 
-                if (existingNav) existingNav.remove();
-            } else {
-                reportContainer.innerHTML = "<p>まだ日報を提出していません。</p>";
-            }
+            // 2. 抽出したデータを表示
+            latestReports.forEach(row => {
+                createReportItem(row);
+            });
+            
+            // ページネーションは不要なので削除
+            const existingNav = document.querySelector('.Pagination'); 
+            if (existingNav) existingNav.remove();
         }
        // ▼▼▼ 新しい sendData 関数（AI返信表示修正版） ▼▼▼
         async function sendData() {
