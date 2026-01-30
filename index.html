@@ -170,7 +170,7 @@
         }
 
         /* 選択された時のデザイン */
-        .condition-label:has(input[type="radio"]:checked) { 
+       .condition-label:has(input:checked) { 
             border-color: #0288d1; 
             background-color: #e1f5fe; 
             font-weight: bold; 
@@ -559,15 +559,14 @@
                     </div>
                     <div class="form-group">
                         <label>体調</label>
-                        <div class="input-wrapper condition-group">
-                            <label class="condition-label"><input type="radio" name="condition" value="😄 絶好調" onclick="toggleRadio(this, 'condition')">😄 絶好調</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="👍 良い" onclick="toggleRadio(this, 'condition')">👍 良い</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="😊 普通" onclick="toggleRadio(this, 'condition')">😊 普通</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="😇 不調" onclick="toggleRadio(this, 'condition')">😇 不調</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🫠 疲労" onclick="toggleRadio(this, 'condition')">🫠 疲労</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🤢 二日酔い" onclick="toggleRadio(this, 'condition')">🤢 二日酔い</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🫨 驚き" onclick="toggleRadio(this, 'condition')">🫨 驚き</label>
-                            <label class="condition-label"><input type="radio" name="condition" value="🎉 達成感" onclick="toggleRadio(this, 'condition')">🎉 達成感</label>
+                        <div class="input-wrapper">
+                            <div class="condition-group">
+                                <label class="condition-label"><input type="checkbox" name="condition" value="良い" onchange="updateConditionState()">👍 良い</label>
+                                <label class="condition-label"><input type="checkbox" name="condition" value="普通" onchange="updateConditionState()">😊 普通</label>
+                                <label class="condition-label"><input type="checkbox" name="condition" value="不調" onchange="updateConditionState()">😇 不調</label>
+                                <label class="condition-label"><input type="checkbox" name="condition" value="others" id="cond-other-check" onchange="toggleOtherInput(); updateConditionState()">🤔 その他</label>
+                            </div>
+                            <input type="text" id="condition-other-text" placeholder="具体的な内容を記入してください" style="display:none; margin-top:10px;" oninput="updateConditionState()">
                         </div>
                     </div>
                     <div class="form-group">
@@ -1426,6 +1425,121 @@
                 cell.appendChild(img);
                 grid.appendChild(cell);
             }
+        }
+        function toggleOtherInput() {
+            const otherCheck = document.getElementById('cond-other-check');
+            const otherInput = document.getElementById('condition-other-text');
+            if(otherCheck.checked) {
+                otherInput.style.display = 'block';
+            } else {
+                otherInput.style.display = 'none';
+            }
+        }
+
+        // ★新規追加：体調の状態（チェックボックスとテキスト）を保存
+        function updateConditionState() {
+            const checks = document.querySelectorAll('input[name="condition"]');
+            const state = {};
+            checks.forEach(c => state[c.value] = c.checked);
+            state['otherText'] = document.getElementById('condition-other-text').value;
+            localStorage.setItem('saved_condition_state', JSON.stringify(state));
+        }
+
+        // ★上書き：選択された体調を取得（カンマ区切り文字列に変換）
+        function getSelectedCondition() {
+            const checks = document.querySelectorAll('input[name="condition"]:checked');
+            let values = [];
+            checks.forEach(c => {
+                if (c.value === 'others') {
+                    const text = document.getElementById('condition-other-text').value;
+                    values.push(`その他(${text})`); 
+                } else {
+                    values.push(c.value);
+                }
+            });
+            return values.join(', ');
+        }
+
+        // ★上書き：入力内容の復元（チェックボックス対応版）
+        function restoreSelections() {
+            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = loggedInUser; saveSelection('saved_name', loggedInUser); } } 
+            else { const savedName = localStorage.getItem('saved_name'); if (savedName) { const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; } } }
+            
+            // 体調の復元処理
+            const savedStateStr = localStorage.getItem('saved_condition_state');
+            if (savedStateStr) {
+                try {
+                    const state = JSON.parse(savedStateStr);
+                    const checks = document.querySelectorAll('input[name="condition"]');
+                    checks.forEach(c => {
+                        if (state[c.value]) c.checked = true;
+                    });
+                    if (state['others']) {
+                        document.getElementById('condition-other-text').value = state['otherText'] || "";
+                        toggleOtherInput(); // 表示更新
+                    }
+                } catch(e) { console.error(e); }
+            }
+
+            const savedProgress = localStorage.getItem('saved_progress'); if (savedProgress) document.getElementById('progress').value = savedProgress;
+            const savedTomorrow = localStorage.getItem('saved_tomorrow'); if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
+            const savedComment = localStorage.getItem('saved_comment'); if (savedComment) document.getElementById('comment').value = savedComment;
+        }
+
+        // ★上書き：フォームのリセット（チェックボックス対応版）
+        function resetForm() {
+            document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false); 
+            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) nameRadio.checked = true; }
+            
+            // 体調のリセット
+            document.querySelectorAll('input[name="condition"]').forEach(c => c.checked = false);
+            document.getElementById('condition-other-text').value = "";
+            document.getElementById('condition-other-text').style.display = 'none';
+
+            document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
+            setTodayDate(); cancelEdit(); resetDate();
+            
+            if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } else { lastSelection = { name: null, condition: null }; }
+            
+            localStorage.removeItem('saved_condition_state');
+            localStorage.removeItem('saved_progress'); localStorage.removeItem('saved_tomorrow'); localStorage.removeItem('saved_comment');
+        }
+
+        // ★上書き：編集モード（チェックボックス読み込み対応版）
+        function editReport(rowIndex) {
+            switchTab('input'); const targetRow = allData.find(row => row[row.length - 1] == rowIndex); if (!targetRow) { alert("データが見つかりません"); return; }
+            
+            const d = new Date(targetRow[0]); const yyyy = d.getFullYear(); const mm = ('0' + (d.getMonth() + 1)).slice(-2); const dd = ('0' + d.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
+            
+            const nameRadios = document.querySelectorAll('#name-radios input[name="name"]'); nameRadios.forEach(r => r.checked = (r.value === targetRow[1])); saveSelection('saved_name', targetRow[1]); lastSelection.name = targetRow[1];
+            
+            // --- 体調の読み込み修正 ---
+            const condStr = targetRow[2] || "";
+            document.querySelectorAll('input[name="condition"]').forEach(c => c.checked = false);
+            document.getElementById('condition-other-text').value = "";
+            document.getElementById('condition-other-text').style.display = 'none';
+
+            if (condStr.includes("良い")) document.querySelector('input[value="良い"]').checked = true;
+            if (condStr.includes("普通")) document.querySelector('input[value="普通"]').checked = true;
+            if (condStr.includes("不調")) document.querySelector('input[value="不調"]').checked = true;
+            
+            // その他の抽出
+            const otherMatch = condStr.match(/その他\((.*?)\)/);
+            if (otherMatch || condStr.includes("その他")) {
+                document.getElementById('cond-other-check').checked = true;
+                if(otherMatch) {
+                     document.getElementById('condition-other-text').value = otherMatch[1];
+                }
+                toggleOtherInput();
+            }
+            updateConditionState();
+            // ------------------------
+
+            document.getElementById('progress').value = targetRow[3]; document.getElementById('tomorrow').value = targetRow[4]; document.getElementById('comment').value = targetRow[5];
+            saveSelection('saved_progress', targetRow[3]); saveSelection('saved_tomorrow', targetRow[4]); saveSelection('saved_comment', targetRow[5]);
+            
+            currentEditingFileUrl = targetRow[7]; if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) { document.getElementById('current-file-msg').style.display = 'block'; } else { document.getElementById('current-file-msg').style.display = 'none'; }
+            isEditing = true; editingRowIndex = rowIndex; document.getElementById('page-title').innerText = "日報の修正・更新"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "更新"; submitBtn.classList.add('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'block'; document.getElementById('form-container').classList.add('editing'); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
