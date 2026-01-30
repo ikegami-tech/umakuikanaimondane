@@ -597,12 +597,11 @@
 
                     <div class="form-group">
                         <label>返事設定</label>
-                        <div class="input-wrapper condition-group">
-                            <label class="condition-label"><input type="radio" name="replyType" value="上司" checked>👔 上司</label>
-                            <label class="condition-label"><input type="radio" name="replyType" value="同僚">🤝 同僚</label>
-                            <label class="condition-label"><input type="radio" name="replyType" value="部下">🔰 部下</label>
-                            <label class="condition-label"><input type="radio" name="replyType" value="恋人">💕 恋人</label>
-                            <label class="condition-label"><input type="radio" name="replyType" value="幼馴染">🚲 幼馴染</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="replyType" placeholder="例：優しい上司、アニメキャラの〇〇、ツンデレな幼馴染 など" value="優しい上司">
+                            <div style="font-size:12px; color:#666; margin-top:5px;">
+                                ※設定したいキャラクターや性格を自由に入力してください（空欄の場合は「優しい上司」になります）
+                            </div>
                         </div>
                     </div>
                     
@@ -1050,9 +1049,10 @@ function renderLastReport() {
             const comment = document.getElementById('comment').value; 
             const fileInput = document.getElementById('file-attach');
 
-            // 返事設定を取得
-            const replyTypeEl = document.querySelector('input[name="replyType"]:checked');
-            const replyType = replyTypeEl ? replyTypeEl.value : "上司";
+            let replyType = document.getElementById('replyType').value;
+            if (!replyType || replyType.trim() === "") {
+                replyType = "優しい上司"; // 空欄ならデフォルト設定
+            }
 
             // 2. 未入力チェック
             if(!name || !condition || !progress || !tomorrow || !comment || !dateVal) { 
