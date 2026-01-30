@@ -544,16 +544,18 @@
 
             <div id="tab-input" class="content-section active">
                 <h1 id="page-title">システム課日報</h1>
-                <div class="form-container" id="form-container">
+               <div class="form-container" id="form-container">
+                    
                     <div id="date-alert" class="date-alert-box">
                         <span id="date-alert-text"></span>
                         <button onclick="resetDate()" style="background:white; color:#ff4d4d; border:none; border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold;">今日に戻す</button>
                     </div>
+
                     <div class="form-group">
                         <label style="display: flex; justify-content: space-between; align-items: center; padding-right: 0;">
                             <span>日付</span>
                             <button type="button" onclick="if(confirm('入力中の内容をすべて消去してリセットしますか？')) resetForm()" 
-                                style="background: #ff4d4d; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px; font-weight: bold; margin-right: 0;">
+                                style="background: #ff4d4d; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 10px; font-weight: bold; margin: 0;">
                                 🧹 リセット
                             </button>
                         </label>
@@ -563,6 +565,7 @@
                         <label>名前</label>
                         <div class="input-wrapper"><div id="name-radios" class="condition-group">読み込み中...</div></div>
                     </div>
+
                     <div class="form-group">
                         <label>体調</label>
                         <div class="input-wrapper">
@@ -575,6 +578,7 @@
                             <input type="text" id="condition-other-text" placeholder="具体的な内容を記入してください" style="display:none; margin-top:10px;" oninput="updateConditionState()">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label style="display: flex; flex-direction: column; gap: 8px;">
                             <span>今日の進捗状況</span>
@@ -582,6 +586,7 @@
                         </label>
                         <div class="input-wrapper"><textarea id="progress" placeholder="本日の業務内容と進捗度合を記入してください"></textarea></div>
                     </div>
+
                     <div class="form-group">
                         <label>次の業務内容</label>
                         <div class="input-wrapper"><textarea id="tomorrow" placeholder="次の実施予定の業務を記入してください"></textarea></div>
@@ -592,7 +597,7 @@
                         <div class="input-wrapper"><textarea id="comment" placeholder="業務を通して感じたこと、所見、課題などを記入してください"></textarea></div>
                     </div>
                     
-                   <div class="form-group">
+                    <div class="form-group">
                         <label>資料添付</label>
                         <div class="input-wrapper">
                             <input type="file" id="file-attach">
@@ -610,13 +615,12 @@
                             <label class="condition-label"><input type="radio" name="replyType" value="幼馴染">🚲 幼馴染</label>
                         </div>
                     </div>
+
                     <div class="button-group">
                         <button id="cancel-edit-btn" onclick="cancelEdit()">キャンセル</button>
                         <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
                     </div>
-                </div>      
-            </div>
-
+                </div>
             <div id="tab-check" class="content-section">
                 <h1>日報提出チェック</h1>
                 <div class="manager-container">
