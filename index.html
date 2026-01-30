@@ -599,9 +599,9 @@
                     <div class="form-group">
                         <label>返事設定</label>
                         <div class="input-wrapper">
-                            <input type="text" id="replyType" placeholder="例：優しい上司、アニメキャラの〇〇、ツンデレな幼馴染 など" value="優しい上司">
+                            <input type="text" id="replyType" placeholder="例：優しい上司、アニメキャラの〇〇 など（空欄なら「優しい上司」になります）">
                             <div style="font-size:12px; color:#666; margin-top:5px;">
-                                ※設定したいキャラクターや性格を自由に入力してください（空欄の場合は「優しい上司」になります）
+                                ※設定したいキャラクターや性格を自由に入力してください
                             </div>
                         </div>
                     </div>
@@ -1244,12 +1244,41 @@ function renderLastReport() {
         function getSelectedCondition() { const selected = document.querySelector('input[name="condition"]:checked'); return selected ? selected.value : ''; }
         function getSelectedName() { const selected = document.querySelector('#name-radios input[name="name"]:checked'); return selected ? selected.value : ''; }
         function getSelectedManagerName() { const selected = document.querySelector('#manage-member-radios input[name="manager-name"]:checked'); return selected ? selected.value : ''; }
+        // 修正：リセット時に「返事設定」も空欄にするように変更
         function resetForm() {
-            document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false); if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) nameRadio.checked = true; }
-            document.querySelectorAll('input[name="condition"]').forEach(radio => radio.checked = false); document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
-            setTodayDate(); cancelEdit(); resetDate();
-            if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } else { lastSelection = { name: null, condition: null }; }
-            localStorage.removeItem('saved_condition'); localStorage.removeItem('saved_progress'); localStorage.removeItem('saved_tomorrow'); localStorage.removeItem('saved_comment');
+            document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false); 
+            if (loggedInUser) { 
+                const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); 
+                if (nameRadio) nameRadio.checked = true; 
+            }
+            
+            document.querySelectorAll('input[name="condition"]').forEach(c => c.checked = false);
+            document.getElementById('condition-other-text').value = "";
+            document.getElementById('condition-other-text').style.display = 'none';
+
+            document.getElementById('progress').value = ""; 
+            document.getElementById('tomorrow').value = ""; 
+            document.getElementById('comment').value = ""; 
+            document.getElementById('file-attach').value = ""; 
+            
+            // ★追加：返事設定も空にする
+            document.getElementById('replyType').value = "";
+
+            setTodayDate(); 
+            cancelEdit(); 
+            resetDate();
+            
+            if(loggedInUser) { 
+                lastSelection = { name: loggedInUser, condition: null }; 
+            } else { 
+                lastSelection = { name: null, condition: null }; 
+            }
+            
+            localStorage.removeItem('saved_condition_state');
+            localStorage.removeItem('saved_progress'); 
+            localStorage.removeItem('saved_tomorrow'); 
+            localStorage.removeItem('saved_comment');
+            localStorage.removeItem('saved_replyType'); // 返事設定の保存も消す
         }
         function copyLastTomorrow() {
             const name = getSelectedName(); if (!name) { alert("まずは名前を選択してください"); return; }
