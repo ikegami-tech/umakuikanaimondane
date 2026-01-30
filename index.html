@@ -162,18 +162,6 @@
         .btn-copy { background: #fff; color: #28a745; border: 1px solid #28a745; font-weight: bold; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
         #cancel-edit-btn { display: none; padding: 10px 30px; background: #999; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
 
-        /* 天気表示エリア */
-        .weather-area-top {
-            display: flex; justify-content: flex-end; margin-bottom: 15px;
-        }
-        #weather-widget {
-            display: inline-flex; align-items: center; gap: 8px;
-            background-color: #f1f8ff; border: 1px solid #b3e5fc;
-            padding: 6px 15px; border-radius: 20px; font-size: 13px; color: #0277bd; font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap;
-        }
-        #weather-icon { font-size: 20px; }
-
         /* ハンバーガーメニュー */
         .hamburger { display: none; }
 
@@ -517,12 +505,6 @@
             <div id="tab-input" class="content-section active">
                 <h1 id="page-title">システム課日報</h1>
                 <div class="form-container" id="form-container">
-                    <div class="weather-area-top">
-                        <div id="weather-widget">
-                            <span id="weather-icon">⏳</span>
-                            <span id="weather-text" style="margin-left:5px;">天気取得中...</span>
-                        </div>
-                    </div>
 
                     <div id="date-alert" class="date-alert-box">
                         <span id="date-alert-text"></span>
@@ -754,7 +736,6 @@
             setTodayDate(); 
             updateBackgroundByTime(); 
             setInterval(updateBackgroundByTime, 15000); 
-            getWeather();
         };
 
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
@@ -1253,71 +1234,6 @@
             const colors = ["#e3f2fd", "#e8f5e9", "#fff3e0", "#fce4ec", "#f3e5f5", "#fffde7"];
             const index = Math.floor(Date.now() / 15000) % colors.length;
             document.body.style.backgroundColor = colors[index];
-        }
-
-        // ==========================================
-        // ■ 新機能：天気・気温・湿度・場所の取得
-        // ==========================================
-        function getWeather() {
-            if (!navigator.geolocation) {
-                document.getElementById('weather-text').innerText = "位置情報オフ";
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(success, error);
-
-            function success(pos) {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-
-                // 1. 天気と湿度を取得 (Open-Meteo)
-                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`;
-                
-                // 2. 場所名を取得 (OpenStreetMap / Nominatim)
-                // zoom=10で市区町村レベルを取得
-                const locationUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`;
-
-                Promise.all([
-                    fetch(weatherUrl).then(r => r.json()),
-                    fetch(locationUrl).then(r => r.json())
-                ]).then(([weatherData, locationData]) => {
-                    // 天気データの解析
-                    const current = weatherData.current;
-                    const temp = current.temperature_2m;
-                    const humidity = current.relative_humidity_2m;
-                    const code = current.weather_code;
-                    const icon = getWeatherIcon(code);
-
-                    // 場所データの解析
-                    const addr = locationData.address;
-                    // 市町村区の取得（優先順位をつけて探す）
-                    const city ="新宿区";
-
-                    // 画面表示
-                    document.getElementById('weather-icon').innerText = icon.emoji;
-                    document.getElementById('weather-text').innerText = `[${city}] ${icon.text} ${temp}℃ / 💧${humidity}%`;
-                })
-                .catch(e => {
-                    console.error(e);
-                    document.getElementById('weather-text').innerText = "取得エラー";
-                });
-            }
-
-            function error() {
-                document.getElementById('weather-text').innerText = "位置情報を許可してください";
-            }
-        }
-
-        // WMOコードを絵文字に変換する辞書
-        function getWeatherIcon(code) {
-            if (code === 0) return { emoji: "☀️", text: "快晴" };
-            if (code >= 1 && code <= 3) return { emoji: "☁️", text: "曇り" };
-            if (code === 45 || code === 48) return { emoji: "🌫️", text: "霧" };
-            if (code >= 51 && code <= 67) return { emoji: "☔", text: "雨" };
-            if (code >= 71 && code <= 77) return { emoji: "☃️", text: "雪" };
-            if (code >= 80 && code <= 82) return { emoji: "☔", text: "にわか雨" };
-            if (code >= 85 && code <= 86) return { emoji: "☃️", text: "雪" };
-            if (code >= 95 && code <= 99) return { emoji: "⚡", text: "雷雨" };
-            return { emoji: "❓", text: "不明" };
         }
         
         function closeAiDialog() {
