@@ -1679,6 +1679,47 @@ function renderLastReport() {
             currentEditingFileUrl = targetRow[7]; if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) { document.getElementById('current-file-msg').style.display = 'block'; } else { document.getElementById('current-file-msg').style.display = 'none'; }
             isEditing = true; editingRowIndex = rowIndex; document.getElementById('page-title').innerText = "日報の修正・更新"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "更新"; submitBtn.classList.add('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'block'; document.getElementById('form-container').classList.add('editing'); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // ▼▼▼ 新規追加：文章から自動で絵文字を選ぶ関数 ▼▼▼
+        function getEmojiForText(text) {
+            if (!text) return "🤔";
+            const t = text;
+            // キーワード判定ロジック
+            if (t.match(/眠|寝|不眠/)) return "😪";
+            if (t.match(/痛|頭痛|腹痛|腰痛/)) return "🤕";
+            if (t.match(/元気|最高|絶好調|良/)) return "💪";
+            if (t.match(/疲|だるい|辛|重い/)) return "😫";
+            if (t.match(/楽|嬉|幸/)) return "😄";
+            if (t.match(/花粉|鼻|咳|風邪/)) return "😷";
+            if (t.match(/酔|吐|気持|悪/)) return "🤢";
+            if (t.match(/暑|熱/)) return "🥵";
+            if (t.match(/寒|冷/)) return "🥶";
+            if (t.match(/忙|バタバタ|焦/)) return "💦";
+            return "🤔"; // 当てはまらない場合のデフォルト
+        }
+
+        // ▼▼▼ 修正（上書き）：体調の保存時に絵文字を付与するように変更 ▼▼▼
+        function getSelectedCondition() {
+            const checks = document.querySelectorAll('input[name="condition"]:checked');
+            let values = [];
+            checks.forEach(c => {
+                if (c.value === 'others') {
+                    // その他の場合、入力テキストに合わせて絵文字を生成
+                    const text = document.getElementById('condition-other-text').value;
+                    const emoji = getEmojiForText(text);
+                    values.push(`${emoji} その他(${text})`); 
+                } else if (c.value === '良い') {
+                    values.push("👍 良い");
+                } else if (c.value === '普通') {
+                    values.push("😊 普通");
+                } else if (c.value === '不調') {
+                    values.push("😇 不調");
+                } else {
+                    values.push(c.value);
+                }
+            });
+            return values.join(', ');
+        }
     </script>
 </body>
 </html>
