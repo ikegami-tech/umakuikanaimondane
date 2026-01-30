@@ -494,6 +494,8 @@
 
             <button class="menu-btn" onclick="toggleSettings()" id="setting-btn">⚙️ 設定 ▼</button>
             <div id="setting-submenu" class="submenu">
+                <button class="menu-btn sub-item" onclick="switchTab('history')">📂 前回の日報</button>
+                <button class="menu-btn sub-item" onclick="switchTab('list')">🗂️ 過去の報告一覧</button>
                 <button class="menu-btn sub-item" onclick="switchTab('check')">📅 日報確認</button>
                 <button class="menu-btn sub-item" onclick="switchTab('holiday')">🏖️ 休日設定</button>
                 <button class="menu-btn sub-item" onclick="switchTab('password')">🔑 PW変更</button>
@@ -667,8 +669,24 @@
 
             <div id="tab-history" class="content-section">
                 <h1>前回の日報</h1>
-                <div id="data-list">
-                    <div id="report-container">読み込み中...</div>
+                <div id="data-list-history">
+                    <div id="last-report-container">読み込み中...</div>
+                </div>
+            </div>
+
+            <div id="tab-list" class="content-section">
+                <h1>過去の報告一覧</h1>
+                <div class="list-header">
+                    <h2>🔍 絞り込み</h2>
+                    <div class="filter-area">
+                        <select id="filter-name" class="filter-select" onchange="applyFilter()">
+                            <option value="">全員</option>
+                        </select>
+                        <input type="text" id="filter-text" class="filter-input" placeholder="キーワード検索" oninput="applyFilter()">
+                    </div>
+                </div>
+                <div id="data-list-all">
+                    <div id="all-report-container">読み込み中...</div>
                 </div>
             </div>
 
@@ -790,20 +808,15 @@
         }
 
         // --- タブ切り替え（修正版） ---
-        function switchTab(tabName) {
-            // 1. コンテンツの表示切り替え
+       function switchTab(tabName) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            // 2. サイドバーボタンのハイライト切り替え
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             
-            // onclick属性の値が一致するボタンを探してactiveにする
             const targetBtn = document.querySelector(`.menu-btn[onclick="switchTab('${tabName}')"]`);
             if (targetBtn) {
                 targetBtn.classList.add('active');
-                
-                // もしサブメニュー内のボタンなら、設定メニューも開いておく
                 if (targetBtn.classList.contains('sub-item')) {
                     const submenu = document.getElementById('setting-submenu');
                     const settingBtn = document.getElementById('setting-btn');
@@ -813,6 +826,19 @@
                     }
                 }
             }
+
+            if(tabName==='check') renderCheckCalendar();
+            if(tabName==='holiday') renderHolidayCalendar();
+            if(tabName==='input') setTodayDate();
+            
+            // ★追加：一覧タブを開いた時にリストを描画
+            if(tabName==='list') {
+                renderFilterOptions(); // フィルタの選択肢更新
+                renderPage(1); // 1ページ目を表示
+            }
+            // ★追加：前回の日報タブを開いた時に再描画
+            if(tabName==='history') renderLastReport();
+        }
 
             // 3. 各機能の初期化処理
             if(tabName==='check') renderCheckCalendar();
@@ -1005,18 +1031,15 @@
             });
         }
 function renderLastReport() {
-            const reportContainer = document.getElementById('report-container');
-            reportContainer.innerHTML = ""; // クリア
+            const reportContainer = document.getElementById('last-report-container');
+            if(!reportContainer) return; // エラー回避
+            reportContainer.innerHTML = ""; 
 
             const seenUsers = new Set();
             const latestReports = [];
 
-            // allDataは新しい順になっている前提
             allData.forEach(row => {
-                const name = row[1]; // 名前
-                
-                // 【重要】メンバーリストに登録されている名前だけを対象にする
-                // これにより「全社共通」やヘッダー行、空行を除外します
+                const name = row[1];
                 if (name && memberList.includes(name)) {
                     if (!seenUsers.has(name)) {
                         seenUsers.add(name);
@@ -1030,13 +1053,16 @@ function renderLastReport() {
                 return;
             }
 
-            latestReports.forEach(row => {
-                createReportItem(row);
-            });
-            
-            // ページネーション削除
-            const existingNav = document.querySelector('.Pagination'); 
-            if (existingNav) existingNav.remove();
+            // 最新1件（自分のものがあれば自分、なければ誰か）を表示
+            // ※基本はログインユーザーのものを優先表示するロジックが良ければフィルタしますが、
+            // ここでは「各メンバーの最新日報」を全員分出すか、単に自分の最新だけ出すかによります。
+            // いったん「自分」の最新1件を表示する形にします。
+            const myLatest = latestReports.find(r => r[1] === loggedInUser);
+            if(myLatest){
+                createReportItem(myLatest, reportContainer); // コンテナを渡す
+            } else {
+                reportContainer.innerHTML = "<p>あなたの日報はまだありません。</p>";
+            }
         }
         
         async function sendData() {
@@ -1264,15 +1290,16 @@ function renderLastReport() {
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
        // ★修正：AI返信の表示エリアを追加した関数
-        function createReportItem(row) {
-            const reportContainer = document.getElementById('report-container');
+        function createReportItem(row, targetContainer) {
+            // 引数がなければデフォルト（一覧用）を使う保険
+            const reportContainer = targetContainer || document.getElementById('all-report-container');
+            if(!reportContainer) return;
+
             const rowIndex = row[row.length - 1]; 
-            
             const targetDateObj = new Date(row[0]);
             const name = row[1] || "名称不明";
             const condition = row[2] || "-";
             
-            // 空文字チェック関数
             const checkText = (text) => {
                 if (!text || text === "undefined" || text.trim() === "") return "（記載なし）";
                 return text;
@@ -1281,13 +1308,10 @@ function renderLastReport() {
             const progress = checkText(row[3]);
             const tomorrow = checkText(row[4]);
             const comment  = checkText(row[5]);
-            
             const savedLikes = row[6] ? row[6] : "";
             const fileUrl = row[7] ? row[7] : "";
-            
-            // ★追加：AI返信（インデックス8）を取得
             const aiReply = (row[8] && row[8] !== "undefined" && row[8].trim() !== "") ? row[8] : "（返信データなし）";
-            
+
             let displayDateStr = "";
             let updateInfoStr = "";
             const dayMap = ['日', '月', '火', '水', '木', '金', '土'];
@@ -1364,11 +1388,35 @@ function renderLastReport() {
             reportContainer.appendChild(div);
         }
         function renderPage(page) {
-            currentPage = page; const reportContainer = document.getElementById('report-container'); reportContainer.innerHTML = "";
-            const totalItems = currentData.length; const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE); const start = (page - 1) * ITEMS_PER_PAGE; const end = start + ITEMS_PER_PAGE; const pageItems = currentData.slice(start, end);
-            pageItems.forEach(row => createReportItem(row));
-            const existingNav = document.querySelector('.Pagination'); if (existingNav) existingNav.remove();
-            if (totalPages > 1) { const nav = document.createElement('div'); nav.className = 'Pagination'; for (let i = 1; i <= totalPages; i++) { const a = document.createElement('a'); a.className = 'Pagination-Item-Link'; if (i === currentPage) a.classList.add('isActive'); a.innerText = i; a.onclick = () => { renderPage(i); window.scrollTo({top:0, behavior:'smooth'}); }; nav.appendChild(a); } document.getElementById('data-list').appendChild(nav); }
+            currentPage = page; 
+            const reportContainer = document.getElementById('all-report-container'); 
+            if(!reportContainer) return;
+            reportContainer.innerHTML = "";
+            
+            const totalItems = currentData.length; 
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE); 
+            const start = (page - 1) * ITEMS_PER_PAGE; 
+            const end = start + ITEMS_PER_PAGE; 
+            const pageItems = currentData.slice(start, end);
+            
+            pageItems.forEach(row => createReportItem(row, reportContainer)); // コンテナを渡す
+            
+            const existingNav = document.querySelector('.Pagination'); 
+            if (existingNav) existingNav.remove();
+            
+            if (totalPages > 1) { 
+                const nav = document.createElement('div'); 
+                nav.className = 'Pagination'; 
+                for (let i = 1; i <= totalPages; i++) { 
+                    const a = document.createElement('a'); 
+                    a.className = 'Pagination-Item-Link'; 
+                    if (i === currentPage) a.classList.add('isActive'); 
+                    a.innerText = i; 
+                    a.onclick = () => { renderPage(i); window.scrollTo({top:0, behavior:'smooth'}); }; 
+                    nav.appendChild(a); 
+                } 
+                document.getElementById('data-list-all').appendChild(nav); 
+            }
         }
         function updateButtonColor(btn) { const text = btn.innerText; if (text.match(/\d+$/)) { btn.style.backgroundColor = '#fff8f0'; btn.style.borderColor = '#ff7f00'; btn.style.color = '#ff7f00'; btn.style.fontWeight = 'bold'; } else { btn.style.backgroundColor = ''; btn.style.borderColor = ''; btn.style.color = ''; btn.style.fontWeight = ''; } }
         function addLike(btn) { let text = btn.innerText; let parts = text.split(' '); let lastPart = parts[parts.length - 1]; let count = parseInt(lastPart); if (!isNaN(count)) { count = count + 1; parts.pop(); btn.innerText = parts.join(' ') + ' ' + count; } else { btn.innerText = text + ' 1'; } updateButtonColor(btn); triggerDebounceSave(btn); }
