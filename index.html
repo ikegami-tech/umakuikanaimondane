@@ -1002,35 +1002,37 @@
                 console.error(err); 
             });
         }
-// ★修正：全メンバーの最新の日報を1件ずつ表示する関数
+// ★修正：メンバーリストにある人の最新日報のみを表示する関数
         function renderLastReport() {
             const reportContainer = document.getElementById('report-container');
             reportContainer.innerHTML = ""; // クリア
 
-            // 1. 既に新しい順(reverse済み)の allData を走査し、
-            //    名前(row[1])ごとに「最初に出てきた行」だけをピックアップする
             const seenUsers = new Set();
             const latestReports = [];
 
+            // allDataは新しい順になっている前提
             allData.forEach(row => {
                 const name = row[1]; // 名前
-                if (!seenUsers.has(name)) {
-                    seenUsers.add(name);
-                    latestReports.push(row);
+                
+                // 【重要】メンバーリストに登録されている名前のデータだけを対象にする
+                // これにより「全社共通」や「ヘッダー行」などの不正データを除外します
+                if (name && memberList.includes(name)) {
+                    if (!seenUsers.has(name)) {
+                        seenUsers.add(name);
+                        latestReports.push(row);
+                    }
                 }
             });
 
             if (latestReports.length === 0) {
-                reportContainer.innerHTML = "<p>まだ報告が登録されていません。</p>";
+                reportContainer.innerHTML = "<p>表示できる日報がありません。</p>";
                 return;
             }
 
-            // 2. 抽出したデータを表示
             latestReports.forEach(row => {
                 createReportItem(row);
             });
             
-            // ページネーションは不要なので削除
             const existingNav = document.querySelector('.Pagination'); 
             if (existingNav) existingNav.remove();
         }
@@ -1191,60 +1193,54 @@
             const data = { action: 'deleteMember', targetName: name };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
+       // ★修正：undefined対策を追加した表示関数
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container');
             
-            const rowIndex = row[row.length - 1]; // IDは必ず一番後ろ
+            const rowIndex = row[row.length - 1]; 
             
             const targetDateObj = new Date(row[0]);
-            const name = row[1];
-            const condition = row[2];
-            const progress = row[3];
-            const tomorrow = row[4];
-            const comment = row[5];
+            const name = row[1] || "名称不明";
+            const condition = row[2] || "-";
+            
+            // 【修正】データがない場合は空文字や代替テキストを入れる
+            const progress = row[3] || "（記載なし）";
+            const tomorrow = row[4] || "（記載なし）";
+            const comment = row[5] || "（記載なし）";
+            
             const savedLikes = row[6] ? row[6] : "";
             const fileUrl = row[7] ? row[7] : "";
             
-            // --- 日時の表示変数 ---
+            // --- 日時の表示処理 ---
             let displayDateStr = "";
             let updateInfoStr = "";
-            // 曜日の配列を定義
             const dayMap = ['日', '月', '火', '水', '木', '金', '土'];
 
-            // ■作成日時 (報告日時) の作成
             if (row[9] && typeof row[9] !== 'number' && !isNaN(new Date(row[9]).getTime())) {
                 const createdDate = new Date(row[9]);
                 const y = createdDate.getFullYear();
                 const m = createdDate.getMonth() + 1;
                 const d = createdDate.getDate();
-                const day = dayMap[createdDate.getDay()]; // 曜日を取得
+                const day = dayMap[createdDate.getDay()];
                 const h = createdDate.getHours();
                 const min = ('0' + createdDate.getMinutes()).slice(-2);
-                
-                // 曜日を追加: (月) など
                 displayDateStr = `${y}年${m}月${d}日(${day}) ${h}時${min}分`;
             } else {
-                // 古いデータ用
                 const y = targetDateObj.getFullYear();
                 const m = targetDateObj.getMonth() + 1;
                 const d = targetDateObj.getDate();
                 const day = dayMap[targetDateObj.getDay()];
-                displayDateStr = `${y}年${m}月${d}日(${day}) (日時記録なし)`;
+                displayDateStr = `${y}年${m}月${d}日(${day})`;
             }
 
-            // ■最終更新日時の作成
+            // 更新日時
             if (row[10] && typeof row[10] !== 'number' && !isNaN(new Date(row[10]).getTime())) {
                 const updatedDate = new Date(row[10]);
-                
-                const uY = updatedDate.getFullYear();
                 const uM = updatedDate.getMonth() + 1;
                 const uD = updatedDate.getDate();
-                const uDay = dayMap[updatedDate.getDay()]; // 曜日を取得
                 const uH = updatedDate.getHours();
                 const uMin = ('0' + updatedDate.getMinutes()).slice(-2);
-                
-                // 曜日を追加
-                updateInfoStr = `<span style="font-size:0.85em; color:#888; margin-left:8px;">(最終更新: ${uY}年${uM}月${uD}日(${uDay}) ${uH}時${uMin}分)</span>`;
+                updateInfoStr = `<span style="font-size:0.85em; color:#888; margin-left:8px;">(更新: ${uM}/${uD} ${uH}:${uMin})</span>`;
             }
 
             let buttonsHtml = ''; 
