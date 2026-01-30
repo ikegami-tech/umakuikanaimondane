@@ -1130,14 +1130,81 @@ function renderLastReport() {
             
         // --- 以下、既存のヘルパー関数 ---
         function saveSelection(key, value) { localStorage.setItem(key, value); }
-        function setupAutoSave() { const textFields = ['progress', 'tomorrow', 'comment']; textFields.forEach(id => { document.getElementById(id).addEventListener('input', function() { saveSelection('saved_' + id, this.value); }); }); }
+        // ■ 入力内容を自動保存する設定（返事設定も含む）
+        function setupAutoSave() { 
+            // 監視するテキストボックスのIDリスト
+            // 'replyType' を追加して、キャラ設定も保存されるようにしています
+            const textFields = ['progress', 'tomorrow', 'comment', 'replyType']; 
+            
+            textFields.forEach(id => { 
+                const el = document.getElementById(id);
+                if(el){
+                    el.addEventListener('input', function() { 
+                        saveSelection('saved_' + id, this.value); 
+                    }); 
+                }
+            }); 
+        }
+        
+        // ■ 保存された内容を画面に復元する（返事設定も含む）
         function restoreSelections() {
-            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = loggedInUser; saveSelection('saved_name', loggedInUser); } } 
-            else { const savedName = localStorage.getItem('saved_name'); if (savedName) { const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; } } }
-            const savedCondition = localStorage.getItem('saved_condition'); if (savedCondition) { const condRadio = document.querySelector(`input[name="condition"][value="${savedCondition}"]`); if (condRadio) { condRadio.checked = true; lastSelection.condition = savedCondition; } }
-            const savedProgress = localStorage.getItem('saved_progress'); if (savedProgress) document.getElementById('progress').value = savedProgress;
-            const savedTomorrow = localStorage.getItem('saved_tomorrow'); if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
-            const savedComment = localStorage.getItem('saved_comment'); if (savedComment) document.getElementById('comment').value = savedComment;
+            // 1. 名前の復元
+            if (loggedInUser) { 
+                const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); 
+                if (nameRadio) { 
+                    nameRadio.checked = true; 
+                    lastSelection.name = loggedInUser; 
+                    saveSelection('saved_name', loggedInUser); 
+                } 
+            } else { 
+                const savedName = localStorage.getItem('saved_name'); 
+                if (savedName) { 
+                    const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); 
+                    if (nameRadio) { 
+                        nameRadio.checked = true; 
+                        lastSelection.name = savedName; 
+                    } 
+                } 
+            }
+            
+            // 2. 体調（チェックボックス）の復元
+            const savedStateStr = localStorage.getItem('saved_condition_state');
+            if (savedStateStr) {
+                try {
+                    const state = JSON.parse(savedStateStr);
+                    const checks = document.querySelectorAll('input[name="condition"]');
+                    checks.forEach(c => { 
+                        if (state[c.value]) c.checked = true; 
+                    });
+                    // 「その他」入力欄の復元
+                    if (state['others']) {
+                        const otherInput = document.getElementById('condition-other-text');
+                        const otherCheck = document.getElementById('cond-other-check');
+                        if (otherInput) {
+                            otherInput.value = state['otherText'] || "";
+                            otherInput.style.display = 'block'; // 表示する
+                        }
+                    }
+                } catch(e) { console.error(e); }
+            }
+
+            // 3. テキストエリア（進捗・予定・所見）の復元
+            const savedProgress = localStorage.getItem('saved_progress'); 
+            if (savedProgress) document.getElementById('progress').value = savedProgress;
+            
+            const savedTomorrow = localStorage.getItem('saved_tomorrow'); 
+            if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
+            
+            const savedComment = localStorage.getItem('saved_comment'); 
+            if (savedComment) document.getElementById('comment').value = savedComment;
+            
+            // 4. ★追加：返事設定（キャラ設定）の復元
+            const savedReplyType = localStorage.getItem('saved_replyType'); 
+            // 保存データがあれば復元、なければデフォルト値（HTML側で設定したvalue）のまま
+            if (savedReplyType) {
+                const replyTypeEl = document.getElementById('replyType');
+                if(replyTypeEl) replyTypeEl.value = savedReplyType;
+            }
         }
         function toggleRadio(radio, type) { if (lastSelection[type] === radio.value) { radio.checked = false; lastSelection[type] = null; saveSelection('saved_' + type, ''); } else { lastSelection[type] = radio.value; saveSelection('saved_' + type, radio.value); } }
         function getSelectedCondition() { const selected = document.querySelector('input[name="condition"]:checked'); return selected ? selected.value : ''; }
