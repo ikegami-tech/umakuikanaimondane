@@ -11,10 +11,10 @@
         body { 
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             margin: 0; padding: 0; 
-            background-color: #e3f2fd; /* 初期色 */
+            background-color: #e3f2fd; 
             height: 100vh; display: flex;
             color: #333;
-            transition: background-color 3.0s ease; /* 背景色をじわっと変える */
+            transition: background-color 3.0s ease; 
         }
 
         /* --- オーバーレイ --- */
@@ -48,12 +48,12 @@
         /* --- アプリ本体 --- */
         .app-container { display: none; width: 100%; height: 100%; }
         
-        /* --- サイドバー（メニュー階層化対応） --- */
+        /* --- サイドバー --- */
         .sidebar {
             width: 220px; 
             background-color: #0277bd; 
             color: white; padding: 20px;
-            display: flex; flex-direction: column; gap: 10px; /* 間隔調整 */
+            display: flex; flex-direction: column; gap: 10px; 
             flex-shrink: 0;
             transition: left 0.3s ease;
         }
@@ -72,11 +72,11 @@
             border: 1px solid rgba(255,255,255,0.3); 
         }
 
-        /* 設定サブメニュー用 */
-        .sidebar-spacer { margin-top: auto; } /* 設定ボタンを下に押しやる */
+        /* 設定サブメニュー */
+        .sidebar-spacer { margin-top: auto; }
 
         .submenu {
-            display: none; /* 初期は非表示 */
+            display: none; 
             flex-direction: column;
             gap: 5px;
             background: rgba(0, 0, 0, 0.15);
@@ -89,7 +89,7 @@
 
         .menu-btn.sub-item {
             font-size: 13px; 
-            padding: 10px 10px 10px 20px; /* インデント */
+            padding: 10px 10px 10px 20px; 
             border-left: 2px solid transparent;
         }
         .menu-btn.sub-item:hover, .menu-btn.sub-item.active {
@@ -133,12 +133,10 @@
         }
         .input-wrapper { flex-grow: 1; }
         
-        /* ラジオボタン以外を幅100%に */
         input:not([type="radio"]), textarea, select { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
         }
 
-        /* ラジオボタン専用の調整 */
         input[type="radio"] {
             transform: scale(1.2); 
             margin-right: 6px; 
@@ -146,40 +144,38 @@
         }
         textarea { height: 100px; resize: vertical; }
 
-        /* --- コンディションボタン（名前・体調など） --- */
+        /* --- コンディションボタン --- */
         .condition-group { 
             display: flex; 
             flex-wrap: wrap; 
-            gap: 10px; /* ボタン同士の間隔を均等に */
+            gap: 10px; 
             padding-top: 5px; 
         }
         
         .condition-label { 
             border: 1px solid transparent; 
             border-radius: 6px; 
-            padding: 8px 2px; /* 上下の余白と、左右の余白 */
-            font-size: 13px;  /* 文字が入りきるように少し調整 */
+            padding: 8px 2px; 
+            font-size: 13px;  
             cursor: pointer; 
             display: flex; 
             align-items: center; 
-            justify-content: flex-start; /* 左揃えで見やすく */
+            justify-content: flex-start; 
             
-            width: calc(25% - 8px); /* 1列に4つ均等に並べる計算式 */
-            white-space: nowrap;    /* 文字を絶対に改行させない（横書き維持） */
-            overflow: hidden;       /* 枠からはみ出ても形を崩さない */
+            width: calc(25% - 8px); 
+            white-space: nowrap;    
+            overflow: hidden;       
         }
 
-        /* 選択された時のデザイン */
-       .condition-label:has(input:checked) { 
+        .condition-label:has(input:checked) { 
             border-color: #0288d1; 
             background-color: #e1f5fe; 
             font-weight: bold; 
         }
 
-        /* スマホの時は2列にする */
         @media (max-width: 768px) {
             .condition-group .condition-label { 
-                width: calc(50% - 6px); /* スマホなら2列 */
+                width: calc(50% - 6px); 
             }
         }
 
@@ -195,7 +191,6 @@
         .btn-copy { background: #fff; color: #28a745; border: 1px solid #28a745; font-weight: bold; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
         #cancel-edit-btn { display: none; padding: 10px 30px; background: #999; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; }
 
-        /* ハンバーガーメニュー */
         .hamburger { display: none; }
 
         /* 過去レポートカード */
@@ -239,25 +234,25 @@
             transition: 0.2s;
         }
         .calendar-day:hover { background-color: #f0f0f0; }
-        .day-selected { background-color: #ffcdd2 !important; border-color: #e57373 !important; color: #c62828; font-weight: bold; } /* 選択中（赤） */
-        .day-saved-holiday { background-color: #cceeff; color: #007bff; } /* 既に登録済みの休み（青） */
+        .day-selected { background-color: #ffcdd2 !important; border-color: #e57373 !important; color: #c62828; font-weight: bold; } 
+        .day-saved-holiday { background-color: #cceeff; color: #007bff; } 
         .day-other-month { background-color: #fafafa; color: #ccc; pointer-events: none; }
         
         /* --- 日報確認カレンダー用の色設定 --- */
         .day-missing { 
-            background-color: #ffebee; /* 未提出：薄い赤 */
+            background-color: #ffebee; 
             color: #c62828; 
             border: 1px solid #ef9a9a !important;
             font-weight: bold;
         }
         .day-holiday-confirmed { 
-            background-color: #e1f5fe; /* 休み：薄い青 */
+            background-color: #e1f5fe; 
             color: #0277bd; 
             border: 1px solid #81d4fa !important;
         }
         .day-submitted { 
             background-color: #ffffff; 
-            border: 2px solid #66bb6a !important; /* 提出済：緑の枠 */
+            border: 2px solid #66bb6a !important; 
             color: #2e7d32;
             font-weight: bold;
         }
@@ -273,32 +268,27 @@
         
         .date-alert-box { background-color: #ff4d4d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
         
-        /* --- 送信メッセージ（トースト）：右下に配置・普段は見えない --- */
+        /* --- 送信メッセージ（トースト） --- */
         #toast { 
-            visibility: hidden; /* 普段は完全に見えなくする */
+            visibility: hidden; 
             min-width: 250px; 
-            background-color: #333; /* 黒背景 */
-            color: #fff; /* 白文字 */
+            background-color: #333; 
+            color: #fff; 
             text-align: center; 
             border-radius: 4px; 
             padding: 16px; 
             position: fixed; 
             z-index: 3000; 
-            
-            /* 右下に配置する設定 */
             right: 30px; 
             bottom: 30px; 
-            
             font-size: 16px; 
             opacity: 0; 
             transition: opacity 0.5s, bottom 0.5s; 
         }
-
-        /* JavaScriptが「表示せよ」と命令した時だけ有効になる設定 */
         #toast.show { 
             visibility: visible; 
             opacity: 1; 
-            bottom: 50px; /* ふわっと少し浮き上がるアニメーション */
+            bottom: 50px; 
         }
 
         /* スマホ対応 */
@@ -313,40 +303,29 @@
             .button-group { flex-direction: column-reverse; gap: 10px; }
             button { width: 100%; padding: 12px; }
             
-            /* コンディションボタンは2列に */
             .condition-group .condition-label { width: calc(50% - 6px); }
             
             .filter-area { flex-direction: column; } .filter-select, .filter-input { width: 100%; }
 
-            /* カレンダータイトル修正 */
-            .calendar-title-area {
-                flex-wrap: wrap; 
-            }
-            .calendar-title-area h3 {
-                width: 100%;        
-                order: -1;          
-                margin-bottom: 10px !important; 
-                text-align: center;
-            }
+            .calendar-title-area { flex-wrap: wrap; }
+            .calendar-title-area h3 { width: 100%; order: -1; margin-bottom: 10px !important; text-align: center; }
         }
-            /* --- ゲーム画面用 CSS --- */
+        
+        /* --- ゲーム画面用 CSS --- */
         .game-area {
-            display: none; /* 初期状態は非表示 */
+            display: none; 
             margin-top: 30px;
             animation: fadeIn 0.5s ease;
         }
-        
-        /* 3x3 のグリッド表示 */
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3列 */
-            gap: 10px; /* 画像間の隙間 */
-            max-width: 400px; /* 全体の幅 */
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+            max-width: 400px; 
             margin: 0 auto;
         }
-
         .game-cell {
-            aspect-ratio: 1 / 1; /* 正方形を維持 */
+            aspect-ratio: 1 / 1; 
             background-color: #ddd;
             border-radius: 8px;
             overflow: hidden;
@@ -355,24 +334,19 @@
             transition: transform 0.2s;
             position: relative;
         }
-        
         .game-cell:hover {
             transform: scale(1.05);
             border-color: #4fc3f7;
         }
-
         .game-cell img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
-        /* 選択された時のスタイル（仮） */
         .game-cell.selected {
             border-color: #0288d1;
             box-shadow: 0 0 10px rgba(2, 136, 209, 0.5);
         }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -395,38 +369,16 @@
             transition: 0.2s;
             font-weight: bold;
         }
-        .difficulty-btn:hover {
-            background: #e1f5fe;
-        }
-        /* 宇宙級だけ特別感 */
-        .difficulty-btn.cosmos {
-            border-color: #9c27b0;
-            color: #9c27b0;
-        }
-        .difficulty-btn.cosmos:hover {
-            background: #f3e5f5;
-        }
+        .difficulty-btn:hover { background: #e1f5fe; }
+        .difficulty-btn.cosmos { border-color: #9c27b0; color: #9c27b0; }
+        .difficulty-btn.cosmos:hover { background: #f3e5f5; }
     </style>
 </head>
 <body>
     <div id="ai-reply-overlay" class="overlay">
         <div class="auth-box" style="width: 90%; max-width: 600px; text-align: left;">
             <h2 style="text-align:center; color:#0288d1;">🤖 AIからの返信</h2>
-            
-            <div id="ai-reply-content" style="
-                background: #f8fbff; 
-                padding: 20px; 
-                border: 1px solid #b3e5fc;
-                border-radius: 8px; 
-                margin-bottom: 20px; 
-                max-height: 400px; 
-                overflow-y: auto; 
-                line-height: 1.8;
-                white-space: pre-wrap;
-                font-size: 16px;
-                color: #333;">
-            </div>
-
+            <div id="ai-reply-content" style="background: #f8fbff; padding: 20px; border: 1px solid #b3e5fc; border-radius: 8px; margin-bottom: 20px; max-height: 400px; overflow-y: auto; line-height: 1.8; white-space: pre-wrap; font-size: 16px; color: #333;"></div>
             <button onclick="closeAiDialog()" class="btn-primary">閉じる</button>
         </div>
     </div>
@@ -488,13 +440,12 @@
         <div class="sidebar">
             <h2>メニュー</h2>
             <button class="menu-btn active" onclick="switchTab('input')">📝 日報入力</button>
-            <button class="menu-btn" onclick="switchTab('history')">📂 前回の日報</button>
-
+            
             <div class="sidebar-spacer"></div>
 
             <button class="menu-btn" onclick="toggleSettings()" id="setting-btn">⚙️ 設定 ▼</button>
             <div id="setting-submenu" class="submenu">
-                <button class="menu-btn sub-item" onclick="switchTab('check')">📅 日報確認</button>
+                <button class="menu-btn sub-item" onclick="switchTab('history')">📂 前回の日報</button> <button class="menu-btn sub-item" onclick="switchTab('check')">📅 日報確認</button>
                 <button class="menu-btn sub-item" onclick="switchTab('holiday')">🏖️ 休日設定</button>
                 <button class="menu-btn sub-item" onclick="switchTab('password')">🔑 PW変更</button>
                 <button class="menu-btn sub-item" onclick="switchTab('member')">👥 メンバー管理</button>
@@ -565,7 +516,7 @@
                                 <label class="condition-label"><input type="checkbox" name="condition" value="良い" onchange="updateConditionState()">👍 良い</label>
                                 <label class="condition-label"><input type="checkbox" name="condition" value="普通" onchange="updateConditionState()">😊 普通</label>
                                 <label class="condition-label"><input type="checkbox" name="condition" value="不調" onchange="updateConditionState()">😇 不調</label>
-                                <label class="condition-label"><input type="checkbox" name="condition" value="others" id="cond-other-check" onchange="toggleOtherInput(); updateConditionState()">その他</label>
+                                <label class="condition-label"><input type="checkbox" name="condition" value="others" id="cond-other-check" onchange="toggleOtherInput(); updateConditionState()">🤔 その他</label>
                             </div>
                             <input type="text" id="condition-other-text" placeholder="具体的な内容を記入してください" style="display:none; margin-top:10px;" oninput="updateConditionState()">
                         </div>
@@ -610,13 +561,15 @@
                         
                         <button type="button" onclick="if(confirm('入力中の内容をすべて消去してリセットしますか？')) resetForm()" 
                             style="padding: 10px 30px; background: #ff4d4d; color: white; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold;">
-                            リセット
+                            🧹 リセット
                         </button>
 
                         <button id="submit-btn" onclick="sendData()" class="send-btn">送信</button>
                     </div>
                 </div>
-            </div> <div id="tab-check" class="content-section">
+            </div>
+
+            <div id="tab-check" class="content-section">
                 <h1>日報提出チェック</h1>
                 <div class="manager-container">
                     <p style="text-align:center; margin-bottom:20px;">
@@ -771,7 +724,6 @@
             setTodayDate(); 
             updateBackgroundByTime(); 
             setInterval(updateBackgroundByTime, 15000); 
-            // 天気機能は削除済み
         };
 
         function setTodayDate() { const today = new Date(); const yyyy = today.getFullYear(); const mm = ('0' + (today.getMonth() + 1)).slice(-2); const dd = ('0' + today.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`; }
@@ -789,21 +741,16 @@
             }
         }
 
-        // --- タブ切り替え（修正版） ---
+        // --- タブ切り替え ---
         function switchTab(tabName) {
-            // 1. コンテンツの表示切り替え
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            // 2. サイドバーボタンのハイライト切り替え
             document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
             
-            // onclick属性の値が一致するボタンを探してactiveにする
             const targetBtn = document.querySelector(`.menu-btn[onclick="switchTab('${tabName}')"]`);
             if (targetBtn) {
                 targetBtn.classList.add('active');
-                
-                // もしサブメニュー内のボタンなら、設定メニューも開いておく
                 if (targetBtn.classList.contains('sub-item')) {
                     const submenu = document.getElementById('setting-submenu');
                     const settingBtn = document.getElementById('setting-btn');
@@ -814,10 +761,9 @@
                 }
             }
 
-            // 3. 各機能の初期化処理
             if(tabName==='check') renderCheckCalendar();
             if(tabName==='holiday') renderHolidayCalendar();
-            if(tabName==='input') setTodayDate(); // 入力画面に戻ったら日付リセットなど
+            if(tabName==='input') setTodayDate(); 
         }
 
         // --- 休日一括設定ロジック ---
@@ -979,6 +925,7 @@
                 if (data.members) { 
                     memberList = data.members; 
                     renderMemberRadios(); 
+                    renderFilterOptions(); 
                     setupAutoSave(); 
                     restoreSelections(); 
                 }
@@ -1004,7 +951,9 @@
                 console.error(err); 
             });
         }
-function renderLastReport() {
+
+        // ★修正：メンバーリストにある人の最新日報のみを表示（不正データ除外）
+        function renderLastReport() {
             const reportContainer = document.getElementById('report-container');
             reportContainer.innerHTML = ""; // クリア
 
@@ -1016,7 +965,6 @@ function renderLastReport() {
                 const name = row[1]; // 名前
                 
                 // 【重要】メンバーリストに登録されている名前だけを対象にする
-                // これにより「全社共通」やヘッダー行、空行を除外します
                 if (name && memberList.includes(name)) {
                     if (!seenUsers.has(name)) {
                         seenUsers.add(name);
@@ -1038,7 +986,7 @@ function renderLastReport() {
             const existingNav = document.querySelector('.Pagination'); 
             if (existingNav) existingNav.remove();
         }
-        
+
         async function sendData() {
             // 1. 入力値を取得
             const dateVal = document.getElementById('report-date').value; 
@@ -1049,9 +997,10 @@ function renderLastReport() {
             const comment = document.getElementById('comment').value; 
             const fileInput = document.getElementById('file-attach');
 
+            // 返事設定を取得
             let replyType = document.getElementById('replyType').value;
             if (!replyType || replyType.trim() === "") {
-                replyType = "優しい上司"; // 空欄ならデフォルト設定
+                replyType = "優しい上司"; 
             }
 
             // 2. 未入力チェック
@@ -1097,10 +1046,7 @@ function renderLastReport() {
             })
             .then(response => response.json()) 
             .then(responseData => { 
-                // ★修正点：必ずAIの返信を表示するように修正しました
                 let messageToShow = "";
-                
-                // GASから geminiMessage か message が返ってきているか確認
                 if (responseData.geminiMessage) {
                     messageToShow = responseData.geminiMessage;
                 } else if (responseData.message) {
@@ -1109,11 +1055,9 @@ function renderLastReport() {
                     messageToShow = "送信完了しました！（AIからの返信データなし）";
                 }
 
-                // ダイアログに文章をセットして表示
                 document.getElementById("ai-reply-content").innerText = messageToShow; 
                 document.getElementById("ai-reply-overlay").style.display = 'flex'; 
 
-                // リセット処理
                 resetForm(); 
                 fetchData(); 
                 submitBtn.disabled = false; 
@@ -1127,15 +1071,12 @@ function renderLastReport() {
             });
         }
             
-            
-        // --- 以下、既存のヘルパー関数 ---
+        // --- ヘルパー関数群 ---
         function saveSelection(key, value) { localStorage.setItem(key, value); }
+        
         // ■ 入力内容を自動保存する設定（返事設定も含む）
         function setupAutoSave() { 
-            // 監視するテキストボックスのIDリスト
-            // 'replyType' を追加して、キャラ設定も保存されるようにしています
             const textFields = ['progress', 'tomorrow', 'comment', 'replyType']; 
-            
             textFields.forEach(id => { 
                 const el = document.getElementById(id);
                 if(el){
@@ -1148,7 +1089,6 @@ function renderLastReport() {
         
         // ■ 保存された内容を画面に復元する（返事設定も含む）
         function restoreSelections() {
-            // 1. 名前の復元
             if (loggedInUser) { 
                 const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); 
                 if (nameRadio) { 
@@ -1167,7 +1107,7 @@ function renderLastReport() {
                 } 
             }
             
-            // 2. 体調（チェックボックス）の復元
+            // 体調の復元処理
             const savedStateStr = localStorage.getItem('saved_condition_state');
             if (savedStateStr) {
                 try {
@@ -1176,47 +1116,70 @@ function renderLastReport() {
                     checks.forEach(c => { 
                         if (state[c.value]) c.checked = true; 
                     });
-                    // 「その他」入力欄の復元
                     if (state['others']) {
-                        const otherInput = document.getElementById('condition-other-text');
-                        const otherCheck = document.getElementById('cond-other-check');
-                        if (otherInput) {
-                            otherInput.value = state['otherText'] || "";
-                            otherInput.style.display = 'block'; // 表示する
-                        }
+                        document.getElementById('condition-other-text').value = state['otherText'] || "";
+                        toggleOtherInput(); 
                     }
                 } catch(e) { console.error(e); }
             }
 
-            // 3. テキストエリア（進捗・予定・所見）の復元
-            const savedProgress = localStorage.getItem('saved_progress'); 
-            if (savedProgress) document.getElementById('progress').value = savedProgress;
+            const savedProgress = localStorage.getItem('saved_progress'); if (savedProgress) document.getElementById('progress').value = savedProgress;
+            const savedTomorrow = localStorage.getItem('saved_tomorrow'); if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
+            const savedComment = localStorage.getItem('saved_comment'); if (savedComment) document.getElementById('comment').value = savedComment;
             
-            const savedTomorrow = localStorage.getItem('saved_tomorrow'); 
-            if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
-            
-            const savedComment = localStorage.getItem('saved_comment'); 
-            if (savedComment) document.getElementById('comment').value = savedComment;
-            
-            // 4. ★追加：返事設定（キャラ設定）の復元
+            // ★追加：返事設定の復元
             const savedReplyType = localStorage.getItem('saved_replyType'); 
-            // 保存データがあれば復元、なければデフォルト値（HTML側で設定したvalue）のまま
             if (savedReplyType) {
                 const replyTypeEl = document.getElementById('replyType');
                 if(replyTypeEl) replyTypeEl.value = savedReplyType;
             }
         }
+
         function toggleRadio(radio, type) { if (lastSelection[type] === radio.value) { radio.checked = false; lastSelection[type] = null; saveSelection('saved_' + type, ''); } else { lastSelection[type] = radio.value; saveSelection('saved_' + type, radio.value); } }
-        function getSelectedCondition() { const selected = document.querySelector('input[name="condition"]:checked'); return selected ? selected.value : ''; }
+        
+        function toggleOtherInput() {
+            const otherCheck = document.getElementById('cond-other-check');
+            const otherInput = document.getElementById('condition-other-text');
+            if(otherCheck.checked) { otherInput.style.display = 'block'; } else { otherInput.style.display = 'none'; }
+        }
+
+        function updateConditionState() {
+            const checks = document.querySelectorAll('input[name="condition"]');
+            const state = {};
+            checks.forEach(c => state[c.value] = c.checked);
+            state['otherText'] = document.getElementById('condition-other-text').value;
+            localStorage.setItem('saved_condition_state', JSON.stringify(state));
+        }
+
+        function getSelectedCondition() {
+            const checks = document.querySelectorAll('input[name="condition"]:checked');
+            let values = [];
+            checks.forEach(c => {
+                if (c.value === 'others') {
+                    const text = document.getElementById('condition-other-text').value;
+                    values.push(`その他(${text})`); 
+                } else {
+                    values.push(c.value);
+                }
+            });
+            return values.join(', ');
+        }
+
         function getSelectedName() { const selected = document.querySelector('#name-radios input[name="name"]:checked'); return selected ? selected.value : ''; }
         function getSelectedManagerName() { const selected = document.querySelector('#manage-member-radios input[name="manager-name"]:checked'); return selected ? selected.value : ''; }
+        
         function resetForm() {
             document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false); if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) nameRadio.checked = true; }
-            document.querySelectorAll('input[name="condition"]').forEach(radio => radio.checked = false); document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
+            document.querySelectorAll('input[name="condition"]').forEach(c => c.checked = false);
+            document.getElementById('condition-other-text').value = "";
+            document.getElementById('condition-other-text').style.display = 'none';
+            document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
             setTodayDate(); cancelEdit(); resetDate();
             if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } else { lastSelection = { name: null, condition: null }; }
-            localStorage.removeItem('saved_condition'); localStorage.removeItem('saved_progress'); localStorage.removeItem('saved_tomorrow'); localStorage.removeItem('saved_comment');
+            localStorage.removeItem('saved_condition_state');
+            localStorage.removeItem('saved_progress'); localStorage.removeItem('saved_tomorrow'); localStorage.removeItem('saved_comment');
         }
+
         function copyLastTomorrow() {
             const name = getSelectedName(); if (!name) { alert("まずは名前を選択してください"); return; }
             const lastReport = allData.find(row => row[1] === name);
@@ -1234,15 +1197,39 @@ function renderLastReport() {
             switchTab('input'); const targetRow = allData.find(row => row[row.length - 1] == rowIndex); if (!targetRow) { alert("データが見つかりません"); return; }
             const d = new Date(targetRow[0]); const yyyy = d.getFullYear(); const mm = ('0' + (d.getMonth() + 1)).slice(-2); const dd = ('0' + d.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
             const nameRadios = document.querySelectorAll('#name-radios input[name="name"]'); nameRadios.forEach(r => r.checked = (r.value === targetRow[1])); saveSelection('saved_name', targetRow[1]); lastSelection.name = targetRow[1];
-            const condRadios = document.querySelectorAll('input[name="condition"]'); condRadios.forEach(r => r.checked = (r.value === targetRow[2])); saveSelection('saved_condition', targetRow[2]); lastSelection.condition = targetRow[2];
+            
+            const condStr = targetRow[2] || "";
+            document.querySelectorAll('input[name="condition"]').forEach(c => c.checked = false);
+            document.getElementById('condition-other-text').value = "";
+            document.getElementById('condition-other-text').style.display = 'none';
+
+            if (condStr.includes("良い")) document.querySelector('input[value="良い"]').checked = true;
+            if (condStr.includes("普通")) document.querySelector('input[value="普通"]').checked = true;
+            if (condStr.includes("不調")) document.querySelector('input[value="不調"]').checked = true;
+            
+            const otherMatch = condStr.match(/その他\((.*?)\)/);
+            if (otherMatch || condStr.includes("その他")) {
+                document.getElementById('cond-other-check').checked = true;
+                if(otherMatch) { document.getElementById('condition-other-text').value = otherMatch[1]; }
+                toggleOtherInput();
+            }
+            updateConditionState();
+
             document.getElementById('progress').value = targetRow[3]; document.getElementById('tomorrow').value = targetRow[4]; document.getElementById('comment').value = targetRow[5];
             saveSelection('saved_progress', targetRow[3]); saveSelection('saved_tomorrow', targetRow[4]); saveSelection('saved_comment', targetRow[5]);
+            
+            // 返事設定（テキスト）の復元
+            // targetRow[?] に保存しているかはGASの実装次第ですが、ここではHTML側での復元処理のみ記述
+            // もしスプレッドシートに保存していない項目なら復元できませんが、自動保存機能(localStorage)でカバーします
+            
             currentEditingFileUrl = targetRow[7]; if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) { document.getElementById('current-file-msg').style.display = 'block'; } else { document.getElementById('current-file-msg').style.display = 'none'; }
             isEditing = true; editingRowIndex = rowIndex; document.getElementById('page-title').innerText = "日報の修正・更新"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "更新"; submitBtn.classList.add('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'block'; document.getElementById('form-container').classList.add('editing'); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         function cancelEdit() { isEditing = false; editingRowIndex = null; currentEditingFileUrl = ""; document.getElementById('page-title').innerText = "システム課日報"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "送信"; submitBtn.classList.remove('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'none'; document.getElementById('form-container').classList.remove('editing'); document.getElementById('current-file-msg').style.display = 'none'; setTodayDate(); }
         function renderFilterOptions() { const select = document.getElementById('filter-name'); select.innerHTML = '<option value="">全員</option>'; memberList.forEach(name => { const option = document.createElement('option'); option.value = name; option.innerText = name; select.appendChild(option); }); }
+        
         function applyFilter() { const nameVal = document.getElementById('filter-name').value; const textVal = document.getElementById('filter-text').value.toLowerCase(); currentData = allData.filter(row => { const name = row[1]; const content = (row[3] + row[4] + row[5]).toLowerCase(); const nameMatch = (nameVal === "") || (name === nameVal); const textMatch = (textVal === "") || (content.includes(textVal)); return nameMatch && textMatch; }); renderPage(1); }
+        
         function renderMemberRadios() {
             const inputContainer = document.getElementById('name-radios'); const manageContainer = document.getElementById('manage-member-radios'); 
             const currentReportName = document.querySelector('#name-radios input[name="name"]:checked')?.value;
@@ -1256,6 +1243,7 @@ function renderLastReport() {
             if (currentManagerName) { const r = manageContainer.querySelector(`input[value="${currentManagerName}"]`); if(r) r.checked = true; }
         }
         function updateManagerButtonState() { const name = getSelectedManagerName(); const deleteBtn = document.getElementById('delete-member-btn'); if (name) deleteBtn.style.display = 'block'; else deleteBtn.style.display = 'none'; }
+        
         function deleteMember() {
             const name = getSelectedManagerName(); if (!name) return;
             if (!confirm(`「${name}」さんを名簿から削除しますか？\n（日報データは削除されません）`)) return;
@@ -1263,16 +1251,16 @@ function renderLastReport() {
             const data = { action: 'deleteMember', targetName: name };
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { document.getElementById("toast").innerText = "メンバーを削除しました"; showToast(); });
         }
-       // ★修正：AI返信の表示エリアを追加した関数
+
+        // ★修正：「undefined」という文字列が表示されないように対策した関数
         function createReportItem(row) {
             const reportContainer = document.getElementById('report-container');
             const rowIndex = row[row.length - 1]; 
-            
             const targetDateObj = new Date(row[0]);
             const name = row[1] || "名称不明";
             const condition = row[2] || "-";
             
-            // 空文字チェック関数
+            // 【修正】undefinedという"文字列"やnullを判定して、空文字の場合は「記載なし」にする
             const checkText = (text) => {
                 if (!text || text === "undefined" || text.trim() === "") return "（記載なし）";
                 return text;
@@ -1287,7 +1275,7 @@ function renderLastReport() {
             
             // ★追加：AI返信（インデックス8）を取得
             const aiReply = (row[8] && row[8] !== "undefined" && row[8].trim() !== "") ? row[8] : "（返信データなし）";
-            
+
             let displayDateStr = "";
             let updateInfoStr = "";
             const dayMap = ['日', '月', '火', '水', '木', '金', '土'];
@@ -1395,9 +1383,6 @@ function renderLastReport() {
         function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
         document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
 
-        // ==========================================
-        // ■ 新機能：15秒ごとに背景色を変更
-        // ==========================================
         function updateBackgroundByTime() {
             const colors = ["#e3f2fd", "#e8f5e9", "#fff3e0", "#fce4ec", "#f3e5f5", "#fffde7"];
             const index = Math.floor(Date.now() / 15000) % colors.length;
@@ -1411,42 +1396,28 @@ function renderLastReport() {
         // ==========================================
         // ■ ゲーム機能（修正版）
         // ==========================================
-        
-        // 選ばれた設定を保存する変数
         let currentGameSettings = {
             category: null,
             difficulty: null,
             categoryName: ""
         };
 
-        // 1. ラジオボタンが押されたら難易度ダイアログを開く
         function openDifficultyDialog(radioBtn) {
             currentGameSettings.category = radioBtn.value;
-            
-            // カテゴリー名の取得（表示用）
             if (radioBtn.value === "game") currentGameSettings.categoryName = "ゲーム";
             if (radioBtn.value === "music") currentGameSettings.categoryName = "音楽";
             if (radioBtn.value === "anime") currentGameSettings.categoryName = "アニメ";
-
-            // オーバーレイを表示
             document.getElementById('difficulty-overlay').style.display = 'flex';
         }
 
-        // 2. 難易度が選ばれたら設定を保存して閉じる
         function setDifficulty(level) {
             currentGameSettings.difficulty = level;
-            
-            // ダイアログを閉じる
             document.getElementById('difficulty-overlay').style.display = 'none';
-            
-            // UI更新
             updateGameUI();
         }
 
-        // キャンセルした場合（ラジオボタンの選択も解除する）
         function closeDifficultyDialog() {
             document.getElementById('difficulty-overlay').style.display = 'none';
-            // ラジオボタンのチェックを外す
             const radios = document.querySelectorAll('input[name="game-category"]');
             radios.forEach(r => r.checked = false);
             currentGameSettings.category = null;
@@ -1454,174 +1425,43 @@ function renderLastReport() {
             updateGameUI();
         }
 
-        // UI（ボタンの状態やテキスト）を更新する関数
         function updateGameUI() {
             const btn = document.getElementById('game-start-btn');
             const statusText = document.getElementById('game-status-display');
 
             if (currentGameSettings.category && currentGameSettings.difficulty) {
-                // 両方選ばれている場合：スタートボタン有効化
                 btn.disabled = false;
                 btn.innerText = "スタート";
                 statusText.innerText = `設定: ${currentGameSettings.categoryName} / ${currentGameSettings.difficulty}`;
                 statusText.style.color = "#0277bd";
             } else {
-                // まだ選ばれていない場合：スタートボタン無効化
                 btn.disabled = true;
                 btn.innerText = "カテゴリーを選択してください";
                 statusText.innerText = "";
             }
         }
 
-        // 3. スタートボタンが押されたらゲーム画面生成
         function startGame() {
             if (!currentGameSettings.category || !currentGameSettings.difficulty) return;
-
-            // 表示エリアの準備
             const gameArea = document.getElementById('game-area');
             const grid = document.getElementById('game-grid');
             const title = document.getElementById('game-title');
             
-            grid.innerHTML = ""; // 前回の内容をリセット
-            gameArea.style.display = 'block'; // エリアを表示
+            grid.innerHTML = ""; 
+            gameArea.style.display = 'block'; 
 
-            // タイトル設定
             title.innerText = `【${currentGameSettings.categoryName}】コース (${currentGameSettings.difficulty})`;
 
-            // 画像（ダミー）を3x3で生成
-            // ※難易度によって画像の枚数を変えるなどの拡張もここで可能です
             for (let i = 1; i <= 9; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'game-cell';
-                
                 const img = document.createElement('img');
-                // ダミー画像生成
                 img.src = `https://placehold.jp/30/81d4fa/ffffff/150x150.png?text=${currentGameSettings.categoryName}${i}`;
                 img.alt = `画像${i}`;
-
-                // クリックイベント
-                cell.onclick = function() {
-                    this.classList.toggle('selected');
-                };
-
+                cell.onclick = function() { this.classList.toggle('selected'); };
                 cell.appendChild(img);
                 grid.appendChild(cell);
             }
-        }
-        function toggleOtherInput() {
-            const otherCheck = document.getElementById('cond-other-check');
-            const otherInput = document.getElementById('condition-other-text');
-            if(otherCheck.checked) {
-                otherInput.style.display = 'block';
-            } else {
-                otherInput.style.display = 'none';
-            }
-        }
-
-        // ★新規追加：体調の状態（チェックボックスとテキスト）を保存
-        function updateConditionState() {
-            const checks = document.querySelectorAll('input[name="condition"]');
-            const state = {};
-            checks.forEach(c => state[c.value] = c.checked);
-            state['otherText'] = document.getElementById('condition-other-text').value;
-            localStorage.setItem('saved_condition_state', JSON.stringify(state));
-        }
-
-        // ★上書き：選択された体調を取得（カンマ区切り文字列に変換）
-        function getSelectedCondition() {
-            const checks = document.querySelectorAll('input[name="condition"]:checked');
-            let values = [];
-            checks.forEach(c => {
-                if (c.value === 'others') {
-                    const text = document.getElementById('condition-other-text').value;
-                    values.push(`その他(${text})`); 
-                } else {
-                    values.push(c.value);
-                }
-            });
-            return values.join(', ');
-        }
-
-        // ★上書き：入力内容の復元（チェックボックス対応版）
-        function restoreSelections() {
-            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = loggedInUser; saveSelection('saved_name', loggedInUser); } } 
-            else { const savedName = localStorage.getItem('saved_name'); if (savedName) { const nameRadio = document.querySelector(`#name-radios input[value="${savedName}"]`); if (nameRadio) { nameRadio.checked = true; lastSelection.name = savedName; } } }
-            
-            // 体調の復元処理
-            const savedStateStr = localStorage.getItem('saved_condition_state');
-            if (savedStateStr) {
-                try {
-                    const state = JSON.parse(savedStateStr);
-                    const checks = document.querySelectorAll('input[name="condition"]');
-                    checks.forEach(c => {
-                        if (state[c.value]) c.checked = true;
-                    });
-                    if (state['others']) {
-                        document.getElementById('condition-other-text').value = state['otherText'] || "";
-                        toggleOtherInput(); // 表示更新
-                    }
-                } catch(e) { console.error(e); }
-            }
-
-            const savedProgress = localStorage.getItem('saved_progress'); if (savedProgress) document.getElementById('progress').value = savedProgress;
-            const savedTomorrow = localStorage.getItem('saved_tomorrow'); if (savedTomorrow) document.getElementById('tomorrow').value = savedTomorrow;
-            const savedComment = localStorage.getItem('saved_comment'); if (savedComment) document.getElementById('comment').value = savedComment;
-        }
-
-        // ★上書き：フォームのリセット（チェックボックス対応版）
-        function resetForm() {
-            document.querySelectorAll('input[name="name"]').forEach(radio => radio.checked = false); 
-            if (loggedInUser) { const nameRadio = document.querySelector(`#name-radios input[value="${loggedInUser}"]`); if (nameRadio) nameRadio.checked = true; }
-            
-            // 体調のリセット
-            document.querySelectorAll('input[name="condition"]').forEach(c => c.checked = false);
-            document.getElementById('condition-other-text').value = "";
-            document.getElementById('condition-other-text').style.display = 'none';
-
-            document.getElementById('progress').value = ""; document.getElementById('tomorrow').value = ""; document.getElementById('comment').value = ""; document.getElementById('file-attach').value = ""; 
-            setTodayDate(); cancelEdit(); resetDate();
-            
-            if(loggedInUser) { lastSelection = { name: loggedInUser, condition: null }; } else { lastSelection = { name: null, condition: null }; }
-            
-            localStorage.removeItem('saved_condition_state');
-            localStorage.removeItem('saved_progress'); localStorage.removeItem('saved_tomorrow'); localStorage.removeItem('saved_comment');
-        }
-
-        // ★上書き：編集モード（チェックボックス読み込み対応版）
-        function editReport(rowIndex) {
-            switchTab('input'); const targetRow = allData.find(row => row[row.length - 1] == rowIndex); if (!targetRow) { alert("データが見つかりません"); return; }
-            
-            const d = new Date(targetRow[0]); const yyyy = d.getFullYear(); const mm = ('0' + (d.getMonth() + 1)).slice(-2); const dd = ('0' + d.getDate()).slice(-2); document.getElementById('report-date').value = `${yyyy}-${mm}-${dd}`;
-            
-            const nameRadios = document.querySelectorAll('#name-radios input[name="name"]'); nameRadios.forEach(r => r.checked = (r.value === targetRow[1])); saveSelection('saved_name', targetRow[1]); lastSelection.name = targetRow[1];
-            
-            // --- 体調の読み込み修正 ---
-            const condStr = targetRow[2] || "";
-            document.querySelectorAll('input[name="condition"]').forEach(c => c.checked = false);
-            document.getElementById('condition-other-text').value = "";
-            document.getElementById('condition-other-text').style.display = 'none';
-
-            if (condStr.includes("良い")) document.querySelector('input[value="良い"]').checked = true;
-            if (condStr.includes("普通")) document.querySelector('input[value="普通"]').checked = true;
-            if (condStr.includes("不調")) document.querySelector('input[value="不調"]').checked = true;
-            
-            // その他の抽出
-            const otherMatch = condStr.match(/その他\((.*?)\)/);
-            if (otherMatch || condStr.includes("その他")) {
-                document.getElementById('cond-other-check').checked = true;
-                if(otherMatch) {
-                     document.getElementById('condition-other-text').value = otherMatch[1];
-                }
-                toggleOtherInput();
-            }
-            updateConditionState();
-            // ------------------------
-
-            document.getElementById('progress').value = targetRow[3]; document.getElementById('tomorrow').value = targetRow[4]; document.getElementById('comment').value = targetRow[5];
-            saveSelection('saved_progress', targetRow[3]); saveSelection('saved_tomorrow', targetRow[4]); saveSelection('saved_comment', targetRow[5]);
-            
-            currentEditingFileUrl = targetRow[7]; if(currentEditingFileUrl && currentEditingFileUrl.indexOf("http") === 0) { document.getElementById('current-file-msg').style.display = 'block'; } else { document.getElementById('current-file-msg').style.display = 'none'; }
-            isEditing = true; editingRowIndex = rowIndex; document.getElementById('page-title').innerText = "日報の修正・更新"; const submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "更新"; submitBtn.classList.add('update-mode'); document.getElementById('cancel-edit-btn').style.display = 'block'; document.getElementById('form-container').classList.add('editing'); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
