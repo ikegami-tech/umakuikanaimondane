@@ -407,6 +407,15 @@
         .difficulty-btn.cosmos:hover {
             background: #f3e5f5;
         }
+        /* ▼▼▼ 追加：メニューが開いている時は本体のスクロールを禁止 ▼▼▼ */
+        body.menu-open {
+            overflow: hidden;
+        }
+        
+        /* メニューの中身自体はスクロールできるようにする */
+        .sidebar {
+            overflow-y: auto; 
+        }
     </style>
 </head>
 <body>
@@ -1474,8 +1483,27 @@
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(() => { alert("リセットリクエストを送信しました。"); showLogin(); document.getElementById('reset-id').value = ""; document.getElementById('reset-email').value = ""; msg.innerText = ""; btn.disabled = false; }).catch(err => { msg.innerText = "通信エラー"; btn.disabled = false; });
         }
         
-        function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
-        
+      function toggleMenu() { 
+            var sidebar = document.querySelector('.sidebar'); 
+            sidebar.classList.toggle('active');
+            // ★追加：メニューの開閉に合わせて、本体のスクロールロックも切り替える
+            document.body.classList.toggle('menu-open');
+        }
+
+        // メニューボタンを押した時の処理（前回の修正分も含んでいます）
+        document.querySelectorAll('.menu-btn').forEach(btn => { 
+            btn.addEventListener('click', () => { 
+                // 設定ボタンなら何もしない（サブメニュー開閉用）
+                if (btn.id === 'setting-btn') return;
+
+                var sidebar = document.querySelector('.sidebar'); 
+                if (window.innerWidth <= 768) { 
+                    sidebar.classList.remove('active'); 
+                    // ★追加：メニューを閉じる時はスクロールロックも解除する
+                    document.body.classList.remove('menu-open');
+                } 
+            }); 
+        });
         // ▼▼▼ 修正：設定ボタンを押した時はメニューを閉じないように除外処理を追加 ▼▼▼
         document.querySelectorAll('.menu-btn').forEach(btn => { 
             btn.addEventListener('click', () => { 
