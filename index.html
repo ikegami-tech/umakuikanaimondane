@@ -458,7 +458,8 @@
     <div id="login-overlay" class="overlay">
         <div class="auth-box">
             <h2>🔑 ログイン</h2>
-            <input type="text" id="login-id" placeholder="ログインID" oninput="value = value.replace(/[^a-zA-Z0-9.]/g, '');">
+            <input type="text" id="login-id" placeholder="ログインID">
+            
             <input type="password" id="login-password" placeholder="パスワード" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()" class="btn-primary" id="login-btn">ログイン</button>
             <div class="msg-area" id="login-msg"></div>
