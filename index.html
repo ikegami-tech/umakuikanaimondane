@@ -1475,8 +1475,20 @@
         }
         
         function toggleMenu() { var sidebar = document.querySelector('.sidebar'); sidebar.classList.toggle('active'); }
-        document.querySelectorAll('.menu-btn').forEach(btn => { btn.addEventListener('click', () => { var sidebar = document.querySelector('.sidebar'); if (window.innerWidth <= 768) { sidebar.classList.remove('active'); } }); });
+        
+        // ▼▼▼ 修正：設定ボタンを押した時はメニューを閉じないように除外処理を追加 ▼▼▼
+        document.querySelectorAll('.menu-btn').forEach(btn => { 
+            btn.addEventListener('click', () => { 
+                // もし押されたのが「設定ボタン」なら、メニューを閉じずに何もしない（サブメニュー開閉はtoggleSettingsで行う）
+                if (btn.id === 'setting-btn') return;
 
+                // それ以外のボタンなら、スマホの時はサイドバーを閉じる
+                var sidebar = document.querySelector('.sidebar'); 
+                if (window.innerWidth <= 768) { 
+                    sidebar.classList.remove('active'); 
+                } 
+            }); 
+        });
         // ==========================================
         // ■ 新機能：15秒ごとに背景色を変更
         // ==========================================
