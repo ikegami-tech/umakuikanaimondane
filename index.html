@@ -133,16 +133,17 @@
         }
         .input-wrapper { flex-grow: 1; }
         
-        /* ラジオボタン以外を幅100%に */
-        input:not([type="radio"]), textarea, select { 
+        /* 修正：ラジオボタンと「チェックボックス」以外を幅100%にする */
+        input:not([type="radio"]):not([type="checkbox"]), textarea, select { 
             width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
         }
 
-        /* ラジオボタン専用の調整 */
-        input[type="radio"] {
+        /* 修正：ラジオボタンとチェックボックスは幅を広げない */
+        input[type="radio"], input[type="checkbox"] {
             transform: scale(1.2); 
             margin-right: 6px; 
             cursor: pointer;
+            width: auto; /* 重要：幅を自動に戻す */
         }
         textarea { height: 100px; resize: vertical; }
 
